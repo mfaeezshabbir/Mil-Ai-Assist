@@ -2,65 +2,58 @@
 
 import type { SymbolData } from '@/types';
 import { MilitarySymbol } from '@/components/military-symbol';
-import Image from 'next/image';
+import Map, { Marker } from 'react-map-gl';
 
 type MapViewProps = {
   symbols: SymbolData[];
 };
 
-// Define a bounding box for our map area (centered around Islamabad)
-const MAP_BOUNDS = {
-  minLon: 72.8,
-  maxLon: 73.3,
-  minLat: 33.5,
-  maxLat: 33.8,
-};
-
-const convertCoordsToPixels = (lat: number, lon: number, width: number, height: number) => {
-  const x = ((lon - MAP_BOUNDS.minLon) / (MAP_BOUNDS.maxLon - MAP_BOUNDS.minLon)) * width;
-  const y = ((MAP_BOUNDS.maxLat - lat) / (MAP_BOUNDS.maxLat - MAP_BOUNDS.minLat)) * height;
-  return { x, y };
-};
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 export function MapView({ symbols }: MapViewProps) {
-  const mapWidth = 1600;
-  const mapHeight = 1200;
+  if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-muted rounded-lg border">
+        <div className="text-center p-8 bg-card rounded-lg shadow-md max-w-lg">
+          <h2 className="text-xl font-semibold text-primary mb-3">Map Configuration Required</h2>
+          <p className="text-muted-foreground mb-4">
+            To display the interactive map, please get a free access token from Mapbox and add it to the <code>.env</code> file.
+          </p>
+          <a
+            href="https://account.mapbox.com/access-tokens/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center h-10 px-4 py-2 bg-accent text-accent-foreground font-medium rounded-md text-sm hover:bg-accent/90"
+          >
+            Get Mapbox Token
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-full bg-card rounded-lg shadow-inner overflow-hidden border">
-      <Image
-        src="https://placehold.co/1600x1200.png"
-        alt="Map background"
-        data-ai-hint="map satellite"
-        width={mapWidth}
-        height={mapHeight}
-        className="object-cover w-full h-full"
-        priority
-      />
-      <div className="absolute inset-0">
-        {symbols.map((symbol) => {
-          const { x, y } = convertCoordsToPixels(symbol.latitude, symbol.longitude, mapWidth, mapHeight);
-
-          // Simple check to not render symbols outside the view
-          if (x < 0 || x > mapWidth || y < 0 || y > mapHeight) {
-            return null;
-          }
-
-          return (
-            <div
-              key={symbol.id}
-              className="absolute transition-all duration-300 ease-out"
-              style={{
-                left: `${x}px`,
-                top: `${y}px`,
-                transform: 'translate(-50%, -50%)',
-              }}
-            >
-              <MilitarySymbol symbol={symbol} />
-            </div>
-          );
-        })}
-      </div>
+    <div className="w-full h-full rounded-lg overflow-hidden border">
+      <Map
+        mapboxAccessToken={MAPBOX_TOKEN}
+        initialViewState={{
+          longitude: 73.05,
+          latitude: 33.675,
+          zoom: 11,
+        }}
+        mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
+      >
+        {symbols.map((symbol) => (
+          <Marker
+            key={symbol.id}
+            longitude={symbol.longitude}
+            latitude={symbol.latitude}
+            anchor="center"
+          >
+            <MilitarySymbol symbol={symbol} />
+          </Marker>
+        ))}
+      </Map>
     </div>
   );
 }
