@@ -19,6 +19,46 @@ const initialState: { data: SymbolData | null; error: string | null } = {
   error: null,
 };
 
+const initialSymbols: SymbolData[] = [
+  {
+    id: 'initial-1',
+    symbolStandardIdentity: 'Friend',
+    symbolCategory: 'Infantry',
+    symbolEchelon: 'Company',
+    latitude: 33.72,
+    longitude: 73.09,
+    symbolDamaged: false,
+    symbolTaskForce: false,
+  },
+  {
+    id: 'initial-2',
+    symbolStandardIdentity: 'Hostile',
+    symbolCategory: 'Armored',
+    symbolEchelon: 'Battalion',
+    latitude: 33.68,
+    longitude: 73.04,
+    symbolDamaged: true,
+    symbolTaskForce: false,
+  },
+  {
+    id: 'initial-3',
+    symbolStandardIdentity: 'Neutral',
+    symbolCategory: 'Infantry',
+    symbolEchelon: 'Regiment',
+    latitude: 33.735,
+    longitude: 73.075,
+    symbolDamaged: false,
+    symbolTaskForce: true,
+  },
+];
+
+const samplePrompts = [
+    "A friendly infantry company at 33.72, 73.09",
+    "Damaged hostile armored battalion at 33.68, 73.04",
+    "A neutral infantry regiment, which is a task force, at 33.735, 73.075",
+    "Unknown squad at 33.69, 73.15"
+];
+
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
@@ -31,11 +71,17 @@ function SubmitButton() {
 
 export function MilAssistLayout() {
   const [state, formAction] = useFormState(getSymbolMetadata, initialState);
-  const [symbols, setSymbols] = useState<SymbolData[]>([]);
+  const [symbols, setSymbols] = useState<SymbolData[]>(initialSymbols);
+  const [command, setCommand] = useState('');
   const [apiLog, setApiLog] = useState<object | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    // Log the entire state object from the server action
+    if (state !== initialState) {
+      setApiLog(state);
+    }
+    
     if (state.error) {
       toast({
         variant: 'destructive',
@@ -49,9 +95,13 @@ export function MilAssistLayout() {
         id: new Date().toISOString() + Math.random(),
       };
       setSymbols((prev) => [...prev, newSymbol]);
-      setApiLog(state.data);
+      setCommand(''); // Clear input on success
     }
   }, [state, toast]);
+  
+  const handleSampleClick = (prompt: string) => {
+    setCommand(prompt);
+  };
 
   return (
     <div className="grid md:grid-cols-[380px_1fr] h-screen bg-background text-foreground">
@@ -75,12 +125,34 @@ export function MilAssistLayout() {
                   name="command"
                   placeholder="A hostile armored unit at 33.68, 73.04..."
                   required
+                  value={command}
+                  onChange={(e) => setCommand(e.target.value)}
                   className="mt-1"
                   aria-label="Natural language command input"
                 />
               </div>
               <SubmitButton />
             </form>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Sample Prompts</CardTitle>
+            <CardDescription>Click a sample to try it out.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {samplePrompts.map((prompt, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                size="sm"
+                className="text-left justify-start h-auto"
+                onClick={() => handleSampleClick(prompt)}
+              >
+                {prompt}
+              </Button>
+            ))}
           </CardContent>
         </Card>
         
