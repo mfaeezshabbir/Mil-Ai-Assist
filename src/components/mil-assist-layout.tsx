@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { Loader2, Send } from 'lucide-react';
 import type { MapRef } from 'react-map-gl';
-import { getSymbolMetadata } from '@/app/actions';
+import { getMapFeatureFromCommand } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { SymbolData } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -19,8 +19,8 @@ import { SymbolEditor } from './symbol-editor';
 import type { SIDCMetadataOutput } from '@/ai/flows/extract-sidc-metadata';
 import { findFunctionId } from '@/lib/sidc-mappings';
 
-const initialState: { data: SIDCMetadataOutput | null; error: string | null } = {
-  data: null,
+const initialState: { feature: any; error: string | null } = {
+  feature: null,
   error: null,
 };
 
@@ -57,29 +57,13 @@ const initialSymbols: SymbolData[] = [
       latitude: 33.68,
       longitude: 73.04,
     },
-    {
-      id: 'initial-3',
-      displayType: 'sidc',
-      uniqueDesignation: 'Task Force HQ',
-      context: 'Reality',
-      symbolStandardIdentity: 'Neutral',
-      status: 'Present',
-      hqtfd: 'Task Force Headquarters',
-      symbolSet: 'Land Unit',
-      functionId: '121100', // Infantry
-      modifier1: '00',
-      modifier2: '00',
-      symbolEchelon: 'Regiment',
-      latitude: 33.735,
-      longitude: 73.075,
-    },
 ];
 
 const samplePrompts = [
     "Friendly infantry company 'Raptors' at 33.72, 73.09",
     "Damaged hostile armored battalion 'Thunder Run' at 33.68, 73.04",
-    "Task Force 141, a neutral infantry regiment which is a task force headquarters, at 33.735, 73.075",
-    "A planned, feint/dummy unknown squad at 33.69, 73.15"
+    "Draw an air corridor for an F-16 from Lahore to Delhi",
+    "Show a main attack route from the Khyber Pass to Kabul"
 ];
 
 function SubmitButton() {
@@ -87,13 +71,13 @@ function SubmitButton() {
   return (
     <Button type="submit" disabled={pending} className="w-full">
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-      <span>Generate Symbol</span>
+      <span>Generate Feature</span>
     </Button>
   );
 }
 
 export function MilAssistLayout() {
-  const [state, formAction] = useFormState(getSymbolMetadata, initialState);
+  const [state, formAction] = useFormState(getMapFeatureFromCommand, initialState);
   const [symbols, setSymbols] = useState<SymbolData[]>(initialSymbols);
   const [command, setCommand] = useState('');
   const [apiLog, setApiLog] = useState<object | null>(null);
@@ -115,25 +99,46 @@ export function MilAssistLayout() {
         description: state.error,
       });
     }
-    if (state.data) {
-      const { symbolCategory, ...restOfData } = state.data;
-      
-      const functionId = findFunctionId(state.data.symbolSet, symbolCategory) || '000000';
 
-      const newSymbol: SymbolData = {
-        ...restOfData,
-        id: new Date().toISOString() + Math.random(),
-        displayType: 'sidc',
-        functionId: functionId,
-        symbolSet: state.data.symbolSet || 'Land Unit',
-        context: state.data.context || 'Reality',
-        status: state.data.status || 'Present',
-        hqtfd: state.data.hqtfd || 'Not Applicable',
-        modifier1: '00',
-        modifier2: '00',
-      };
-      setSymbols((prev) => [...prev, newSymbol]);
-      setCommand(''); // Clear input on success
+    if (state.feature) {
+      if (state.feature.type === 'symbol') {
+        const { symbolCategory, ...restOfData } = state.feature.data;
+        const functionId = findFunctionId(state.feature.data.symbolSet, symbolCategory) || '000000';
+        const newSymbol: SymbolData = {
+          ...restOfData,
+          id: new Date().toISOString() + Math.random(),
+          displayType: 'sidc',
+          functionId: functionId,
+          symbolSet: state.feature.data.symbolSet || 'Land Unit',
+          context: state.feature.data.context || 'Reality',
+          status: state.feature.data.status || 'Present',
+          hqtfd: state.feature.data.hqtfd || 'Not Applicable',
+          modifier1: '00',
+          modifier2: '00',
+        };
+        setSymbols((prev) => [...prev, newSymbol]);
+        setCommand(''); // Clear input on success
+
+      } else if (state.feature.type === 'route') {
+        const routeData = state.feature.data;
+        const newFeature = {
+          id: new Date().toISOString() + Math.random(),
+          type: 'Feature',
+          properties: {
+            type: routeData.pathType || 'Path',
+            unitInfo: routeData.unitInfo || 'Unknown'
+          },
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [routeData.start.lng, routeData.start.lat],
+              [routeData.end.lng, routeData.end.lat]
+            ]
+          }
+        };
+        setFeatures(prevFeatures => [...prevFeatures, newFeature]);
+        setCommand(''); // Clear input on success
+      }
     }
   }, [state, toast]);
   
@@ -183,11 +188,11 @@ export function MilAssistLayout() {
 
   return (
     <div className="grid md:grid-cols-[420px_1fr] h-screen bg-background text-foreground">
-      <aside className="p-4 flex flex-col gap-4 border-r bg-secondary overflow-y-auto">
+      <aside className="p-4 flex flex-col gap-4 border-r bg-muted/50 overflow-y-auto">
         <header className="flex items-center justify-between p-2">
           <div>
             <h1 className="text-2xl font-bold text-primary">MilAIAssist</h1>
-            <p className="text-sm text-muted-foreground">AI Mission Planner Assistant</p>
+            <p className="text-sm text-muted-foreground">AI Mission Planner</p>
           </div>
           <SymbolListSheet 
             symbols={symbols}
@@ -200,7 +205,7 @@ export function MilAssistLayout() {
         <Card className="flex-shrink-0 shadow-md">
           <CardHeader>
             <CardTitle>Natural Language Command</CardTitle>
-            <CardDescription>Describe the military symbol to generate. You can also double-click on the map.</CardDescription>
+            <CardDescription>Describe the military symbol or route to generate. You can also double-click on the map to add coordinates.</CardDescription>
           </CardHeader>
           <CardContent>
             <form action={formAction} className="space-y-4">
@@ -250,7 +255,7 @@ export function MilAssistLayout() {
             <CardDescription>Raw JSON output from the AI model.</CardDescription>
           </CardHeader>
           <CardContent className="h-full pb-2">
-            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-muted/50">
+            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-muted/20">
               <pre className="text-xs p-3">
                 {apiLog ? JSON.stringify(apiLog, null, 2) : 'Awaiting command...'}
               </pre>

@@ -1,24 +1,18 @@
-// src/ai/flows/extract-sidc-metadata.ts
+// src/ai/flows/process-command-flow.ts
 'use server';
 
 /**
- * @fileOverview Extracts SIDC metadata from natural language commands using function calling.
- *
- * @function extractSIDCMetadata - Extracts and returns SIDC metadata from a natural language command.
- * @typedef {Object} SIDCMetadataInput - The input type for the extractSIDCMetadata function.
- * @typedef {Object} SIDCMetadataOutput - The return type for the extractSIDCMetadata function.
+ * @fileOverview This file defines the primary Genkit flow for processing natural language commands.
+ * It uses AI tools to determine whether the user wants to draw a single symbol or a route between two points,
+ * and extracts the necessary data for either action.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { geocode } from '@/services/geocoding';
 
-const SIDCMetadataInputSchema = z.object({
-  naturalLanguageCommand: z.string().describe('A natural language command describing a military symbol.'),
-});
-
-export type SIDCMetadataInput = z.infer<typeof SIDCMetadataInputSchema>;
-
-const SIDCMetadataOutputSchema = z.object({
+// Zod schema for the input required to draw a standard military symbol.
+const SymbolInputSchema = z.object({
   context: z.enum([
       'Reality',
       'Exercise',
@@ -95,47 +89,58 @@ const SIDCMetadataOutputSchema = z.object({
   type: z.string().optional().describe('Type of equipment. Max length 24.'),
 });
 
-export type SIDCMetadataOutput = z.infer<typeof SIDCMetadataOutputSchema>;
+// Zod schema for the data extracted for a route.
+export const RouteInputSchema = z.object({
+  startLocationName: z.string().describe('The starting location name of the path or route (e.g., "Paris", "Lahore").'),
+  endLocationName: z.string().describe('The ending location name of the path or route (e.g., "Berlin", "Delhi").'),
+  pathType: z.string().optional().describe('The type of military path, e.g., "Axis of Advance", "Air Corridor", "Main Attack Route".'),
+  unitInfo: z.string().optional().describe('Information about the unit associated with the path, e.g., "F-16".'),
+});
 
-async function extractSIDCMetadata(input: SIDCMetadataInput): Promise<SIDCMetadataOutput> {
-  return extractSIDCMetadataFlow(input);
-}
+// The final feature data that the flow can output. It's a union of the two possible feature types.
+const MapFeatureSchema = z.union([
+  z.object({
+    type: z.literal('symbol'),
+    data: SymbolInputSchema,
+  }),
+  z.object({
+    type: z.literal('route'),
+    data: RouteInputSchema,
+  }),
+]);
+export type MapFeature = z.infer<typeof MapFeatureSchema>;
 
-const drawSIDC = ai.defineTool({
-  name: 'draw_sidc_symbol',
-  description: 'Use this tool to extract the metadata of SIDC symbol from natural language. Use title case for string enum values.',
-  inputSchema: SIDCMetadataOutputSchema,
-  outputSchema: SIDCMetadataOutputSchema,
+// The tool the AI will use to "draw" features. Its input is the union schema.
+const drawMapFeaturesTool = ai.defineTool({
+  name: 'drawMapFeatures',
+  description: 'Draw features on the map. This can be a single symbol or a route between two locations.',
+  inputSchema: MapFeatureSchema,
+  outputSchema: MapFeatureSchema,
+}, async (input) => input); // The tool just returns the structured data.
+
+
+// The main prompt that directs the AI to use the appropriate tool based on the user's command.
+const processCommandPrompt = ai.definePrompt({
+  name: 'processCommandPrompt',
+  tools: [drawMapFeaturesTool],
+  prompt: `You are an AI mission planning assistant. Analyze the user's command and extract the necessary information to draw a feature on the map using the drawMapFeatures tool.
+- If the command describes a single unit at a specific location, extract the data for a 'symbol'.
+- If the command describes a path, movement, or route between two locations, extract the data for a 'route'.
+- For routes, you must extract both a start and an end location name.
+- Your response must be a call to the drawMapFeatures tool.
+
+Command: {{{command}}}`,
+});
+
+// The main flow that gets executed by the server action.
+export const processCommandFlow = ai.defineFlow({
+  name: 'processCommandFlow',
+  inputSchema: z.object({ command: z.string() }),
+  outputSchema: MapFeatureSchema,
 }, async (input) => {
-  // This tool itself does not perform any action, but defines the structure for data extraction.
-  return input;
-});
-
-const extractSIDCMetadataPrompt = ai.definePrompt({
-  name: 'extractSIDCMetadataPrompt',
-  tools: [drawSIDC],
-  input: {schema: SIDCMetadataInputSchema},
-  output: {schema: SIDCMetadataOutputSchema},
-  prompt: `Extract the SIDC metadata from the following natural language command, using the draw_sidc_symbol tool to extract all fields necessary to draw the symbol.
-- Extract any unique name or designation for the unit (e.g., "Alpha Company", "TF-121").
-- Return latitude and longitude as floating point numbers.
-- Also extract context (reality, exercise, etc), status (planned, damaged, etc), and headquarters/task force/dummy status.
-- Determine the correct symbolSet, symbolCategory (the main icon, e.g. Infantry), and any applicable Modifiers (1 and 2).
-- Also extract any text amplifiers like quantity, speed, unique designation, or higher formation.
-
-Command: {{{naturalLanguageCommand}}}`,
-});
-
-const extractSIDCMetadataFlow = ai.defineFlow(
-  {
-    name: 'extractSIDCMetadataFlow',
-    inputSchema: SIDCMetadataInputSchema,
-    outputSchema: SIDCMetadataOutputSchema,
-  },
-  async input => {
-    const {output} = await extractSIDCMetadataPrompt(input);
-    return output!;
+  const { output } = await processCommandPrompt(input);
+  if (!output) {
+    throw new Error('AI model did not return a valid feature.');
   }
-);
-
-export { extractSIDCMetadata };
+  return output;
+});
