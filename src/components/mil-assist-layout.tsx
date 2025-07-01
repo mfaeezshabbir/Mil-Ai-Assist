@@ -17,7 +17,7 @@ import { Separator } from './ui/separator';
 import { SymbolListSheet } from './symbol-list-sheet';
 import { SymbolEditor } from './symbol-editor';
 import type { SIDCMetadataOutput } from '@/ai/flows/extract-sidc-metadata';
-import { LandUnitSymbolSet10, findFunctionId, symbolSetData } from '@/lib/sidc-mappings';
+import { findFunctionId } from '@/lib/sidc-mappings';
 
 const initialState: { data: SIDCMetadataOutput | null; error: string | null } = {
   data: null,
@@ -25,48 +25,48 @@ const initialState: { data: SIDCMetadataOutput | null; error: string | null } = 
 };
 
 const initialSymbols: SymbolData[] = [
-  {
-    id: 'initial-1',
-    context: 'Reality',
-    symbolStandardIdentity: 'Friend',
-    status: 'Present',
-    hqtfd: 'Not Applicable',
-    symbolSet: 'Land Unit',
-    functionId: LandUnitSymbolSet10.INFANTRY,
-    modifier1: '00',
-    modifier2: '00',
-    symbolEchelon: 'Company',
-    latitude: 33.72,
-    longitude: 73.09,
-  },
-  {
-    id: 'initial-2',
-    context: 'Reality',
-    symbolStandardIdentity: 'Hostile',
-    status: 'Damaged',
-    hqtfd: 'Not Applicable',
-    symbolSet: 'Land Unit',
-    functionId: LandUnitSymbolSet10.ARMOUR,
-    modifier1: '00',
-    modifier2: '00',
-    symbolEchelon: 'Battalion',
-    latitude: 33.68,
-    longitude: 73.04,
-  },
-  {
-    id: 'initial-3',
-    context: 'Reality',
-    symbolStandardIdentity: 'Neutral',
-    status: 'Present',
-    hqtfd: 'Task Force Headquarters',
-    symbolSet: 'Land Unit',
-    functionId: LandUnitSymbolSet10.INFANTRY,
-    modifier1: '00',
-    modifier2: '00',
-    symbolEchelon: 'Regiment',
-    latitude: 33.735,
-    longitude: 73.075,
-  },
+    {
+      id: 'initial-1',
+      context: 'Reality',
+      symbolStandardIdentity: 'Friend',
+      status: 'Present',
+      hqtfd: 'Not Applicable',
+      symbolSet: 'Land Unit',
+      functionId: '121100', // Infantry
+      modifier1: '00',
+      modifier2: '00',
+      symbolEchelon: 'Company',
+      latitude: 33.72,
+      longitude: 73.09,
+    },
+    {
+      id: 'initial-2',
+      context: 'Reality',
+      symbolStandardIdentity: 'Hostile',
+      status: 'Damaged',
+      hqtfd: 'Not Applicable',
+      symbolSet: 'Land Unit',
+      functionId: '120500', // Armour
+      modifier1: '00',
+      modifier2: '00',
+      symbolEchelon: 'Battalion',
+      latitude: 33.68,
+      longitude: 73.04,
+    },
+    {
+      id: 'initial-3',
+      context: 'Reality',
+      symbolStandardIdentity: 'Neutral',
+      status: 'Present',
+      hqtfd: 'Task Force Headquarters',
+      symbolSet: 'Land Unit',
+      functionId: '121100', // Infantry
+      modifier1: '00',
+      modifier2: '00',
+      symbolEchelon: 'Regiment',
+      latitude: 33.735,
+      longitude: 73.075,
+    },
 ];
 
 const samplePrompts = [
@@ -79,7 +79,7 @@ const samplePrompts = [
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" disabled={pending} className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+    <Button type="submit" disabled={pending} className="w-full">
       {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
       <span>Generate Symbol</span>
     </Button>
@@ -121,7 +121,7 @@ export function MilAssistLayout() {
         context: state.data.context || 'Reality',
         status: state.data.status || 'Present',
         hqtfd: state.data.hqtfd || 'Not Applicable',
-        modifier1: '00', // Default modifiers
+        modifier1: '00',
         modifier2: '00',
       };
       setSymbols((prev) => [...prev, newSymbol]);
@@ -174,8 +174,8 @@ export function MilAssistLayout() {
   };
 
   return (
-    <div className="grid md:grid-cols-[420px_1fr] h-screen bg-secondary/30 text-foreground">
-      <aside className="p-4 flex flex-col gap-4 border-r bg-background overflow-y-auto">
+    <div className="grid md:grid-cols-[420px_1fr] h-screen bg-background text-foreground">
+      <aside className="p-4 flex flex-col gap-4 border-r bg-secondary/20 overflow-y-auto">
         <header className="flex items-center justify-between p-2">
           <div>
             <h1 className="text-2xl font-bold text-primary">MilAIAssist</h1>
@@ -189,7 +189,7 @@ export function MilAssistLayout() {
           />
         </header>
 
-        <Card className="flex-shrink-0 shadow-md">
+        <Card className="flex-shrink-0 shadow-md bg-card/60">
           <CardHeader>
             <CardTitle>Natural Language Command</CardTitle>
             <CardDescription>Describe the military symbol to generate. You can also double-click on the map.</CardDescription>
@@ -214,7 +214,7 @@ export function MilAssistLayout() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
+        <Card className="shadow-md bg-card/60">
           <CardHeader>
             <CardTitle>Sample Prompts</CardTitle>
             <CardDescription>Click a sample to try it out.</CardDescription>
@@ -236,13 +236,13 @@ export function MilAssistLayout() {
         
         <Separator />
 
-        <Card className="flex-1 min-h-0 shadow-md">
+        <Card className="flex-1 min-h-0 shadow-md bg-card/60">
           <CardHeader>
             <CardTitle>API Response Log</CardTitle>
             <CardDescription>Raw JSON output from the AI model.</CardDescription>
           </CardHeader>
           <CardContent className="h-full pb-2">
-            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-muted/50">
+            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-background/50">
               <pre className="text-xs p-3">
                 {apiLog ? JSON.stringify(apiLog, null, 2) : 'Awaiting command...'}
               </pre>
@@ -250,7 +250,7 @@ export function MilAssistLayout() {
           </CardContent>
         </Card>
       </aside>
-      <main className="p-4">
+      <main className="p-4 bg-black">
         <MapView 
             symbols={symbols} 
             onMapDoubleClick={handleMapDoubleClick} 

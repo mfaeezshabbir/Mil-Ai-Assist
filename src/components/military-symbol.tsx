@@ -10,33 +10,44 @@ import { getFunctionIdName } from '@/lib/sidc-mappings';
 
 type MilitarySymbolProps = {
   symbol: SymbolData;
+  size?: number;
 };
 
-export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
+export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
   const [svgHtml, setSvgHtml] = useState('');
   const [sidc, setSidc] = useState('');
 
   useEffect(() => {
     // milsymbol is a client-side library, so we only run it in the browser
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !symbol) return;
 
     try {
       const generatedSidc = generateSIDC(symbol);
       setSidc(generatedSidc);
       
+      const { 
+        id, latitude, longitude, symbolEchelon, functionId, symbolStandardIdentity, 
+        context, status, hqtfd, symbolSet, modifier1, modifier2, 
+        ...options 
+      } = symbol;
+
       const milSymbol = new MS.Symbol(generatedSidc, { 
-        size: 35,
+        ...options,
+        size: size,
         colorMode: "Light",
         outlineWidth: 3,
-        outlineColor: "rgba(255, 255, 255, 0.8)",
+        outlineColor: "rgba(0, 0, 0, 0.9)",
       });
+
       setSvgHtml(milSymbol.asSVG());
     } catch (e) {
-      console.error('Error creating military symbol:', e);
+      console.error('Error creating military symbol:', e, symbol);
       // Fallback to a simple placeholder if milsymbol fails
-      setSvgHtml('<svg width="35" height="40"><rect x="0" y="0" width="35" height="40" fill="red" /></svg>');
+      setSvgHtml(`<svg width="${size}" height="${size}"><rect x="0" y="0" width="${size}" height="${size}" fill="red" /></svg>`);
     }
-  }, [symbol]);
+  }, [symbol, size]);
+
+  if (!symbol) return null;
 
   const title = [
     symbol.context,

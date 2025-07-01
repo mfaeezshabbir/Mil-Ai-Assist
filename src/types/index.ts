@@ -10,4 +10,25 @@ export type SymbolData = Omit<AIMetadata, 'symbolCategory'> & {
   status: string;
   hqtfd: string;
   symbolEchelon?: string;
+  // Text Amplifiers
+  quantity?: string;
+  reinforcedReduced?: string;
+  staffComments?: string;
+  additionalInformation?: string;
+  higherFormation?: string;
+  dtg?: string;
+  type?: string;
+  uniqueDesignation?: string;
+  evaluationRating?: string;
+  combatEffectiveness?: string;
+  signatureEquipment?: string;
+  specialHeadquarters?: string;
+  iffSif?: string;
+  // Graphic Amplifiers
+  altitudeDepth?: string;
+  location?: string;
+  speed?: string;
+  hostile?: string;
+  direction?: string;
+  engagementBar?: string;
 };

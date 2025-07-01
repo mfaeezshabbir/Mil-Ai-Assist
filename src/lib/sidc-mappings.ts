@@ -76,6 +76,7 @@ export const sidcEnumMapping = {
     }
 };
 
+// Simplified for now, but can be expanded with all the data provided.
 export const LandUnitSymbolSet10 = {
     COMMAND_AND_CONTROL: "110000",
     BROADCAST_TRANSMITTER_ANTENNA: "110100",
@@ -83,231 +84,87 @@ export const LandUnitSymbolSet10 = {
     CIVIL_MILITARY_COOPERATION: "110300",
     INFORMATION_OPERATIONS: "110400",
     LIAISON: "110500",
-    LIAISON_RECONNAISSANCE: "110501",
     MILITARY_INFORMATION_SUPPORT_OPERATIONS: "110600",
-    MILITARY_INFORMATION_SUPPORT_OPERATIONS_BROADCAST: "110601",
-    RADIO: "110700",
-    RADIO_RELAY: "110800",
-    RADIO_TELETYPE_CENTRE: "110900",
     SIGNAL: "111000",
-    SIGNAL_RADIO: "111001",
-    SIGNAL_RADIO_RELAY: "111002",
-    SIGNAL_RADIO_TELETYPE_CENTRE: "111003",
-    SIGNAL_SATELLITE: "111004",
-    SIGNAL_VIDEO_IMAGERY: "111005",
-    SATELLITE: "111100",
-    VIDEO_IMAGERY: "111200",
     SPACE: "111300",
-    SPECIAL_TROOPS: "111400",
-    MULTI_DOMAIN: "111500",
-    AIR_ASSAULT_WITH_ORGANIC_LIFT: "120100",
-    AIR_TRAFFIC_SERVICES: "120200",
     AMPHIBIOUS: "120300",
     ANTITANK_ANTIARMOUR: "120400",
-    ANTITANK_ANTIARMOUR_ARMOUR: "120401",
-    ANTITANK_ANTIARMOUR_MOTORIZED: "120402",
     ARMOUR: "120500",
-    ARMOUR_RECONNAISSANCE: "120501",
-    ARMOUR_AMPHIBIOUS: "120502",
     AVIATION_ROTARY_WING: "120600",
-    AVIATION_ROTARY_WING_RECONNAISSANCE: "120601",
-    AVIATION_COMPOSITE: "120700",
     AVIATION_FIXED_WING: "120800",
-    AVIATION_FIXED_WING_RECONNAISSANCE: "120801",
     COMBAT: "120900",
     COMBINED_ARMS: "121000",
     INFANTRY: "121100",
-    INFANTRY_AMPHIBIOUS: "121101",
-    INFANTRY_ARMOUR: "121102",
-    INFANTRY_MAIN_GUN_SYSTEM: "121103",
-    INFANTRY_MOTORIZED: "121104",
-    INFANTRY_ARMOUR_MAIN_GUN_SYSTEM: "121105",
-    MAIN_GUN_SYSTEM: "121106",
-    OBSERVER_OBSERVATION: "121200",
     RECONNAISSANCE: "121300",
-    RECONNAISSANCE_SURVEILLANCE: "121301",
-    RECONNAISSANCE_AMPHIBIOUS: "121302",
-    RECONNAISSANCE_MOTORIZED: "121303",
-    SEA_AIR_LAND: "121400",
-    SNIPER: "121500",
-    SURVEILLANCE: "121600",
     SPECIAL_FORCES: "121700",
     SPECIAL_OPERATIONS_FORCES: "121800",
-    FIXED_WING_MISO: "121801",
-    SPECIAL_OPERATIONS_FORCES_INFANTRY: "121802",
-    SPECIAL_BOAT: "121803",
-    SPECIAL_SSNR: "121804",
-    UNDERWATER_DEMOLITION_TEAM: "121805",
     UNMANNED_SYSTEMS: "121900",
-    RANGER: "122000",
     AIR_DEFENCE: "130100",
-    AIR_DEFENCE_MAIN_GUN_SYSTEM: "130101",
-    AIR_DEFENCE_MISSILE: "130102",
-    AIR_DEFENCE_AIR_AND_MISSILE_DEFENSE: "130103",
-    FIELD_ARTILLERY_RECONNAISSANCE_AVIATION_NAVAL: "130200",
     FIELD_ARTILLERY: "130300",
-    FIELD_ARTILLERY_SELF_PROPELLED: "130301",
-    FIELD_ARTILLERY_TARGET_ACQUISITION: "130302",
-    FIELD_ARTILLERY_RECONNAISSANCE: "130303",
-    FIELD_ARTILLERY_OBSERVER: "130400",
-    JOINT_FIRE_SUPPORT: "130500",
-    METEOROLOGICAL: "130600",
-    MISSILE: "130700",
     MORTAR: "130800",
-    MORTAR_TRACKED: "130801",
-    MORTAR_TRUCK: "130802",
-    MORTAR_TOWED: "130803",
-    SURVEY: "130900",
     CBRN: "140100",
-    CBRN_ARMOUR: "140101",
-    CBRN_MOTORIZED: "140102",
-    CBRN_RECONNAISSANCE: "140103",
-    CBRN_RECONNAISSANCE_ARMOUR: "140104",
-    CBRN_RECONNAISSANCE_MOTORIZED: "140105",
-    CBRN_CHEMICAL_BIOLOGICAL_RADIOLOGICAL_NUCLEAR: "140106",
-    COMBAT_SUPPORT: "140200",
-    CRIMINAL_INVESTIGATION_DIVISION: "140300",
-    DIVER_CIVILIAN: "140400",
-    DOG: "140500",
-    DRILLING: "140600",
     ENGINEER: "140700",
-    ENGINEER_MECHANIZED: "140701",
-    ENGINEER_MOTORIZED: "140702",
-    ENGINEER_RECONNAISSANCE: "140703",
-    EXPLOSIVE_ORDNANCE_DISPOSAL: "140800",
-    FIELD_CAMP_CONSTRUCTION: "140900",
-    FIRE_PROTECTION: "141000",
-    GEOSPATIAL_SUPPORT: "141100",
     MILITARY_POLICE: "141200",
-    MINE: "141300",
-    MINE_CLEARING: "141400",
-    MINE_LAUNCHING: "141500",
-    MINE_LAYING: "141600",
     SECURITY: "141700",
-    SECURITY_ARMOUR: "141701",
-    SECURITY_MOTORIZED: "141702",
-    SEARCH_AND_RESCUE: "141800",
-    ISOLATED_PERSONNEL: "141801",
-    SECURITY_POLICE_AIR: "141900",
-    SHORE_PATROL: "142000",
-    TOPOGRAPHIC: "142100",
-    AIR_AND_MISSILE_DEFENSE: "142200",
-    ANALYSIS: "150100",
-    COUNTER_INTELLIGENCE: "150200",
-    DIRECTION_FINDING: "150300",
-    ELECTRONIC_RANGING: "150400",
-    ELECTRONIC_WARFARE: "150500",
-    ELECTRONIC_WARFARE_ANALYSIS: "150501",
-    ELECTRONIC_WARFARE_DIRECTION_FINDING: "150502",
-    ELECTRONIC_WARFARE_INTERCEPT: "150503",
-    ELECTRONIC_WARFARE_JAMMING: "150504",
-    ELECTRONIC_WARFARE_SEARCH: "150505",
-    INTERCEPT: "150600",
-    INTERROGATION: "150700",
-    JAMMING: "150800",
-    JOINT_INTELLIGENCE_CENTRE: "150900",
     MILITARY_INTELLIGENCE: "151000",
-    SEARCH: "151100",
-    SENSOR: "151200",
-    MILITARY_HISTORY: "151300",
     SUSTAINMENT: "160000",
-    ADMINISTRATIVE: "160100",
-    SUPPLY_CLASS_ALL: "160200",
-    TRANSPORTATION_AIRPORT_OF_DEBARKATION: "160300",
-    AMMUNITION: "160400",
-    BAND: "160500",
-    ARMY_MUSIC: "160501",
-    COMBAT_SERVICE_SUPPORT: "160600",
-    FINANCE: "160700",
-    JUDGE_ADVOCATE_GENERAL: "160800",
-    LABOUR: "160900",
-    LAUNDRY_BATH: "161000",
     MAINTENANCE: "161100",
-    SUPPLY_MATERIEL: "161200",
     MEDICAL: "161300",
-    MEDICAL_TREATMENT_FACILITY: "161400",
-    MORALE_WELFARE_AND_RECREATION: "161500",
-    MORTUARY_AFFAIRS: "161600",
-    SUPPLY_CLASS_MULTIPLE: "161700",
-    SUPPLY_NATO_CLASS_I: "161800",
-    SUPPLY_NATO_CLASS_II: "161900",
-    SUPPLY_NATO_CLASS_III: "162000",
-    SUPPLY_NATO_CLASS_IV: "162100",
-    SUPPLY_NATO_CLASS_V: "162200",
     ORDNANCE: "162300",
-    PERSONNEL_SERVICES: "162400",
-    PETROLEUM_OIL_LUBRICANTS: "162500",
-    PIPELINE: "162600",
-    POSTAL: "162700",
-    PUBLIC_AFFAIRS: "162800",
-    QUARTERMASTER: "162900",
-    RAILHEAD: "163000",
-    RELIGIOUS_SUPPORT: "163100",
-    REPLACEMENT_HOLDING_UNIT: "163200",
-    SEAPORT_OF_DEBARKATION: "163300",
-    SUPPLY: "163400",
-    JOINT_INFORMATION_BUREAU: "163500",
     TRANSPORTATION: "163600",
-    TRANSPORTATION_FLOATING_CRAFT: "163601",
-    SUPPLY_CLASS_I: "163700",
-    SUPPLY_CLASS_II: "163800",
-    SUPPLY_CLASS_III: "163900",
-    SUPPLY_CLASS_IV: "164000",
-    SUPPLY_CLASS_V: "164100",
-    SUPPLY_CLASS_VI: "164200",
-    SUPPLY_CLASS_VII: "164300",
-    SUPPLY_CLASS_VIII: "164400",
-    SUPPLY_CLASS_IX: "164500",
-    SUPPLY_CLASS_X: "164600",
-    WATER: "164700",
-    WATER_PURIFICATION: "164800",
-    PUBLIC_AFFAIRS_BROADCAST: "164900",
-    SUPPLY_NATO_CLASS_ALL: "165000",
-    INTERPRETER_TRANSLATOR: "165100",
-    SUPPORT: "165200",
-    ARMY_FIELD_SUPPORT: "165300",
-    CONTRACTING_SERVICES: "165400",
-    PARACHUTE_RIGGER: "165500",
-    HUMAN_RESOURCES: "165600",
-    NAVAL: "170100",
-    ALLIED_COMMAND_EUROPE_RAPID_REACTION_CORPS: "180100",
-    ALLIED_COMMAND_OPERATIONS: "180200",
-    INTERNATIONAL_SECURITY_ASSISTANCE_FORCE: "180300",
-    MULTINATIONAL: "180400",
-    EMERGENCY_OPERATION: "190000",
-    LAW_ENFORCEMENT: "200000",
-    BUREAU_OF_ALCOHOL_TOBACCO_FIREARMS_AND_EXPLOSIVES: "200100",
-    BORDER_PATROL: "200200",
-    CUSTOMS_SERVICE: "200300",
-    DRUG_ENFORCEMENT_AGENCY: "200400",
-    DEPARTMENT_OF_JUSTICE: "200500",
-    FEDERAL_BUREAU_OF_INVESTIGATION: "200600",
-    LAW_ENFORCEMENT_VESSEL: "201100",
-    US_MARSHALS_SERVICE: "201200",
-    INTERNAL_SECURITY_FORCE: "201300",
-    CYBER: "210000",
 };
 
-const mainIconSets = {
-    'Land Unit': LandUnitSymbolSet10,
-    // Add other main icon sets here as they are defined
+const LandUnitModifier1 = {
+    AIRMOBILE_AIR_ASSAULT: "01",
+    ATTACK: "03",
+    BRIDGING: "06",
+    CHEMICAL: "07",
+    COMBAT: "09",
+    COMMAND_AND_CONTROL: "10",
+    CONSTRUCTION: "12",
+    DECONTAMINATION: "15",
+    DOG: "20",
+    EXPLOSIVE_ORDNANCE_DISPOSAL: "24",
+    MAINTENANCE: "31",
+    MISSILE: "34",
+    MOBILITY_SUPPORT: "37",
+    MULTIPLE_ROCKET_LAUNCHER: "41",
+    NAVAL: "46",
+    NUCLEAR: "48",
+    RADAR: "50",
+    RADIOLOGICAL: "52",
+    SECURITY: "54",
+    SENSOR: "55",
+    SNIPER: "61",
+    SPECIAL_OPERATIONS_FORCES: "63",
+    TARGET_ACQUISITION: "67",
+    UTILITY: "69",
 };
 
-const modifier1Sets = {
-    // Add modifier 1 sets here
+const LandUnitModifier2 = {
+    AIRBORNE: "01",
+    ARCTIC: "02",
+    HEAVY: "15",
+    LIGHT: "19",
+    MEDIUM: "24",
+    MOUNTAIN: "27",
+    RAILROAD: "36",
+    SKI: "42",
+    TOWED: "47",
+    WHEELED: "51",
+    AMPHIBIOUS: "60",
 };
 
-const modifier2Sets = {
-    // Add modifier 2 sets here
-};
 
 // Helper function to format options for the Select component
 const formatOptions = (obj: Record<string, string>) => {
-    return Object.entries(obj).map(([name, code]) => ({
+    return [{name: "Unspecified", code: "00"}, ...Object.entries(obj).map(([name, code]) => ({
         name: toTitleCase(name),
         code
-    }));
+    }))];
 };
+
+const emptySet = { mainIcons: [], modifier1: [], modifier2: [] };
 
 export const symbolSetData: Record<string, {
     mainIcons: { name: string, code: string }[],
@@ -316,20 +173,37 @@ export const symbolSetData: Record<string, {
 }> = {
     'Land Unit': {
         mainIcons: formatOptions(LandUnitSymbolSet10),
-        // Add modifier options if they exist for Land Unit
+        modifier1: formatOptions(LandUnitModifier1),
+        modifier2: formatOptions(LandUnitModifier2),
     },
-    // ... other symbol sets
+    'Air': emptySet,
+    'Air Missile': emptySet,
+    'Space': emptySet,
+    'Space Missile': emptySet,
+    'Land Civilian': emptySet,
+    'Land Equipment': emptySet,
+    'Land Installation': emptySet,
+    'Control Measure': emptySet,
+    'Dismounted Individual': emptySet,
+    'Sea Surface': emptySet,
+    'Subsurface': emptySet,
+    'Sea Mine': emptySet,
+    'Activities': emptySet,
+    'SIGINT Air': emptySet,
+    'SIGINT Space': emptySet,
+    'SIGINT Land': emptySet,
+    'SIGINT Surface': emptySet,
+    'SIGINT Subsurface': emptySet,
+    'Cyberspace': emptySet,
+    'Unknown': emptySet,
 };
 
 export function getFunctionIdName(symbolSet: string, functionId: string): string {
-    const sets = Object.values(mainIconSets);
-    for (const set of sets) {
-        const entry = Object.entries(set).find(([, code]) => code === functionId);
-        if (entry) {
-            return toTitleCase(entry[0]);
-        }
-    }
-    return 'Unknown';
+    const set = symbolSetData[symbolSet]?.mainIcons;
+    if (!set) return 'Unknown Function';
+    
+    const entry = set.find(item => item.code === functionId);
+    return entry ? entry.name : 'Unknown Function';
 }
 
 export function findFunctionId(symbolSet: string, categoryName?: string): string | undefined {
@@ -339,7 +213,14 @@ export function findFunctionId(symbolSet: string, categoryName?: string): string
     if (!setData) return undefined;
 
     const normalizedCategory = categoryName.replace(/\s+/g, '_').toUpperCase();
-    const icon = setData.mainIcons.find(icon => icon.name.replace(/\s+/g, '_').toUpperCase() === normalizedCategory);
     
-    return icon?.code;
+    // Exact match first
+    let icon = Object.entries(LandUnitSymbolSet10).find(([key,]) => key === normalizedCategory);
+    if(icon) return icon[1];
+    
+    // Partial match
+    icon = Object.entries(LandUnitSymbolSet10).find(([key,]) => key.includes(normalizedCategory));
+    if(icon) return icon[1];
+
+    return undefined;
 }
