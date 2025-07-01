@@ -74,7 +74,12 @@ export async function getMapFeatureFromCommand(
 
   } catch (e) {
     console.error(e);
-    const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
-    return { feature: null, error: `Failed to process command: ${errorMessage}` };
+    let errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
+    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+      errorMessage = 'The AI model is currently busy. Please try your command again shortly.';
+    } else {
+      errorMessage = `Failed to process command: ${errorMessage}`;
+    }
+    return { feature: null, error: errorMessage };
   }
 }
