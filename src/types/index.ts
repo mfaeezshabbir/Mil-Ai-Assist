@@ -30,5 +30,9 @@ export type SymbolData = Omit<AIMetadata, 'symbolCategory'> & {
   speed?: string;
   hostile?: string;
   direction?: string;
-  engagementBar?: string;
+  // New Amplifiers
+  commonIdentifier?: string;
+  equipmentTeardownTime?: string;
+  headquartersElement?: string;
+  platformType?: string;
 };

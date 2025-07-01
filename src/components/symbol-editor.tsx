@@ -20,12 +20,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from './ui/scroll-area';
 import { toTitleCase } from '@/lib/utils';
-import { sidcEnumMapping, symbolSetData, getFunctionIdName } from '@/lib/sidc-mappings';
+import { sidcEnumMapping, symbolSetData, getFunctionIdName, amplifierData, amplifiersInSymbolSet } from '@/lib/sidc-mappings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MilitarySymbol } from './military-symbol';
 import { generateSIDC } from '@/lib/sidc-generator';
+import { HelpCircle } from 'lucide-react';
 
 type SymbolEditorProps = {
   symbol: SymbolData | null;
@@ -46,12 +48,10 @@ const symbolSets = Object.keys(sidcEnumMapping.symbolSet).map(key => ({
     code: sidcEnumMapping.symbolSet[key as keyof typeof sidcEnumMapping.symbolSet],
 }));
 
-const amplifierFields: (keyof SymbolData)[] = [
-    'quantity', 'higherFormation', 'additionalInformation', 'dtg', 'altitudeDepth', 'location', 
-    'type', 'uniqueDesignation', 'hostile', 'speed', 'direction', 'staffComments',
-    'combatEffectiveness', 'evaluationRating', 'iffSif', 'reinforcedReduced', 'signatureEquipment',
-    'specialHeadquarters'
-];
+function normalize(str: string | undefined): string {
+    if (!str) return '';
+    return str.replace(/\s+/g, '_').toUpperCase();
+}
 
 export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEditorProps) {
   const [editedSymbol, setEditedSymbol] = useState<SymbolData | null>(symbol);
@@ -63,6 +63,10 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
   if (!editedSymbol) return null;
 
   const currentSetData = symbolSetData[editedSymbol.symbolSet || ''];
+  const symbolSetCode = sidcEnumMapping.symbolSet[normalize(editedSymbol.symbolSet) as keyof typeof sidcEnumMapping.symbolSet];
+  const validAmplifierFields = amplifiersInSymbolSet[symbolSetCode as keyof typeof amplifiersInSymbolSet] || {};
+  const visibleAmplifiers = amplifierData.filter(amp => amp.field && validAmplifierFields.hasOwnProperty(amp.field));
+
 
   const handleChange = (field: keyof SymbolData, value: any) => {
     const newSymbol = { ...editedSymbol, [field]: value };
@@ -116,17 +120,31 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
     </div>
   );
 
-  const renderInputGroup = (field: keyof SymbolData) => (
-    <div className="grid grid-cols-3 items-center gap-4">
-        <Label htmlFor={field} className="text-right">{toTitleCase(field)}</Label>
-        <Input 
-            id={field}
-            value={(editedSymbol[field] as string) || ''}
-            onChange={(e) => handleChange(field, e.target.value)}
-            className="col-span-2"
-        />
+  const renderAmplifierInput = (amp: typeof amplifierData[number]) => (
+    <div key={amp.amplifierId} className="grid grid-cols-3 items-center gap-4">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Label htmlFor={amp.amplifierId} className="text-right flex items-center justify-end gap-1 cursor-help">
+              <span>{amp.label}</span>
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+            </Label>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs">{amp.description}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+      <Input
+        id={amp.amplifierId}
+        value={(editedSymbol[amp.amplifierId as keyof SymbolData] as string) || ''}
+        onChange={(e) => handleChange(amp.amplifierId as keyof SymbolData, e.target.value)}
+        className="col-span-2"
+        maxLength={amp.maxLength}
+      />
     </div>
-  )
+  );
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -189,7 +207,10 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
               <TabsContent value="amplifiers">
                  <ScrollArea className="h-[400px] p-1">
                     <div className="space-y-4 p-4">
-                        {amplifierFields.map(field => renderInputGroup(field))}
+                      {visibleAmplifiers.map(renderAmplifierInput)}
+                      {visibleAmplifiers.length === 0 && (
+                        <p className="text-center text-muted-foreground p-8">No amplifiers available for this symbol set.</p>
+                      )}
                     </div>
                 </ScrollArea>
               </TabsContent>
