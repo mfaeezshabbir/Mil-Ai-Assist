@@ -3,8 +3,9 @@
 import type { MapRef, MapLayerMouseEvent } from 'react-map-gl';
 import Map, { Marker, NavigationControl, GeolocateControl, FullscreenControl } from 'react-map-gl';
 import type { SymbolData } from '@/types';
-import { MilitarySymbol } from '@/components/military-symbol';
 import { Geocoder } from '@/components/geocoder';
+import { PointMarker } from './point-marker';
+import DrawControl from './draw-control';
 
 type MapViewProps = {
   symbols: SymbolData[];
@@ -12,11 +13,21 @@ type MapViewProps = {
   onSymbolClick: (symbolId: string) => void;
   onSymbolDragEnd: (symbolId: string, coords: { lng: number; lat: number }) => void;
   mapRef: React.RefObject<MapRef>;
+  features: any;
+  onFeaturesChange: (features: any) => void;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-export function MapView({ symbols, onMapDoubleClick, onSymbolClick, onSymbolDragEnd, mapRef }: MapViewProps) {
+export function MapView({ 
+  symbols, 
+  onMapDoubleClick, 
+  onSymbolClick, 
+  onSymbolDragEnd, 
+  mapRef,
+  features,
+  onFeaturesChange
+}: MapViewProps) {
   if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
     return (
       <div className="flex items-center justify-center w-full h-full bg-muted rounded-lg border">
@@ -44,6 +55,18 @@ export function MapView({ symbols, onMapDoubleClick, onSymbolClick, onSymbolDrag
       lat: event.lngLat.lat,
     });
   };
+  
+  const onUpdate = (e: { features: object[] }) => {
+    onFeaturesChange(e.features);
+  };
+
+  const onCreate = (e: { features: object[] }) => {
+    onFeaturesChange(e.features);
+  };
+
+  const onDelete = (e: { features: object[] }) => {
+    onFeaturesChange(e.features);
+  };
 
   return (
     <div className="w-full h-full rounded-lg overflow-hidden border relative">
@@ -63,6 +86,20 @@ export function MapView({ symbols, onMapDoubleClick, onSymbolClick, onSymbolDrag
         <NavigationControl position="top-right" />
         <GeolocateControl position="top-right" />
         <FullscreenControl position="top-right" />
+        
+        <DrawControl
+          position="top-right"
+          displayControlsDefault={false}
+          controls={{
+            polygon: true,
+            line_string: true,
+            trash: true
+          }}
+          features={features}
+          onCreate={onCreate}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+        />
 
         {symbols.map((symbol) => (
           <Marker
@@ -71,6 +108,7 @@ export function MapView({ symbols, onMapDoubleClick, onSymbolClick, onSymbolDrag
             latitude={symbol.latitude}
             anchor="bottom"
             draggable={true}
+            onClick={() => onSymbolClick(symbol.id)}
             onDragEnd={(event) =>
               onSymbolDragEnd(symbol.id, {
                 lng: event.lngLat.lng,
@@ -78,9 +116,7 @@ export function MapView({ symbols, onMapDoubleClick, onSymbolClick, onSymbolDrag
               })
             }
           >
-            <div onClick={() => onSymbolClick(symbol.id)} className="cursor-move">
-              <MilitarySymbol symbol={symbol} />
-            </div>
+            <PointMarker symbol={symbol} />
           </Marker>
         ))}
       </Map>

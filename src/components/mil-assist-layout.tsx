@@ -27,6 +27,7 @@ const initialState: { data: SIDCMetadataOutput | null; error: string | null } = 
 const initialSymbols: SymbolData[] = [
     {
       id: 'initial-1',
+      displayType: 'sidc',
       uniqueDesignation: 'Alpha Company',
       context: 'Reality',
       symbolStandardIdentity: 'Friend',
@@ -42,6 +43,7 @@ const initialSymbols: SymbolData[] = [
     },
     {
       id: 'initial-2',
+      displayType: 'sidc',
       uniqueDesignation: 'Enemy Armor',
       context: 'Reality',
       symbolStandardIdentity: 'Hostile',
@@ -57,6 +59,7 @@ const initialSymbols: SymbolData[] = [
     },
     {
       id: 'initial-3',
+      displayType: 'sidc',
       uniqueDesignation: 'Task Force HQ',
       context: 'Reality',
       symbolStandardIdentity: 'Neutral',
@@ -98,6 +101,7 @@ export function MilAssistLayout() {
   
   const mapRef = useRef<MapRef>(null);
   const [editingSymbol, setEditingSymbol] = useState<SymbolData | null>(null);
+  const [features, setFeatures] = useState<any[]>([]);
 
   useEffect(() => {
     if (state !== initialState) {
@@ -119,6 +123,7 @@ export function MilAssistLayout() {
       const newSymbol: SymbolData = {
         ...restOfData,
         id: new Date().toISOString() + Math.random(),
+        displayType: 'sidc',
         functionId: functionId,
         symbolSet: state.data.symbolSet || 'Land Unit',
         context: state.data.context || 'Reality',
@@ -260,6 +265,8 @@ export function MilAssistLayout() {
             mapRef={mapRef}
             onSymbolClick={handleEditClick}
             onSymbolDragEnd={handleSymbolDragEnd}
+            features={features}
+            onFeaturesChange={setFeatures}
         />
       </main>
       <SymbolEditor 

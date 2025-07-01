@@ -27,7 +27,9 @@ import { sidcEnumMapping, symbolSetData, getFunctionIdName, amplifierData, getEm
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MilitarySymbol } from './military-symbol';
 import { generateSIDC } from '@/lib/sidc-generator';
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Upload } from 'lucide-react';
+import Image from 'next/image';
+
 
 type SymbolEditorProps = {
   symbol: SymbolData | null;
@@ -73,9 +75,23 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
         newSymbol.modifier1 = '00';
         newSymbol.modifier2 = '00';
         newSymbol.symbolEchelon = "Unspecified";
+        newSymbol.displayType = 'sidc';
+        newSymbol.imageUrl = undefined;
     }
     
     setEditedSymbol(newSymbol);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const imageUrl = loadEvent.target?.result as string;
+        setEditedSymbol((prev) => prev ? { ...prev, imageUrl, displayType: 'image' } : null);
+      };
+      reader.readAsDataURL(file);
+    }
   };
   
   const handleSave = () => {
@@ -158,7 +174,10 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 p-1">
           <div className="flex flex-col items-center justify-start pt-8 space-y-4 border rounded-lg bg-muted/20">
-            <MilitarySymbol symbol={editedSymbol} size={150} />
+            {editedSymbol.displayType === 'image' && editedSymbol.imageUrl ?
+              <Image src={editedSymbol.imageUrl} alt="Custom Icon" width={150} height={150} className="object-contain" />
+              : <MilitarySymbol symbol={editedSymbol} size={150} />
+            }
             <div className="text-center px-4">
               <p className="font-bold text-sm">{getFunctionIdName(editedSymbol.symbolSet, editedSymbol.functionId)}</p>
               <p className="text-xs text-muted-foreground">{editedSymbol.symbolSet}</p>
@@ -172,9 +191,10 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
 
           <div>
             <Tabs defaultValue="identifiers" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="identifiers">Identifiers</TabsTrigger>
                 <TabsTrigger value="amplifiers">Amplifiers</TabsTrigger>
+                <TabsTrigger value="custom">Custom Icon</TabsTrigger>
               </TabsList>
               <TabsContent value="identifiers">
                 <ScrollArea className="h-[400px] p-1">
@@ -214,6 +234,27 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
                       {allAmplifiers.map(renderAmplifierInput)}
                     </div>
                 </ScrollArea>
+              </TabsContent>
+              <TabsContent value="custom">
+                <div className="h-[400px] p-4 flex flex-col items-center justify-center gap-4">
+                  <p className="text-sm text-muted-foreground text-center">Upload a custom image to use as the symbol icon. This will override the SIDC-based symbol.</p>
+                  <Label htmlFor="custom-icon-upload" className="w-full">
+                    <div className="flex items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                        <p className="text-xs text-muted-foreground">PNG, JPG, or SVG</p>
+                      </div>
+                    </div>
+                  </Label>
+                  <Input id="custom-icon-upload" type="file" className="sr-only" onChange={handleImageUpload} accept="image/png, image/jpeg, image/svg+xml" />
+                   {editedSymbol.imageUrl && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium mb-2">Current Custom Icon:</p>
+                        <Image src={editedSymbol.imageUrl} alt="Custom icon preview" width={80} height={80} className="rounded-md border p-1" />
+                      </div>
+                    )}
+                </div>
               </TabsContent>
             </Tabs>
           </div>
