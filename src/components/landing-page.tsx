@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -57,7 +58,7 @@ export function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://images.unsplash.com/photo-1587622833935-8df1a7336531?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YWN0aWNhbCUyMHRlYW18ZW58MHx8fHwxNzUyMjgxMjgwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+                src="https://images.unsplash.com/photo-1647606375715-ddb3a957cdce?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxOXx8d2FyJTIwYXJteSUyMHN0cmF0ZWd5fGVufDB8fHx8MTc1MTM3MjgzOXww&ixlib=rb-4.1.0&q=80&w=1080"
                 width="600"
                 height="400"
                 alt="Hero"
