@@ -45,6 +45,7 @@
     "genkit": "^1.13.0",
     "lucide-react": "^0.475.0",
     "mapbox-gl": "^3.5.1",
+    "milsymbol": "^2.2.0",
     "next": "15.3.3",
     "patch-package": "^8.0.0",
     "react": "^18.3.1",
