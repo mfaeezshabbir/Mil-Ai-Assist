@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { SymbolData } from '@/types';
 import MS from 'milsymbol';
+import { generateSIDC } from '@/lib/sidc-generator';
 
 type MilitarySymbolProps = {
   symbol: SymbolData;
@@ -10,41 +11,17 @@ type MilitarySymbolProps = {
 
 export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
   const [svgHtml, setSvgHtml] = useState('');
+  const [sidc, setSidc] = useState('');
 
   useEffect(() => {
     // milsymbol is a client-side library, so we only run it in the browser
     if (typeof window === 'undefined') return;
 
-    const {
-      symbolStandardIdentity,
-      symbolCategory,
-      symbolEchelon,
-      symbolDamaged,
-      symbolTaskForce,
-    } = symbol;
-
-    const properties: { [key: string]: any } = {
-      identity: symbolStandardIdentity.toLowerCase(),
-      // Assuming Land Unit for now. This could be extended via AI later.
-      symbolset: '10', 
-      status: symbolDamaged ? 'damaged' : 'present',
-      echelon: symbolEchelon,
-      taskForce: symbolTaskForce,
-    };
-
-    const category = symbolCategory.toLowerCase();
-    switch (category) {
-      case 'infantry':
-        properties.functionid = '121100'; // MIL-STD-2525D Infantry
-        break;
-      case 'armored':
-        properties.functionid = '120300'; // MIL-STD-2525D Armor/Armoured/Mechanized/Tracked
-        break;
-      // 'unknown' category will result in a question mark in the symbol frame, which is good.
-    }
-
     try {
-      const milSymbol = new MS.Symbol(properties, { 
+      const generatedSidc = generateSIDC(symbol);
+      setSidc(generatedSidc);
+      
+      const milSymbol = new MS.Symbol(generatedSidc, { 
         size: 35,
         colorMode: "Light",
         outlineWidth: 3,
@@ -62,7 +39,8 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     (symbol.symbolEchelon ? ` (${symbol.symbolEchelon})` : '') +
     (symbol.symbolDamaged ? ', Damaged' : '') +
     (symbol.symbolTaskForce ? ', Task Force' : '') +
-    ` at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}`;
+    ` at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}` +
+    `\nSIDC: ${sidc}`;
 
   // The container div is for tooltip and layout purposes. 
   // dangerouslySetInnerHTML will insert the SVG from milsymbol.
