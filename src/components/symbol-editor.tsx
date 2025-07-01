@@ -20,6 +20,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { ScrollArea } from './ui/scroll-area';
+import { toTitleCase } from '@/lib/utils';
+import { LandUnitSymbolSet10, sidcEnumMapping } from '@/lib/sidc-mappings';
 
 type SymbolEditorProps = {
   symbol: SymbolData | null;
@@ -28,12 +31,16 @@ type SymbolEditorProps = {
   onUpdate: (symbol: SymbolData) => void;
 };
 
-const identities = ['Friend', 'Hostile', 'Neutral', 'Unknown'];
-const categories = ['Infantry', 'Armored', 'Unknown'];
-const echelons = [
-  'Team', 'Squad', 'Section', 'Platoon', 'Company', 'Battalion',
-  'Regiment', 'Brigade', 'Division', 'Corps', 'Army',
-];
+const identities = Object.keys(sidcEnumMapping.standardIdentity).map(key => toTitleCase(key));
+
+const echelons = Object.keys(sidcEnumMapping.echelonMobilityTowedArray)
+    .filter(k => k !== 'UNSPECIFIED') // Don't show unspecified in the list
+    .map(key => toTitleCase(key));
+
+const functionIds = Object.entries(LandUnitSymbolSet10).map(([name, code]) => ({
+    name: toTitleCase(name.replace(/_/g, ' ')),
+    code,
+}));
 
 export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEditorProps) {
   const [editedSymbol, setEditedSymbol] = useState<SymbolData | null>(symbol);
@@ -56,7 +63,7 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Edit Symbol</DialogTitle>
           <DialogDescription>
@@ -81,18 +88,20 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="category" className="text-right">Category</Label>
+            <Label htmlFor="functionId" className="text-right">Function ID</Label>
             <Select
-              value={editedSymbol.symbolCategory}
-              onValueChange={(value) => handleChange('symbolCategory', value)}
+              value={editedSymbol.functionId}
+              onValueChange={(value) => handleChange('functionId', value)}
             >
-              <SelectTrigger id="category" className="col-span-3">
-                <SelectValue placeholder="Select category" />
+              <SelectTrigger id="functionId" className="col-span-3">
+                <SelectValue placeholder="Select function ID" />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
+                <ScrollArea className="h-72">
+                  {functionIds.map((item) => (
+                    <SelectItem key={item.code} value={item.code}>{item.name}</SelectItem>
+                  ))}
+                </ScrollArea>
               </SelectContent>
             </Select>
           </div>

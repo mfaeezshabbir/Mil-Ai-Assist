@@ -4,10 +4,17 @@ import { useEffect, useState } from 'react';
 import type { SymbolData } from '@/types';
 import MS from 'milsymbol';
 import { generateSIDC } from '@/lib/sidc-generator';
+import { toTitleCase } from '@/lib/utils';
+import { LandUnitSymbolSet10 } from '@/lib/sidc-mappings';
 
 type MilitarySymbolProps = {
   symbol: SymbolData;
 };
+
+function getFunctionIdName(functionId: string): string {
+    const entry = Object.entries(LandUnitSymbolSet10).find(([, code]) => code === functionId);
+    return entry ? toTitleCase(entry[0]) : 'Unknown';
+}
 
 export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
   const [svgHtml, setSvgHtml] = useState('');
@@ -35,7 +42,7 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     }
   }, [symbol]);
 
-  const title = `${symbol.symbolStandardIdentity} ${symbol.symbolCategory} unit` +
+  const title = `${symbol.symbolStandardIdentity} ${getFunctionIdName(symbol.functionId)} unit` +
     (symbol.symbolEchelon ? ` (${symbol.symbolEchelon})` : '') +
     (symbol.symbolDamaged ? ', Damaged' : '') +
     (symbol.symbolTaskForce ? ', Task Force' : '') +

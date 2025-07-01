@@ -16,8 +16,10 @@ import { MapView } from '@/components/map-view';
 import { Separator } from './ui/separator';
 import { SymbolListSheet } from './symbol-list-sheet';
 import { SymbolEditor } from './symbol-editor';
+import type { SIDCMetadataOutput } from '@/ai/flows/extract-sidc-metadata';
+import { LandUnitSymbolSet10 } from '@/lib/sidc-mappings';
 
-const initialState: { data: SymbolData | null; error: string | null } = {
+const initialState: { data: SIDCMetadataOutput | null; error: string | null } = {
   data: null,
   error: null,
 };
@@ -26,7 +28,7 @@ const initialSymbols: SymbolData[] = [
   {
     id: 'initial-1',
     symbolStandardIdentity: 'Friend',
-    symbolCategory: 'Infantry',
+    functionId: LandUnitSymbolSet10.INFANTRY,
     symbolEchelon: 'Company',
     latitude: 33.72,
     longitude: 73.09,
@@ -36,7 +38,7 @@ const initialSymbols: SymbolData[] = [
   {
     id: 'initial-2',
     symbolStandardIdentity: 'Hostile',
-    symbolCategory: 'Armored',
+    functionId: LandUnitSymbolSet10.ARMOUR,
     symbolEchelon: 'Battalion',
     latitude: 33.68,
     longitude: 73.04,
@@ -46,7 +48,7 @@ const initialSymbols: SymbolData[] = [
   {
     id: 'initial-3',
     symbolStandardIdentity: 'Neutral',
-    symbolCategory: 'Infantry',
+    functionId: LandUnitSymbolSet10.INFANTRY,
     symbolEchelon: 'Regiment',
     latitude: 33.735,
     longitude: 73.075,
@@ -72,6 +74,18 @@ function SubmitButton() {
   );
 }
 
+const categoryToFunctionId: Record<string, string> = {
+    'infantry': LandUnitSymbolSet10.INFANTRY,
+    'armored': LandUnitSymbolSet10.ARMOUR,
+    'armour': LandUnitSymbolSet10.ARMOUR,
+    'unknown': '000000',
+};
+
+function mapCategoryToFunctionId(category?: string): string {
+    if (!category) return '000000';
+    return categoryToFunctionId[category.toLowerCase()] || '000000';
+}
+
 export function MilAssistLayout() {
   const [state, formAction] = useFormState(getSymbolMetadata, initialState);
   const [symbols, setSymbols] = useState<SymbolData[]>(initialSymbols);
@@ -95,9 +109,11 @@ export function MilAssistLayout() {
       });
     }
     if (state.data) {
+      const { symbolCategory, ...restOfData } = state.data;
       const newSymbol: SymbolData = {
-        ...state.data,
+        ...restOfData,
         id: new Date().toISOString() + Math.random(),
+        functionId: mapCategoryToFunctionId(symbolCategory),
       };
       setSymbols((prev) => [...prev, newSymbol]);
       setCommand(''); // Clear input on success

@@ -20,10 +20,13 @@ export type SIDCMetadataInput = z.infer<typeof SIDCMetadataInputSchema>;
 
 const SIDCMetadataOutputSchema = z.object({
   symbolStandardIdentity: z.enum([
+    'Pending',
     'Unknown',
+    'Assumed Friend',
     'Friend',
-    'Hostile',
     'Neutral',
+    'Suspect',
+    'Hostile',
   ]).describe('The standard identity of the symbol.'),
   symbolCategory: z.string().describe('The category of the symbol (e.g., armored, infantry).'),
   symbolEchelon: z.enum([
