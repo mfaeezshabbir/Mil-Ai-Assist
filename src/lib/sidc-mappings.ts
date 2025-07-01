@@ -1,4 +1,5 @@
 // This file contains comprehensive mappings for generating SIDC codes based on APP-6D standard.
+import { toTitleCase } from './utils';
 
 export const sidcEnumMapping = {
     context: {
@@ -18,19 +19,19 @@ export const sidcEnumMapping = {
     symbolSet: {
         "UNKNOWN": "00",
         "AIR": "01",
-        "MISSILE": "02",
+        "AIR_MISSILE": "02",
         "SPACE": "05",
         "SPACE_MISSILE": "06",
-        "UNIT": "10",
-        "CIVILIAN": "11",
-        "EQUIPMENT": "15",
-        "INSTALLATION": "20",
+        "LAND_UNIT": "10",
+        "LAND_CIVILIAN": "11",
+        "LAND_EQUIPMENT": "15",
+        "LAND_INSTALLATION": "20",
         "CONTROL_MEASURE": "25",
-        "DISMOUNTED": "27",
-        "SURFACE": "30",
+        "DISMOUNTED_INDIVIDUAL": "27",
+        "SEA_SURFACE": "30",
         "SUBSURFACE": "35",
-        "MINE": "36",
-        "ACTIVITY": "40",
+        "SEA_MINE": "36",
+        "ACTIVITIES": "40",
         "SIGINT_AIR": "50",
         "SIGINT_SPACE": "51",
         "SIGINT_LAND": "52",
@@ -285,4 +286,60 @@ export const LandUnitSymbolSet10 = {
     US_MARSHALS_SERVICE: "201200",
     INTERNAL_SECURITY_FORCE: "201300",
     CYBER: "210000",
-} as const;
+};
+
+const mainIconSets = {
+    'Land Unit': LandUnitSymbolSet10,
+    // Add other main icon sets here as they are defined
+};
+
+const modifier1Sets = {
+    // Add modifier 1 sets here
+};
+
+const modifier2Sets = {
+    // Add modifier 2 sets here
+};
+
+// Helper function to format options for the Select component
+const formatOptions = (obj: Record<string, string>) => {
+    return Object.entries(obj).map(([name, code]) => ({
+        name: toTitleCase(name),
+        code
+    }));
+};
+
+export const symbolSetData: Record<string, {
+    mainIcons: { name: string, code: string }[],
+    modifier1?: { name: string, code: string }[],
+    modifier2?: { name: string, code: string }[]
+}> = {
+    'Land Unit': {
+        mainIcons: formatOptions(LandUnitSymbolSet10),
+        // Add modifier options if they exist for Land Unit
+    },
+    // ... other symbol sets
+};
+
+export function getFunctionIdName(symbolSet: string, functionId: string): string {
+    const sets = Object.values(mainIconSets);
+    for (const set of sets) {
+        const entry = Object.entries(set).find(([, code]) => code === functionId);
+        if (entry) {
+            return toTitleCase(entry[0]);
+        }
+    }
+    return 'Unknown';
+}
+
+export function findFunctionId(symbolSet: string, categoryName?: string): string | undefined {
+    if (!categoryName) return undefined;
+
+    const setData = symbolSetData[symbolSet];
+    if (!setData) return undefined;
+
+    const normalizedCategory = categoryName.replace(/\s+/g, '_').toUpperCase();
+    const icon = setData.mainIcons.find(icon => icon.name.replace(/\s+/g, '_').toUpperCase() === normalizedCategory);
+    
+    return icon?.code;
+}

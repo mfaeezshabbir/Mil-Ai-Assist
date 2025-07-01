@@ -33,7 +33,8 @@ const SIDCMetadataOutputSchema = z.object({
     'Suspect',
     'Hostile',
   ]).describe('The standard identity of the symbol.'),
-  symbolCategory: z.string().describe('The category of the symbol (e.g., armored, infantry).'),
+  symbolSet: z.string().describe("The operational domain of the symbol (e.g., 'Land Unit', 'Air', 'Subsurface')."),
+  symbolCategory: z.string().describe('The main function or category of the symbol (e.g., armored, infantry, bomber). This determines the Function ID.'),
   status: z.enum([
       'Present',
       'Planned',
@@ -65,6 +66,8 @@ const SIDCMetadataOutputSchema = z.object({
     'Corps',
     'Army',
   ]).optional().describe('The echelon/command level of the symbol, if specified.'),
+  modifier1: z.string().optional().describe("The first modifier for the symbol, if applicable (e.g., 'Attack', 'Cargo'). Use Title Case."),
+  modifier2: z.string().optional().describe("The second modifier for the symbol, if applicable (e.g., 'Heavy', 'Light'). Use Title Case."),
   latitude: z.number().describe('Latitude of the unit'),
   longitude: z.number().describe('Longitude of the unit'),
 });
@@ -77,21 +80,12 @@ async function extractSIDCMetadata(input: SIDCMetadataInput): Promise<SIDCMetada
 
 const drawSIDC = ai.defineTool({
   name: 'draw_sidc_symbol',
-  description: 'Use this tool to extract the metadata of SIDC symbol from natural language, including context, standard identity, category, status, hqtfd, echelon, latitude and longitude. Use title case for string enum values.',
-  inputSchema: SIDCMetadataInputSchema,
+  description: 'Use this tool to extract the metadata of SIDC symbol from natural language. Use title case for string enum values.',
+  inputSchema: SIDCMetadataOutputSchema,
   outputSchema: SIDCMetadataOutputSchema,
 }, async (input) => {
   // This tool itself does not perform any action, but defines the structure for data extraction.
-  return {
-    context: 'Reality',
-    symbolStandardIdentity: 'Unknown',
-    symbolCategory: 'Unknown',
-    status: 'Present',
-    hqtfd: 'Not Applicable',
-    symbolEchelon: 'Team',
-    latitude: 0,
-    longitude: 0,
-  };
+  return input;
 });
 
 const extractSIDCMetadataPrompt = ai.definePrompt({
@@ -99,7 +93,10 @@ const extractSIDCMetadataPrompt = ai.definePrompt({
   tools: [drawSIDC],
   input: {schema: SIDCMetadataInputSchema},
   output: {schema: SIDCMetadataOutputSchema},
-  prompt: `Extract the SIDC metadata from the following natural language command, using the draw_sidc_symbol tool to extract all fields necessary to draw the symbol. Return latitude and longitude as floating point numbers. Also extract context (reality, exercise, etc), status (planned, damaged, etc), and headquarters/task force/dummy status.
+  prompt: `Extract the SIDC metadata from the following natural language command, using the draw_sidc_symbol tool to extract all fields necessary to draw the symbol.
+- Return latitude and longitude as floating point numbers.
+- Also extract context (reality, exercise, etc), status (planned, damaged, etc), and headquarters/task force/dummy status.
+- Determine the correct symbolSet, symbolCategory (the main icon, e.g. Infantry), and any applicable Modifiers (1 and 2).
 
 Command: {{{naturalLanguageCommand}}}`,
 });

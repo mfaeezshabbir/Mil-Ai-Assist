@@ -2,8 +2,12 @@ import type { SIDCMetadataOutput as AIMetadata } from '@/ai/flows/extract-sidc-m
 
 export type SymbolData = Omit<AIMetadata, 'symbolCategory'> & {
   id: string;
-  functionId: string; // Derived from symbolCategory
+  symbolSet: string;
+  functionId: string;
+  modifier1: string;
+  modifier2: string;
   context: string;
   status: string;
   hqtfd: string;
+  symbolEchelon?: string;
 };

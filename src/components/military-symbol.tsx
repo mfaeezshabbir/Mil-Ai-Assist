@@ -5,16 +5,12 @@ import type { SymbolData } from '@/types';
 import MS from 'milsymbol';
 import { generateSIDC } from '@/lib/sidc-generator';
 import { toTitleCase } from '@/lib/utils';
-import { LandUnitSymbolSet10 } from '@/lib/sidc-mappings';
+import { getFunctionIdName } from '@/lib/sidc-mappings';
+
 
 type MilitarySymbolProps = {
   symbol: SymbolData;
 };
-
-function getFunctionIdName(functionId: string): string {
-    const entry = Object.entries(LandUnitSymbolSet10).find(([, code]) => code === functionId);
-    return entry ? toTitleCase(entry[0]) : 'Unknown';
-}
 
 export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
   const [svgHtml, setSvgHtml] = useState('');
@@ -46,7 +42,7 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     symbol.context,
     symbol.status,
     symbol.symbolStandardIdentity,
-    getFunctionIdName(symbol.functionId) + ' unit',
+    getFunctionIdName(symbol.symbolSet, symbol.functionId) + ' unit',
     symbol.symbolEchelon ? `(${symbol.symbolEchelon})` : '',
     symbol.hqtfd !== 'Not Applicable' ? `(${toTitleCase(symbol.hqtfd)})` : '',
     `at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}`,

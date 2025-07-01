@@ -4,7 +4,7 @@ import { sidcEnumMapping } from './sidc-mappings';
 
 function normalize(str: string | undefined): string {
     if (!str) return '';
-    return str.replace(/\s/g, '_').toUpperCase();
+    return str.replace(/\s+/g, '_').toUpperCase();
 }
 
 export function generateSIDC(symbol: SymbolData): string {
@@ -14,10 +14,10 @@ export function generateSIDC(symbol: SymbolData): string {
     const contextCode = sidcEnumMapping.context[contextKey] || '0';
 
     const identityKey = normalize(symbol.symbolStandardIdentity) as keyof typeof sidcEnumMapping.standardIdentity;
-    const standardIdentityCode = sidcEnumMapping.standardIdentity[identityKey] || "1"; // Default to Unknown
+    const standardIdentityCode = sidcEnumMapping.standardIdentity[identityKey] || "1";
 
-    // For now, hardcode symbol set to Land Unit (10) as we only have land categories.
-    const symbolSetCode = "10"; 
+    const symbolSetKey = normalize(symbol.symbolSet) as keyof typeof sidcEnumMapping.symbolSet;
+    const symbolSetCode = sidcEnumMapping.symbolSet[symbolSetKey] || "10"; // Default to Land Unit
 
     const statusKey = normalize(symbol.status) as keyof typeof sidcEnumMapping.status;
     const statusCode = sidcEnumMapping.status[statusKey] || '0';
@@ -28,10 +28,10 @@ export function generateSIDC(symbol: SymbolData): string {
     const echelonKey = symbol.symbolEchelon ? normalize(symbol.symbolEchelon) as keyof typeof sidcEnumMapping.echelonMobilityTowedArray : null;
     const echelonCode = echelonKey ? (sidcEnumMapping.echelonMobilityTowedArray[echelonKey] || "00") : "00";
 
-    const functionIdCode = symbol.functionId || "000000"; // Use functionId from SymbolData
+    const functionIdCode = symbol.functionId || "000000";
     
-    const modifier1 = "00";
-    const modifier2 = "00";
+    const modifier1Code = symbol.modifier1 || "00";
+    const modifier2Code = symbol.modifier2 || "00";
 
     const sidc = version +
                  contextCode +
@@ -41,8 +41,8 @@ export function generateSIDC(symbol: SymbolData): string {
                  hqtfdCode +
                  echelonCode +
                  functionIdCode +
-                 modifier1 +
-                 modifier2;
+                 modifier1Code +
+                 modifier2Code;
 
     return sidc;
 }
