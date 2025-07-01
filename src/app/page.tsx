@@ -1,5 +1,5 @@
-import { MilAssistLayout } from '@/components/mil-assist-layout';
+import { LandingPage } from '@/components/landing-page';
 
 export default function Home() {
-  return <MilAssistLayout />;
+  return <LandingPage />;
 }
