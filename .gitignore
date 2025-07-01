@@ -45,4 +45,4 @@ firebase-debug.log
 firestore-debug.log
 
 # vscode 
-.vscode
+.vscode/
