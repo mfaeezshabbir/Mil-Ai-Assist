@@ -57,11 +57,11 @@ export function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://images.unsplash.com/photo-1614728263952-84ea256ec346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwY29tbWFuZCUyMGNlbnRlcnxlbnwwfHx8fDE3NTEzOTU5MDV8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                src="https://images.unsplash.com/photo-1587622833935-8df1a7336531?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx0YWN0aWNhbCUyMHRlYW18ZW58MHx8fHwxNzUyMjgxMjgwfDA&ixlib=rb-4.1.0&q=80&w=1080"
                 width="600"
                 height="400"
                 alt="Hero"
-                data-ai-hint="futuristic command center"
+                data-ai-hint="tactical team"
                 className="mx-auto overflow-hidden rounded-xl object-cover"
               />
             </div>
@@ -71,7 +71,7 @@ export function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Core Features</div>
+                <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">Core Features</div>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">Accelerate Your Planning Cycle</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                   From simple voice commands to detailed symbol editing, MilAIAssist provides the tools you need for efficient and accurate mission planning.
@@ -79,7 +79,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 mt-12">
-              <Card className="hover:shadow-lg transition-shadow bg-background/50 backdrop-blur-sm">
+              <Card className="hover:shadow-lg transition-shadow bg-background/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <BrainCircuit className="h-8 w-8 text-primary" />
@@ -92,7 +92,7 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="hover:shadow-lg transition-shadow bg-background/50 backdrop-blur-sm">
+              <Card className="hover:shadow-lg transition-shadow bg-background/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <Globe className="h-8 w-8 text-primary" />
@@ -105,7 +105,7 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="hover:shadow-lg transition-shadow bg-background/50 backdrop-blur-sm">
+              <Card className="hover:shadow-lg transition-shadow bg-background/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <FilePenLine className="h-8 w-8 text-primary" />
