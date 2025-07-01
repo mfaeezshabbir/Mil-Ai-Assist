@@ -56,6 +56,7 @@ export function MapView({ symbols, onMapDoubleClick }: MapViewProps) {
         }}
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
         onDblClick={handleDblClick}
+        doubleClickZoom={false}
       >
         <Geocoder mapboxAccessToken={MAPBOX_TOKEN} mapRef={mapRef} />
         <NavigationControl position="top-right" />
