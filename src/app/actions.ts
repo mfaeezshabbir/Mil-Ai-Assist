@@ -1,6 +1,6 @@
 'use server';
 
-import { processCommandFlow, type MapFeature } from '@/ai/flows/process-command-flow';
+import { processCommand, type MapFeature } from '@/ai/flows/process-command-flow';
 import type { SIDCMetadataOutput } from '@/ai/flows/extract-sidc-metadata';
 import { geocode } from '@/services/geocoding';
 
@@ -35,7 +35,7 @@ export async function getMapFeatureFromCommand(
   }
 
   try {
-    const extractedFeature = await processCommandFlow({ command });
+    const extractedFeature = await processCommand({ command });
 
     if (extractedFeature.type === 'symbol') {
       return {

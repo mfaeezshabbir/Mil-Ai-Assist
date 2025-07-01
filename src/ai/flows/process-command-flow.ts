@@ -90,7 +90,7 @@ const SymbolInputSchema = z.object({
 });
 
 // Zod schema for the data extracted for a route.
-export const RouteInputSchema = z.object({
+const RouteInputSchema = z.object({
   startLocationName: z.string().describe('The starting location name of the path or route (e.g., "Paris", "Lahore").'),
   endLocationName: z.string().describe('The ending location name of the path or route (e.g., "Berlin", "Delhi").'),
   pathType: z.string().optional().describe('The type of military path, e.g., "Axis of Advance", "Air Corridor", "Main Attack Route".'),
@@ -133,7 +133,7 @@ Command: {{{command}}}`,
 });
 
 // The main flow that gets executed by the server action.
-export const processCommandFlow = ai.defineFlow({
+const processCommandFlow = ai.defineFlow({
   name: 'processCommandFlow',
   inputSchema: z.object({ command: z.string() }),
   outputSchema: MapFeatureSchema,
@@ -144,3 +144,7 @@ export const processCommandFlow = ai.defineFlow({
   }
   return output;
 });
+
+export async function processCommand(input: { command: string }): Promise<MapFeature> {
+  return processCommandFlow(input);
+}
