@@ -47,11 +47,10 @@ export function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://placehold.co/600x400.png"
+                src="https://images.unsplash.com/photo-1570989647921-af889fce4309?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaWwlMjBzdHJhdGVneSUyMGltYWdlfGVufDB8fHx8MTc1MTM2MjIyNXww&ixlib=rb-4.1.0&q=80&w=1080"
                 width="600"
                 height="400"
                 alt="Hero"
-                data-ai-hint="map command center"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last lg:aspect-square"
               />
             </div>
