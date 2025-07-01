@@ -1,8 +1,10 @@
 'use client';
 
+import { useRef } from 'react';
 import type { SymbolData } from '@/types';
 import { MilitarySymbol } from '@/components/military-symbol';
-import Map, { Marker } from 'react-map-gl';
+import Map, { Marker, NavigationControl, GeolocateControl, FullscreenControl, MapRef } from 'react-map-gl';
+import { Geocoder } from '@/components/geocoder';
 
 type MapViewProps = {
   symbols: SymbolData[];
@@ -11,6 +13,8 @@ type MapViewProps = {
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 export function MapView({ symbols }: MapViewProps) {
+  const mapRef = useRef<MapRef>(null);
+
   if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
     return (
       <div className="flex items-center justify-center w-full h-full bg-muted rounded-lg border">
@@ -33,8 +37,9 @@ export function MapView({ symbols }: MapViewProps) {
   }
 
   return (
-    <div className="w-full h-full rounded-lg overflow-hidden border">
+    <div className="w-full h-full rounded-lg overflow-hidden border relative">
       <Map
+        ref={mapRef}
         mapboxAccessToken={MAPBOX_TOKEN}
         initialViewState={{
           longitude: 73.05,
@@ -43,6 +48,11 @@ export function MapView({ symbols }: MapViewProps) {
         }}
         mapStyle="mapbox://styles/mapbox/satellite-streets-v12"
       >
+        <Geocoder mapboxAccessToken={MAPBOX_TOKEN} mapRef={mapRef} />
+        <NavigationControl position="top-right" />
+        <GeolocateControl position="top-right" />
+        <FullscreenControl position="top-right" />
+
         {symbols.map((symbol) => (
           <Marker
             key={symbol.id}
