@@ -55,7 +55,7 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     <div
       title={title}
       aria-label={title}
-      className="drop-shadow-lg cursor-pointer"
+      className="drop-shadow-lg"
       dangerouslySetInnerHTML={{ __html: svgHtml }}
     />
   );

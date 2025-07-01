@@ -162,6 +162,16 @@ export function MilAssistLayout() {
     setSymbols((prev) => prev.filter((s) => s.id !== symbolId));
     setEditingSymbol(null);
   };
+  
+  const handleSymbolDragEnd = (symbolId: string, { lng, lat }: { lng: number; lat: number }) => {
+    setSymbols((prevSymbols) =>
+      prevSymbols.map((symbol) =>
+        symbol.id === symbolId
+          ? { ...symbol, longitude: lng, latitude: lat }
+          : symbol
+      )
+    );
+  };
 
   return (
     <div className="grid md:grid-cols-[420px_1fr] h-screen bg-secondary/30 text-foreground">
@@ -246,6 +256,7 @@ export function MilAssistLayout() {
             onMapDoubleClick={handleMapDoubleClick} 
             mapRef={mapRef}
             onSymbolClick={handleEditClick}
+            onSymbolDragEnd={handleSymbolDragEnd}
         />
       </main>
       <SymbolEditor 

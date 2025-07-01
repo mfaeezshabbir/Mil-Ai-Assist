@@ -10,12 +10,13 @@ type MapViewProps = {
   symbols: SymbolData[];
   onMapDoubleClick: (coords: { lng: number; lat: number }) => void;
   onSymbolClick: (symbolId: string) => void;
+  onSymbolDragEnd: (symbolId: string, coords: { lng: number; lat: number }) => void;
   mapRef: React.RefObject<MapRef>;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-export function MapView({ symbols, onMapDoubleClick, onSymbolClick, mapRef }: MapViewProps) {
+export function MapView({ symbols, onMapDoubleClick, onSymbolClick, onSymbolDragEnd, mapRef }: MapViewProps) {
   if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
     return (
       <div className="flex items-center justify-center w-full h-full bg-muted rounded-lg border">
@@ -69,8 +70,15 @@ export function MapView({ symbols, onMapDoubleClick, onSymbolClick, mapRef }: Ma
             longitude={symbol.longitude}
             latitude={symbol.latitude}
             anchor="bottom"
+            draggable={true}
+            onDragEnd={(event) =>
+              onSymbolDragEnd(symbol.id, {
+                lng: event.lngLat.lng,
+                lat: event.lngLat.lat,
+              })
+            }
           >
-            <div onClick={() => onSymbolClick(symbol.id)}>
+            <div onClick={() => onSymbolClick(symbol.id)} className="cursor-move">
               <MilitarySymbol symbol={symbol} />
             </div>
           </Marker>
