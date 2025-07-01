@@ -58,7 +58,9 @@ export const sidcEnumMapping = {
         "FEINT_DUMMY_TASK_FORCE_HEADQUARTERS": "7"
     },
     echelonMobilityTowedArray: {
+        // Generic
         "UNSPECIFIED": "00",
+        // Echelon
         "TEAM": "11",
         "SQUAD": "12",
         "SECTION": "13",
@@ -73,8 +75,69 @@ export const sidcEnumMapping = {
         "ARMY_GROUP_FRONT": "24",
         "REGION_THEATER": "25",
         "COMMAND": "26",
+        // Mobility
+        "WHEELED_LIMITED": "31",
+        "WHEELED_CROSS": "32",
+        "TRACKED": "33",
+        "WHEELED_AND_TRACKED": "34",
+        "TOWED": "35",
+        "RAILWAY": "36",
+        "PACK_ANIMALS": "37",
+        "OVER_SNOW": "41",
+        "SLED": "42",
+        "BARGE": "51",
+        "AMPHIBIOUS": "52",
+        // Towed Array
+        "SHORT_TOWED_ARRAY": "61",
+        "LONG_TOWED_ARRAY": "62",
     }
 };
+
+const echelonValues = [
+    { name: "Team", code: "11" }, { name: "Squad", code: "12" }, { name: "Section", code: "13" },
+    { name: "Platoon", code: "14" }, { name: "Company", code: "15" }, { name: "Battalion", code: "16" },
+    { name: "Regiment", code: "17" }, { name: "Brigade", code: "18" }, { name: "Division", code: "21" },
+    { name: "Corps", code: "22" }, { name: "Army", code: "23" }, { name: "Army Group Front", code: "24" },
+    { name: "Region Theater", code: "25" }, { name: "Command", code: "26" }
+];
+
+const mobilityValues = [
+    { name: "Wheeled Limited", code: "31" }, { name: "Wheeled Cross", code: "32" }, { name: "Tracked", code: "33" },
+    { name: "Wheeled And Tracked", code: "34" }, { name: "Towed", code: "35" }, { name: "Railway", code: "36" },
+    { name: "Pack Animals", code: "37" }, { name: "Over Snow", code: "41" }, { name: "Sled", code: "42" },
+    { name: "Barge", code: "51" }, { name: "Amphibious", code: "52" }
+];
+
+const towedArrayValues = [
+    { name: "Short Towed Array", code: "61" }, { name: "Long Towed Array", code: "62" }
+];
+
+const leadershipValues = [
+    { name: "Leader", code: "71"}
+];
+
+const unspecified = [{ name: "Unspecified", code: "00" }];
+
+export function getEmtOptionsForSymbolSet(symbolSetCode: string): {name: string, code: string}[] {
+    const options = [...unspecified];
+    switch(symbolSetCode) {
+        case "10": // Land Unit
+            options.push(...echelonValues);
+            break;
+        case "15": // Land Equipment
+            options.push(...mobilityValues);
+            break;
+        case "27": // Dismounted Individual
+            options.push(...leadershipValues);
+            break;
+        case "30": // Sea Surface
+        case "35": // Subsurface
+            options.push(...towedArrayValues);
+            break;
+    }
+    return options.map(o => ({...o, name: toTitleCase(o.name)}));
+}
+
 
 // ==================================
 // Main Icons
@@ -507,7 +570,6 @@ export const amplifiersInSymbolSet = {
   "11": LAND_VALUES,
   "15": LAND_VALUES,
   "20": LAND_VALUES,
-  "25": { C: 1, H: 1, N: 1, Q: 1, T: 1, V: 1, W: 1, X: 1, Y: 1, Z: 1 },
   "27": { J: 1, K: 1, M: 1, P: 1, Q: 1, T: 1, V: 1, W: 1, X: 1, Y: 1, Z: 1 },
   "30": SEA_VALUES,
   "35": SEA_VALUES,

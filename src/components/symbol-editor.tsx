@@ -23,7 +23,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from './ui/scroll-area';
 import { toTitleCase } from '@/lib/utils';
-import { sidcEnumMapping, symbolSetData, getFunctionIdName, amplifierData, amplifiersInSymbolSet } from '@/lib/sidc-mappings';
+import { sidcEnumMapping, symbolSetData, getFunctionIdName, amplifierData, amplifiersInSymbolSet, getEmtOptionsForSymbolSet } from '@/lib/sidc-mappings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MilitarySymbol } from './military-symbol';
 import { generateSIDC } from '@/lib/sidc-generator';
@@ -40,9 +40,7 @@ const contexts = Object.keys(sidcEnumMapping.context).map(key => toTitleCase(key
 const identities = Object.keys(sidcEnumMapping.standardIdentity).map(key => toTitleCase(key.replace(/_/g, ' ')));
 const statuses = Object.keys(sidcEnumMapping.status).map(key => toTitleCase(key.replace(/_/g, ' ')));
 const hqtfds = Object.keys(sidcEnumMapping.hqtfd).map(key => toTitleCase(key.replace(/_/g, ' ')));
-const echelons = Object.keys(sidcEnumMapping.echelonMobilityTowedArray)
-    .filter(k => k !== 'UNSPECIFIED')
-    .map(key => toTitleCase(key.replace(/_/g, ' ')));
+
 const symbolSets = Object.keys(sidcEnumMapping.symbolSet).map(key => ({
     name: toTitleCase(key.replace(/_/g, ' ')),
     code: sidcEnumMapping.symbolSet[key as keyof typeof sidcEnumMapping.symbolSet],
@@ -63,10 +61,10 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
   if (!editedSymbol) return null;
 
   const currentSetData = symbolSetData[editedSymbol.symbolSet || ''];
-  const symbolSetCode = sidcEnumMapping.symbolSet[normalize(editedSymbol.symbolSet) as keyof typeof sidcEnumMapping.symbolSet];
-  const validAmplifierFields = amplifiersInSymbolSet[symbolSetCode as keyof typeof amplifiersInSymbolSet] || {};
+  const currentSetCode = sidcEnumMapping.symbolSet[normalize(editedSymbol.symbolSet) as keyof typeof sidcEnumMapping.symbolSet] || "10";
+  const validAmplifierFields = amplifiersInSymbolSet[currentSetCode as keyof typeof amplifiersInSymbolSet] || {};
   const visibleAmplifiers = amplifierData.filter(amp => amp.field && validAmplifierFields.hasOwnProperty(amp.field));
-
+  const currentEmtOptions = getEmtOptionsForSymbolSet(currentSetCode);
 
   const handleChange = (field: keyof SymbolData, value: any) => {
     const newSymbol = { ...editedSymbol, [field]: value };
@@ -75,6 +73,7 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
         newSymbol.functionId = '000000';
         newSymbol.modifier1 = '00';
         newSymbol.modifier2 = '00';
+        newSymbol.symbolEchelon = "Unspecified";
     }
     
     setEditedSymbol(newSymbol);
@@ -86,16 +85,19 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
     }
   };
 
-  const renderSelectGroup = (label: string, field: keyof SymbolData, options: string[], placeholder: string) => (
+  const renderSelectGroup = (label: string, field: keyof SymbolData, options: {name: string, code?: string}[], placeholder: string) => (
      <div className="grid grid-cols-3 items-center gap-4">
       <Label htmlFor={field} className="text-right">{label}</Label>
-      <Select value={editedSymbol[field] as string} onValueChange={(value) => handleChange(field as keyof SymbolData, value)}>
+      <Select 
+        value={editedSymbol[field] as string} 
+        onValueChange={(value) => handleChange(field as keyof SymbolData, value)}
+      >
         <SelectTrigger id={field} className="col-span-2">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
             {options.map((item) => (
-              <SelectItem key={item} value={item}>{item}</SelectItem>
+              <SelectItem key={item.name} value={item.name}>{item.name}</SelectItem>
             ))}
         </SelectContent>
       </Select>
@@ -178,11 +180,11 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
               <TabsContent value="identifiers">
                 <ScrollArea className="h-[400px] p-1">
                     <div className="space-y-4 p-4">
-                        {renderSelectGroup('Context', 'context', contexts, 'Select context')}
-                        {renderSelectGroup('Identity', 'symbolStandardIdentity', identities, 'Select identity')}
-                        {renderSelectGroup('Status', 'status', statuses, 'Select status')}
-                        {renderSelectGroup('HQ/TF/Dummy', 'hqtfd', hqtfds, 'Select setting')}
-                        {renderSelectGroup('Echelon', 'symbolEchelon', echelons, 'Select echelon')}
+                        {renderSelectGroup('Context', 'context', contexts.map(c => ({name: c})), 'Select context')}
+                        {renderSelectGroup('Identity', 'symbolStandardIdentity', identities.map(i => ({name: i})), 'Select identity')}
+                        {renderSelectGroup('Status', 'status', statuses.map(s => ({name: s})), 'Select status')}
+                        {renderSelectGroup('HQ/TF/Dummy', 'hqtfd', hqtfds.map(h => ({name: h})), 'Select setting')}
+                        
                         <div className="grid grid-cols-3 items-center gap-4">
                             <Label htmlFor="symbolSet" className="text-right">Symbol Set</Label>
                             <Select value={editedSymbol.symbolSet} onValueChange={(value) => handleChange('symbolSet', value)}>
@@ -198,9 +200,12 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
                                 </SelectContent>
                             </Select>
                         </div>
+                        
+                        {renderSelectGroup('Echelon/Mobility', 'symbolEchelon', currentEmtOptions, 'Select Echelon/Mobility')}
+                        
                         {currentSetData && renderComplexSelectGroup('Function ID', 'functionId', currentSetData.mainIcons, 'Select Function ID')}
-                        {currentSetData?.modifier1 && renderComplexSelectGroup('Modifier 1', 'modifier1', currentSetData.modifier1, 'Select Modifier 1')}
-                        {currentSetData?.modifier2 && renderComplexSelectGroup('Modifier 2', 'modifier2', currentSetData.modifier2, 'Select Modifier 2')}
+                        {currentSetData?.modifier1 && currentSetData.modifier1.length > 1 && renderComplexSelectGroup('Modifier 1', 'modifier1', currentSetData.modifier1, 'Select Modifier 1')}
+                        {currentSetData?.modifier2 && currentSetData.modifier2.length > 1 && renderComplexSelectGroup('Modifier 2', 'modifier2', currentSetData.modifier2, 'Select Modifier 2')}
                     </div>
                 </ScrollArea>
               </TabsContent>
