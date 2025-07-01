@@ -1,21 +1,21 @@
 'use client';
 
-import { useRef } from 'react';
+import type { MapRef, MapLayerMouseEvent } from 'react-map-gl';
+import Map, { Marker, NavigationControl, GeolocateControl, FullscreenControl } from 'react-map-gl';
 import type { SymbolData } from '@/types';
 import { MilitarySymbol } from '@/components/military-symbol';
-import Map, { Marker, NavigationControl, GeolocateControl, FullscreenControl, MapRef, type MapLayerMouseEvent } from 'react-map-gl';
 import { Geocoder } from '@/components/geocoder';
 
 type MapViewProps = {
   symbols: SymbolData[];
   onMapDoubleClick: (coords: { lng: number; lat: number }) => void;
+  onSymbolClick: (symbolId: string) => void;
+  mapRef: React.RefObject<MapRef>;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-export function MapView({ symbols, onMapDoubleClick }: MapViewProps) {
-  const mapRef = useRef<MapRef>(null);
-
+export function MapView({ symbols, onMapDoubleClick, onSymbolClick, mapRef }: MapViewProps) {
   if (!MAPBOX_TOKEN || MAPBOX_TOKEN === 'YOUR_MAPBOX_ACCESS_TOKEN_HERE') {
     return (
       <div className="flex items-center justify-center w-full h-full bg-muted rounded-lg border">
@@ -68,9 +68,11 @@ export function MapView({ symbols, onMapDoubleClick }: MapViewProps) {
             key={symbol.id}
             longitude={symbol.longitude}
             latitude={symbol.latitude}
-            anchor="center"
+            anchor="bottom"
           >
-            <MilitarySymbol symbol={symbol} />
+            <div onClick={() => onSymbolClick(symbol.id)}>
+              <MilitarySymbol symbol={symbol} />
+            </div>
           </Marker>
         ))}
       </Map>

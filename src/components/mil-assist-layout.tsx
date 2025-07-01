@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { Loader2, Send } from 'lucide-react';
+import type { MapRef } from 'react-map-gl';
 import { getSymbolMetadata } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { SymbolData } from '@/types';
@@ -13,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapView } from '@/components/map-view';
 import { Separator } from './ui/separator';
+import { SymbolListSheet } from './symbol-list-sheet';
+import { SymbolEditor } from './symbol-editor';
 
 const initialState: { data: SymbolData | null; error: string | null } = {
   data: null,
@@ -75,9 +78,11 @@ export function MilAssistLayout() {
   const [command, setCommand] = useState('');
   const [apiLog, setApiLog] = useState<object | null>(null);
   const { toast } = useToast();
+  
+  const mapRef = useRef<MapRef>(null);
+  const [editingSymbol, setEditingSymbol] = useState<SymbolData | null>(null);
 
   useEffect(() => {
-    // Log the entire state object from the server action
     if (state !== initialState) {
       setApiLog(state);
     }
@@ -105,26 +110,47 @@ export function MilAssistLayout() {
 
   const handleMapDoubleClick = ({ lng, lat }: { lng: number; lat: number }) => {
     const coordsString = `at ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-    // Regex to find "at" followed by two numbers (lat, lng)
     const coordRegex = /at\s+(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/i;
 
     setCommand((prevCommand) => {
       if (coordRegex.test(prevCommand)) {
-        // If coordinates already exist, replace them
         return prevCommand.replace(coordRegex, coordsString);
       } else {
-        // Otherwise, append the new coordinates
         return `${prevCommand.trim()} ${coordsString}`.trim();
       }
     });
   };
 
+  const handleEditClick = (symbolId: string) => {
+    const symbolToEdit = symbols.find((s) => s.id === symbolId);
+    setEditingSymbol(symbolToEdit || null);
+  };
+
+  const handleUpdateSymbol = (updatedSymbol: SymbolData) => {
+    setSymbols((prev) =>
+      prev.map((s) => (s.id === updatedSymbol.id ? updatedSymbol : s))
+    );
+    setEditingSymbol(null);
+  };
+
+  const handleDeleteSymbol = (symbolId: string) => {
+    setSymbols((prev) => prev.filter((s) => s.id !== symbolId));
+  };
+
   return (
     <div className="grid md:grid-cols-[380px_1fr] h-screen bg-background text-foreground">
       <aside className="p-4 flex flex-col gap-4 border-r bg-card/50 overflow-y-auto">
-        <header>
-          <h1 className="text-3xl font-bold font-headline text-primary">MilAIAssist</h1>
-          <p className="text-muted-foreground">AI Mission Planner Assistant</p>
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold font-headline text-primary">MilAIAssist</h1>
+            <p className="text-muted-foreground">AI Mission Planner Assistant</p>
+          </div>
+          <SymbolListSheet 
+            symbols={symbols}
+            mapRef={mapRef}
+            onEdit={handleEditClick}
+            onDelete={handleDeleteSymbol}
+          />
         </header>
 
         <Card className="flex-shrink-0">
@@ -189,8 +215,19 @@ export function MilAssistLayout() {
         </Card>
       </aside>
       <main className="p-4 bg-gray-200/50">
-        <MapView symbols={symbols} onMapDoubleClick={handleMapDoubleClick} />
+        <MapView 
+            symbols={symbols} 
+            onMapDoubleClick={handleMapDoubleClick} 
+            mapRef={mapRef}
+            onSymbolClick={handleEditClick}
+        />
       </main>
+      <SymbolEditor 
+        symbol={editingSymbol}
+        open={!!editingSymbol}
+        onOpenChange={(open) => !open && setEditingSymbol(null)}
+        onUpdate={handleUpdateSymbol}
+      />
     </div>
   );
 }

@@ -44,12 +44,17 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     }
 
     try {
-      const milSymbol = new MS.Symbol(properties, { size: 50 });
+      const milSymbol = new MS.Symbol(properties, { 
+        size: 35,
+        colorMode: "Light",
+        outlineWidth: 3,
+        outlineColor: "rgba(255, 255, 255, 0.8)",
+      });
       setSvgHtml(milSymbol.asSVG());
     } catch (e) {
       console.error('Error creating military symbol:', e);
       // Fallback to a simple placeholder if milsymbol fails
-      setSvgHtml('<svg width="50" height="60"><rect x="0" y="0" width="50" height="60" fill="red" /></svg>');
+      setSvgHtml('<svg width="35" height="40"><rect x="0" y="0" width="35" height="40" fill="red" /></svg>');
     }
   }, [symbol]);
 
@@ -65,7 +70,7 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     <div
       title={title}
       aria-label={title}
-      className="drop-shadow-lg"
+      className="drop-shadow-lg cursor-pointer"
       dangerouslySetInnerHTML={{ __html: svgHtml }}
     />
   );
