@@ -27,41 +27,44 @@ const initialState: { data: SIDCMetadataOutput | null; error: string | null } = 
 const initialSymbols: SymbolData[] = [
   {
     id: 'initial-1',
+    context: 'Reality',
     symbolStandardIdentity: 'Friend',
+    status: 'Present',
+    hqtfd: 'Not Applicable',
     functionId: LandUnitSymbolSet10.INFANTRY,
     symbolEchelon: 'Company',
     latitude: 33.72,
     longitude: 73.09,
-    symbolDamaged: false,
-    symbolTaskForce: false,
   },
   {
     id: 'initial-2',
+    context: 'Reality',
     symbolStandardIdentity: 'Hostile',
+    status: 'Damaged',
+    hqtfd: 'Not Applicable',
     functionId: LandUnitSymbolSet10.ARMOUR,
     symbolEchelon: 'Battalion',
     latitude: 33.68,
     longitude: 73.04,
-    symbolDamaged: true,
-    symbolTaskForce: false,
   },
   {
     id: 'initial-3',
+    context: 'Reality',
     symbolStandardIdentity: 'Neutral',
+    status: 'Present',
+    hqtfd: 'Task Force Headquarters',
     functionId: LandUnitSymbolSet10.INFANTRY,
     symbolEchelon: 'Regiment',
     latitude: 33.735,
     longitude: 73.075,
-    symbolDamaged: false,
-    symbolTaskForce: true,
   },
 ];
 
 const samplePrompts = [
     "A friendly infantry company at 33.72, 73.09",
     "Damaged hostile armored battalion at 33.68, 73.04",
-    "A neutral infantry regiment, which is a task force, at 33.735, 73.075",
-    "Unknown squad at 33.69, 73.15"
+    "A neutral infantry regiment, which is a task force headquarters, at 33.735, 73.075",
+    "A planned, feint/dummy unknown squad at 33.69, 73.15"
 ];
 
 function SubmitButton() {
@@ -114,6 +117,9 @@ export function MilAssistLayout() {
         ...restOfData,
         id: new Date().toISOString() + Math.random(),
         functionId: mapCategoryToFunctionId(symbolCategory),
+        context: state.data.context || 'Reality',
+        status: state.data.status || 'Present',
+        hqtfd: state.data.hqtfd || 'Not Applicable',
       };
       setSymbols((prev) => [...prev, newSymbol]);
       setCommand(''); // Clear input on success

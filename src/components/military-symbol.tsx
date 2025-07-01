@@ -42,12 +42,16 @@ export function MilitarySymbol({ symbol }: MilitarySymbolProps) {
     }
   }, [symbol]);
 
-  const title = `${symbol.symbolStandardIdentity} ${getFunctionIdName(symbol.functionId)} unit` +
-    (symbol.symbolEchelon ? ` (${symbol.symbolEchelon})` : '') +
-    (symbol.symbolDamaged ? ', Damaged' : '') +
-    (symbol.symbolTaskForce ? ', Task Force' : '') +
-    ` at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}` +
-    `\nSIDC: ${sidc}`;
+  const title = [
+    symbol.context,
+    symbol.status,
+    symbol.symbolStandardIdentity,
+    getFunctionIdName(symbol.functionId) + ' unit',
+    symbol.symbolEchelon ? `(${symbol.symbolEchelon})` : '',
+    symbol.hqtfd !== 'Not Applicable' ? `(${toTitleCase(symbol.hqtfd)})` : '',
+    `at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}`,
+    `\nSIDC: ${sidc}`
+  ].filter(Boolean).join(' ');
 
   // The container div is for tooltip and layout purposes. 
   // dangerouslySetInnerHTML will insert the SVG from milsymbol.

@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from './ui/scroll-area';
 import { toTitleCase } from '@/lib/utils';
 import { LandUnitSymbolSet10, sidcEnumMapping } from '@/lib/sidc-mappings';
@@ -31,11 +30,14 @@ type SymbolEditorProps = {
   onUpdate: (symbol: SymbolData) => void;
 };
 
-const identities = Object.keys(sidcEnumMapping.standardIdentity).map(key => toTitleCase(key));
+const contexts = Object.keys(sidcEnumMapping.context).map(key => toTitleCase(key.replace(/_/g, ' ')));
+const identities = Object.keys(sidcEnumMapping.standardIdentity).map(key => toTitleCase(key.replace(/_/g, ' ')));
+const statuses = Object.keys(sidcEnumMapping.status).map(key => toTitleCase(key.replace(/_/g, ' ')));
+const hqtfds = Object.keys(sidcEnumMapping.hqtfd).map(key => toTitleCase(key.replace(/_/g, ' ')));
 
 const echelons = Object.keys(sidcEnumMapping.echelonMobilityTowedArray)
     .filter(k => k !== 'UNSPECIFIED') // Don't show unspecified in the list
-    .map(key => toTitleCase(key));
+    .map(key => toTitleCase(key.replace(/_/g, ' ')));
 
 const functionIds = Object.entries(LandUnitSymbolSet10).map(([name, code]) => ({
     name: toTitleCase(name.replace(/_/g, ' ')),
@@ -71,6 +73,22 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="context" className="text-right">Context</Label>
+            <Select
+              value={editedSymbol.context}
+              onValueChange={(value) => handleChange('context', value)}
+            >
+              <SelectTrigger id="context" className="col-span-3">
+                <SelectValue placeholder="Select context" />
+              </SelectTrigger>
+              <SelectContent>
+                {contexts.map((item) => (
+                  <SelectItem key={item} value={item}>{item}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="identity" className="text-right">Identity</Label>
             <Select
@@ -83,6 +101,38 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
               <SelectContent>
                 {identities.map((id) => (
                   <SelectItem key={id} value={id}>{id}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="status" className="text-right">Status</Label>
+            <Select
+              value={editedSymbol.status}
+              onValueChange={(value) => handleChange('status', value)}
+            >
+              <SelectTrigger id="status" className="col-span-3">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statuses.map((item) => (
+                  <SelectItem key={item} value={item}>{item}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="hqtfd" className="text-right whitespace-nowrap">HQ/TF/Dummy</Label>
+            <Select
+              value={editedSymbol.hqtfd}
+              onValueChange={(value) => handleChange('hqtfd', value)}
+            >
+              <SelectTrigger id="hqtfd" className="col-span-3">
+                <SelectValue placeholder="Select setting" />
+              </SelectTrigger>
+              <SelectContent>
+                {hqtfds.map((item) => (
+                  <SelectItem key={item} value={item}>{item}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -120,24 +170,6 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="damaged" className="text-right">Damaged</Label>
-            <Switch
-              id="damaged"
-              checked={!!editedSymbol.symbolDamaged}
-              onCheckedChange={(checked) => handleChange('symbolDamaged', checked)}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="taskforce" className="text-right">Task Force</Label>
-            <Switch
-              id="taskforce"
-              checked={!!editedSymbol.symbolTaskForce}
-              onCheckedChange={(checked) => handleChange('symbolTaskForce', checked)}
-              className="col-span-3"
-            />
           </div>
         </div>
         <DialogFooter>

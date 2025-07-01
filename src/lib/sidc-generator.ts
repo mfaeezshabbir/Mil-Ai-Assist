@@ -9,20 +9,21 @@ function normalize(str: string | undefined): string {
 
 export function generateSIDC(symbol: SymbolData): string {
     const version = "10"; // APP-6D
-    const context = "0"; // Reality
     
+    const contextKey = normalize(symbol.context) as keyof typeof sidcEnumMapping.context;
+    const contextCode = sidcEnumMapping.context[contextKey] || '0';
+
     const identityKey = normalize(symbol.symbolStandardIdentity) as keyof typeof sidcEnumMapping.standardIdentity;
     const standardIdentityCode = sidcEnumMapping.standardIdentity[identityKey] || "1"; // Default to Unknown
 
     // For now, hardcode symbol set to Land Unit (10) as we only have land categories.
     const symbolSetCode = "10"; 
 
-    const statusCode = symbol.symbolDamaged ? sidcEnumMapping.status.DAMAGED : sidcEnumMapping.status.PRESENT;
+    const statusKey = normalize(symbol.status) as keyof typeof sidcEnumMapping.status;
+    const statusCode = sidcEnumMapping.status[statusKey] || '0';
 
-    let hqtfdCode = sidcEnumMapping.hqtfd.NOT_APPLICABLE;
-    if (symbol.symbolTaskForce) {
-        hqtfdCode = sidcEnumMapping.hqtfd.TASK_FORCE_HEADQUARTERS; // Assumption: a task force is also a HQ
-    }
+    const hqtfdKey = normalize(symbol.hqtfd) as keyof typeof sidcEnumMapping.hqtfd;
+    const hqtfdCode = sidcEnumMapping.hqtfd[hqtfdKey] || "0";
 
     const echelonKey = symbol.symbolEchelon ? normalize(symbol.symbolEchelon) as keyof typeof sidcEnumMapping.echelonMobilityTowedArray : null;
     const echelonCode = echelonKey ? (sidcEnumMapping.echelonMobilityTowedArray[echelonKey] || "00") : "00";
@@ -33,7 +34,7 @@ export function generateSIDC(symbol: SymbolData): string {
     const modifier2 = "00";
 
     const sidc = version +
-                 context +
+                 contextCode +
                  standardIdentityCode +
                  symbolSetCode +
                  statusCode +
