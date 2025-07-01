@@ -27,6 +27,7 @@ const initialState: { data: SIDCMetadataOutput | null; error: string | null } = 
 const initialSymbols: SymbolData[] = [
     {
       id: 'initial-1',
+      uniqueDesignation: 'Alpha Company',
       context: 'Reality',
       symbolStandardIdentity: 'Friend',
       status: 'Present',
@@ -41,6 +42,7 @@ const initialSymbols: SymbolData[] = [
     },
     {
       id: 'initial-2',
+      uniqueDesignation: 'Enemy Armor',
       context: 'Reality',
       symbolStandardIdentity: 'Hostile',
       status: 'Damaged',
@@ -55,6 +57,7 @@ const initialSymbols: SymbolData[] = [
     },
     {
       id: 'initial-3',
+      uniqueDesignation: 'Task Force HQ',
       context: 'Reality',
       symbolStandardIdentity: 'Neutral',
       status: 'Present',
@@ -70,9 +73,9 @@ const initialSymbols: SymbolData[] = [
 ];
 
 const samplePrompts = [
-    "A friendly infantry company at 33.72, 73.09",
-    "Damaged hostile armored battalion at 33.68, 73.04",
-    "A neutral infantry regiment, which is a task force headquarters, at 33.735, 73.075",
+    "Friendly infantry company 'Raptors' at 33.72, 73.09",
+    "Damaged hostile armored battalion 'Thunder Run' at 33.68, 73.04",
+    "Task Force 141, a neutral infantry regiment which is a task force headquarters, at 33.735, 73.075",
     "A planned, feint/dummy unknown squad at 33.69, 73.15"
 ];
 
@@ -175,7 +178,7 @@ export function MilAssistLayout() {
 
   return (
     <div className="grid md:grid-cols-[420px_1fr] h-screen bg-background text-foreground">
-      <aside className="p-4 flex flex-col gap-4 border-r bg-secondary/20 overflow-y-auto">
+      <aside className="p-4 flex flex-col gap-4 border-r bg-secondary overflow-y-auto">
         <header className="flex items-center justify-between p-2">
           <div>
             <h1 className="text-2xl font-bold text-primary">MilAIAssist</h1>
@@ -189,7 +192,7 @@ export function MilAssistLayout() {
           />
         </header>
 
-        <Card className="flex-shrink-0 shadow-md bg-card/60">
+        <Card className="flex-shrink-0 shadow-md">
           <CardHeader>
             <CardTitle>Natural Language Command</CardTitle>
             <CardDescription>Describe the military symbol to generate. You can also double-click on the map.</CardDescription>
@@ -214,7 +217,7 @@ export function MilAssistLayout() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md bg-card/60">
+        <Card className="shadow-md">
           <CardHeader>
             <CardTitle>Sample Prompts</CardTitle>
             <CardDescription>Click a sample to try it out.</CardDescription>
@@ -236,13 +239,13 @@ export function MilAssistLayout() {
         
         <Separator />
 
-        <Card className="flex-1 min-h-0 shadow-md bg-card/60">
+        <Card className="flex-1 min-h-0 shadow-md">
           <CardHeader>
             <CardTitle>API Response Log</CardTitle>
             <CardDescription>Raw JSON output from the AI model.</CardDescription>
           </CardHeader>
           <CardContent className="h-full pb-2">
-            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-background/50">
+            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-muted/50">
               <pre className="text-xs p-3">
                 {apiLog ? JSON.stringify(apiLog, null, 2) : 'Awaiting command...'}
               </pre>
@@ -250,7 +253,7 @@ export function MilAssistLayout() {
           </CardContent>
         </Card>
       </aside>
-      <main className="p-4 bg-black">
+      <main className="p-4">
         <MapView 
             symbols={symbols} 
             onMapDoubleClick={handleMapDoubleClick} 

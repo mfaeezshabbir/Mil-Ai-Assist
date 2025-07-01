@@ -68,6 +68,7 @@ const SIDCMetadataOutputSchema = z.object({
   ]).optional().describe('The echelon/command level of the symbol, if specified.'),
   modifier1: z.string().optional().describe("The first modifier for the symbol, if applicable (e.g., 'Attack', 'Cargo'). Use Title Case."),
   modifier2: z.string().optional().describe("The second modifier for the symbol, if applicable (e.g., 'Heavy', 'Light'). Use Title Case."),
+  uniqueDesignation: z.string().optional().describe('A unique name or designation for the unit, if specified (e.g., "Alpha-1", "Task Force Bravo").'),
   latitude: z.number().describe('Latitude of the unit'),
   longitude: z.number().describe('Longitude of the unit'),
 });
@@ -94,6 +95,7 @@ const extractSIDCMetadataPrompt = ai.definePrompt({
   input: {schema: SIDCMetadataInputSchema},
   output: {schema: SIDCMetadataOutputSchema},
   prompt: `Extract the SIDC metadata from the following natural language command, using the draw_sidc_symbol tool to extract all fields necessary to draw the symbol.
+- Extract any unique name or designation for the unit (e.g., "Alpha Company", "TF-121").
 - Return latitude and longitude as floating point numbers.
 - Also extract context (reality, exercise, etc), status (planned, damaged, etc), and headquarters/task force/dummy status.
 - Determine the correct symbolSet, symbolCategory (the main icon, e.g. Infantry), and any applicable Modifiers (1 and 2).
