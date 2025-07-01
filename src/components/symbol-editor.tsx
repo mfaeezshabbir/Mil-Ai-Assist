@@ -165,7 +165,7 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl bg-background/80 backdrop-blur-md">
         <DialogHeader>
           <DialogTitle>Symbol Editor</DialogTitle>
           <DialogDescription>
@@ -173,7 +173,7 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 p-1">
-          <div className="flex flex-col items-center justify-start pt-8 space-y-4 border rounded-lg bg-muted/20">
+          <div className="flex flex-col items-center justify-start pt-8 space-y-4 border rounded-lg bg-white/5">
             {editedSymbol.displayType === 'image' && editedSymbol.imageUrl ?
               <Image src={editedSymbol.imageUrl} alt="Custom Icon" width={150} height={150} className="object-contain" />
               : <MilitarySymbol symbol={editedSymbol} size={150} />

@@ -188,7 +188,7 @@ export function MilAssistLayout() {
 
   return (
     <div className="grid md:grid-cols-[420px_1fr] h-screen bg-background text-foreground">
-      <aside className="p-4 flex flex-col gap-4 border-r bg-muted/50 overflow-y-auto">
+      <aside className="p-4 flex flex-col gap-4 border-r bg-background/60 backdrop-blur-xl overflow-y-auto">
         <header className="flex items-center justify-between p-2">
           <div>
             <h1 className="text-2xl font-bold text-primary">MilAIAssist</h1>
@@ -202,7 +202,7 @@ export function MilAssistLayout() {
           />
         </header>
 
-        <Card className="flex-shrink-0 shadow-md">
+        <Card className="flex-shrink-0 bg-card/50 backdrop-blur-lg border border-white/10 shadow-lg">
           <CardHeader>
             <CardTitle>Natural Language Command</CardTitle>
             <CardDescription>Describe the military symbol or route to generate. You can also double-click on the map to add coordinates.</CardDescription>
@@ -227,7 +227,7 @@ export function MilAssistLayout() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
+        <Card className="bg-card/50 backdrop-blur-lg border border-white/10 shadow-lg">
           <CardHeader>
             <CardTitle>Sample Prompts</CardTitle>
             <CardDescription>Click a sample to try it out.</CardDescription>
@@ -249,13 +249,13 @@ export function MilAssistLayout() {
         
         <Separator />
 
-        <Card className="flex-1 min-h-0 shadow-md">
+        <Card className="flex-1 min-h-0 bg-card/50 backdrop-blur-lg border border-white/10 shadow-lg">
           <CardHeader>
             <CardTitle>API Response Log</CardTitle>
             <CardDescription>Raw JSON output from the AI model.</CardDescription>
           </CardHeader>
           <CardContent className="h-full pb-2">
-            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-muted/20">
+            <ScrollArea className="h-[calc(100%-4rem)] rounded-md border bg-muted/30">
               <pre className="text-xs p-3">
                 {apiLog ? JSON.stringify(apiLog, null, 2) : 'Awaiting command...'}
               </pre>

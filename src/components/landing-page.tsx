@@ -57,11 +57,11 @@ export function LandingPage() {
                 </div>
               </div>
               <Image
-                src="https://images.unsplash.com/photo-1570989647921-af889fce4309?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaWwlMjBzdHJhdGVneSUyMGltYWdlfGVufDB8fHx8MTc1MTM2MjIyNXww&ixlib=rb-4.1.0&q=80&w=1080"
+                src="https://images.unsplash.com/photo-1614728263952-84ea256ec346?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxmdXR1cmlzdGljJTIwY29tbWFuZCUyMGNlbnRlcnxlbnwwfHx8fDE3NTEzOTU5MDV8MA&ixlib=rb-4.1.0&q=80&w=1080"
                 width="600"
                 height="400"
                 alt="Hero"
-                data-ai-hint="map command center"
+                data-ai-hint="futuristic command center"
                 className="mx-auto overflow-hidden rounded-xl object-cover"
               />
             </div>
@@ -79,7 +79,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:grid-cols-3 mt-12">
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-shadow bg-background/50 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <BrainCircuit className="h-8 w-8 text-primary" />
@@ -92,7 +92,7 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-shadow bg-background/50 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <Globe className="h-8 w-8 text-primary" />
@@ -105,7 +105,7 @@ export function LandingPage() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="hover:shadow-lg transition-shadow">
+              <Card className="hover:shadow-lg transition-shadow bg-background/50 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-3">
                     <FilePenLine className="h-8 w-8 text-primary" />

@@ -57,10 +57,10 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onBlur={() => setTimeout(() => setResults([]), 200)}
-            className="bg-background/90 backdrop-blur-sm shadow-lg"
+            className="bg-background/80 backdrop-blur-md shadow-lg"
           />
           {results.length > 0 && (
-            <Card className="absolute top-full mt-2 w-full max-h-60 overflow-y-auto">
+            <Card className="absolute top-full mt-2 w-full max-h-60 overflow-y-auto bg-background/80 backdrop-blur-md">
               <CardContent className="p-2">
                 {results.map((result) => (
                   <button
@@ -75,7 +75,7 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
             </Card>
           )}
         </div>
-        <Button type="submit" size="icon" className="bg-accent hover:bg-accent/90 shrink-0 shadow-lg">
+        <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90 shrink-0 shadow-lg">
           <Search />
         </Button>
       </form>
