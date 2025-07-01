@@ -23,7 +23,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ScrollArea } from './ui/scroll-area';
 import { toTitleCase } from '@/lib/utils';
-import { sidcEnumMapping, symbolSetData, getFunctionIdName, amplifierData, amplifiersInSymbolSet, getEmtOptionsForSymbolSet } from '@/lib/sidc-mappings';
+import { sidcEnumMapping, symbolSetData, getFunctionIdName, amplifierData, getEmtOptionsForSymbolSet } from '@/lib/sidc-mappings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MilitarySymbol } from './military-symbol';
 import { generateSIDC } from '@/lib/sidc-generator';
@@ -62,8 +62,7 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
 
   const currentSetData = symbolSetData[editedSymbol.symbolSet || ''];
   const currentSetCode = sidcEnumMapping.symbolSet[normalize(editedSymbol.symbolSet) as keyof typeof sidcEnumMapping.symbolSet] || "10";
-  const validAmplifierFields = amplifiersInSymbolSet[currentSetCode as keyof typeof amplifiersInSymbolSet] || {};
-  const visibleAmplifiers = amplifierData.filter(amp => amp.field && validAmplifierFields.hasOwnProperty(amp.field));
+  const allAmplifiers = amplifierData; // Show all amplifiers regardless of symbol set
   const currentEmtOptions = getEmtOptionsForSymbolSet(currentSetCode);
 
   const handleChange = (field: keyof SymbolData, value: any) => {
@@ -157,10 +156,10 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
             Modify the symbol's properties and see a live preview. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6 p-1">
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 p-1">
           <div className="flex flex-col items-center justify-start pt-8 space-y-4 border rounded-lg bg-muted/20">
-            <MilitarySymbol symbol={editedSymbol} size={100} />
-            <div className="text-center">
+            <MilitarySymbol symbol={editedSymbol} size={150} />
+            <div className="text-center px-4">
               <p className="font-bold text-sm">{getFunctionIdName(editedSymbol.symbolSet, editedSymbol.functionId)}</p>
               <p className="text-xs text-muted-foreground">{editedSymbol.symbolSet}</p>
             </div>
@@ -212,10 +211,7 @@ export function SymbolEditor({ symbol, open, onOpenChange, onUpdate }: SymbolEdi
               <TabsContent value="amplifiers">
                  <ScrollArea className="h-[400px] p-1">
                     <div className="space-y-4 p-4">
-                      {visibleAmplifiers.map(renderAmplifierInput)}
-                      {visibleAmplifiers.length === 0 && (
-                        <p className="text-center text-muted-foreground p-8">No amplifiers available for this symbol set.</p>
-                      )}
+                      {allAmplifiers.map(renderAmplifierInput)}
                     </div>
                 </ScrollArea>
               </TabsContent>
