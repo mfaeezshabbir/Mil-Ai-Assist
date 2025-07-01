@@ -103,6 +103,22 @@ export function MilAssistLayout() {
     setCommand(prompt);
   };
 
+  const handleMapDoubleClick = ({ lng, lat }: { lng: number; lat: number }) => {
+    const coordsString = `at ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    // Regex to find "at" followed by two numbers (lat, lng)
+    const coordRegex = /at\s+(-?\d+\.?\d*),\s*(-?\d+\.?\d*)/i;
+
+    setCommand((prevCommand) => {
+      if (coordRegex.test(prevCommand)) {
+        // If coordinates already exist, replace them
+        return prevCommand.replace(coordRegex, coordsString);
+      } else {
+        // Otherwise, append the new coordinates
+        return `${prevCommand.trim()} ${coordsString}`.trim();
+      }
+    });
+  };
+
   return (
     <div className="grid md:grid-cols-[380px_1fr] h-screen bg-background text-foreground">
       <aside className="p-4 flex flex-col gap-4 border-r bg-card/50 overflow-y-auto">
@@ -114,7 +130,7 @@ export function MilAssistLayout() {
         <Card className="flex-shrink-0">
           <CardHeader>
             <CardTitle>Natural Language Command</CardTitle>
-            <CardDescription>Describe the military symbol to generate.</CardDescription>
+            <CardDescription>Describe the military symbol to generate. You can also double-click on the map.</CardDescription>
           </CardHeader>
           <CardContent>
             <form action={formAction} className="space-y-4">
@@ -173,7 +189,7 @@ export function MilAssistLayout() {
         </Card>
       </aside>
       <main className="p-4 bg-gray-200/50">
-        <MapView symbols={symbols} />
+        <MapView symbols={symbols} onMapDoubleClick={handleMapDoubleClick} />
       </main>
     </div>
   );
