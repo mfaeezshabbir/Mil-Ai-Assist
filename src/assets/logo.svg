@@ -1,0 +1,35 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer shield shape -->
+    <path
+        d="M60 10
+             Q90 20 100 40
+             Q110 70 60 110
+             Q10 70 20 40
+             Q30 20 60 10
+             Z"
+        fill="#4A6572"
+        stroke="#E27D60"
+        stroke-width="3"
+        />
+    <!-- Inner tactical grid -->
+    <g opacity="0.25">
+        <rect x="25" y="25" width="70" height="70" fill="none" stroke="#E27D60" stroke-width="1"/>
+        <line x1="25" y1="45" x2="95" y2="45" stroke="#E27D60" stroke-width="1"/>
+        <line x1="25" y1="65" x2="95" y2="65" stroke="#E27D60" stroke-width="1"/>
+        <line x1="45" y1="25" x2="45" y2="95" stroke="#E27D60" stroke-width="1"/>
+        <line x1="65" y1="25" x2="65" y2="95" stroke="#E27D60" stroke-width="1"/>
+    </g>
+    <!-- Central AI circuit (stylized brain) -->
+    <g>
+        <ellipse cx="60" cy="60" rx="18" ry="14" fill="#E8E8E8" stroke="#4A6572" stroke-width="2"/>
+        <path d="M60 46 v28" stroke="#4A6572" stroke-width="2" stroke-linecap="round"/>
+        <path d="M52 54 Q60 60 52 66" stroke="#4A6572" stroke-width="2" fill="none"/>
+        <path d="M68 54 Q60 60 68 66" stroke="#4A6572" stroke-width="2" fill="none"/>
+        <circle cx="60" cy="53" r="2" fill="#E27D60"/>
+        <circle cx="60" cy="67" r="2" fill="#E27D60"/>
+    </g>
+    <!-- "MilAIAssist" text, military style -->
+    <text x="60" y="118" text-anchor="middle" font-family="Orbitron, 'JetBrains Mono', monospace" font-size="13" fill="#4A6572" letter-spacing="2" font-weight="bold">
+        MilAIAssist
+    </text>
+</svg>
