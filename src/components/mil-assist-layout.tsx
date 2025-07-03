@@ -13,8 +13,10 @@ import {
   Info,
   MapPin,
   Crosshair,
+  Map as MapIcon,
+  Layers,
 } from "lucide-react";
-import type { MapRef } from "react-map-gl";
+import type { MapRef, ViewState } from "react-map-gl";
 import { getMapFeatureFromCommand } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { SymbolData } from "@/types";
@@ -30,12 +32,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapView } from "@/components/map-view";
+import { MapView, MAP_STYLES } from "@/components/map-view";
 import { Separator } from "./ui/separator";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
 import { Badge } from "./ui/badge";
 import { findFunctionId } from "@/lib/sidc-mappings";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 const initialState: { feature: any; error: string | null } = {
   feature: null,
@@ -125,12 +133,45 @@ export function MilAssistLayout() {
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
+  const [currentMapStyle, setCurrentMapStyle] = useState<string>(MAP_STYLES.TACTICAL);
+  const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
+  const [viewState, setViewState] = useState<ViewState>({
+    longitude: 73.09,
+    latitude: 33.72,
+    zoom: 10,
+    bearing: 0,
+    pitch: 0,
+    padding: { top: 0, bottom: 0, left: 0, right: 0 }
+  });
   const mapRef = useRef<MapRef>(null);
   const { toast } = useToast();
   const [state, formAction] = useFormState(
     getMapFeatureFromCommand,
     initialState
   );
+
+  // Live time update
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleViewStateChange = (newViewState: ViewState) => {
+    setViewState(newViewState);
+  };
+
+  const formatCoordinate = (coord: number): string => {
+    return coord.toFixed(6);
+  };
+
+  const formatScale = (zoom: number): string => {
+    // Approximate scale calculation based on zoom level
+    const scale = Math.round(559082264.028 / Math.pow(2, zoom));
+    return `1:${scale.toLocaleString()}`;
+  };
 
   useEffect(() => {
     if (state.feature) {
@@ -199,8 +240,34 @@ export function MilAssistLayout() {
               className="font-mono text-xs gap-1 border border-primary/20"
             >
               <Clock className="h-3 w-3" />
-              <span>{new Date().toLocaleTimeString()}</span>
+              <span>{currentTime}</span>
             </Badge>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-mono text-xs border-primary/30"
+                >
+                  <Layers className="h-3 w-3 mr-1" />
+                  MAP STYLE
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.TACTICAL)}>
+                  Tactical (Dark)
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.SATELLITE)}>
+                  Satellite
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.TERRAIN)}>
+                  Terrain
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.STREETS)}>
+                  Streets
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="outline"
               size="sm"
@@ -229,13 +296,13 @@ export function MilAssistLayout() {
               <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm px-2 py-1 text-xs font-mono text-primary/70 rounded-sm border border-primary/20">
                 <div className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  <span>33.72°N, 73.09°E</span>
+                  <span>{formatCoordinate(viewState.latitude)}°N, {formatCoordinate(viewState.longitude)}°E</span>
                 </div>
               </div>
               <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm px-2 py-1 text-xs font-mono text-primary/70 rounded-sm border border-primary/20">
                 <div className="flex items-center gap-1">
                   <Info className="h-3 w-3" />
-                  <span>SCALE: 1:50,000</span>
+                  <span>SCALE: {formatScale(viewState.zoom)}</span>
                 </div>
               </div>
               <div className="absolute bottom-2 right-2 bg-destructive/20 backdrop-blur-sm px-2 py-1 text-xs font-mono text-destructive rounded-sm border border-destructive/30">
@@ -253,6 +320,8 @@ export function MilAssistLayout() {
                 setActiveSymbol(symbol);
                 setEditSheetOpen(true);
               }}
+              mapStyle={currentMapStyle}
+              onViewStateChange={handleViewStateChange}
             />
           </div>
 

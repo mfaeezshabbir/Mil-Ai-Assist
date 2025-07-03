@@ -5,7 +5,9 @@ MilAIAssist is a web-based mission planning assistant that leverages generative 
 ## Features
 
 - **Natural Language Commands**: Describe units, their status, and locations in plain English (e.g., "Friendly infantry company 'Raptors' at 33.72, 73.09"). The AI extracts the necessary metadata to create a compliant symbol.
-- **Interactive Map**: Powered by Mapbox, the map allows for intuitive placement and adjustment of units. Users can double-click to set coordinates and drag-and-drop symbols to new locations.
+- **Live Situational Awareness**: The interface displays real-time information including current time, exact coordinates of the map center, and map scale.
+- **Multiple Map Styles**: Choose between tactical (dark), satellite, terrain, and street map views depending on mission requirements.
+- **Interactive Map**: Powered by Mapbox, the map allows for intuitive placement and adjustment of units. Users can double-click to set coordinates and drag-and-drop symbols to new locations. Multiple map styles are available including Tactical (dark), Satellite, Terrain, and Streets.
 - **MIL-STD-2525D Compliant Symbols**: Symbols are generated using the `milsymbol` library, ensuring they conform to military standards for symbology.
 - **Detailed Symbol Editor**: A comprehensive editor allows users to fine-tune every aspect of a symbol, from its identity and status to specific function IDs and modifiers, with dynamic dropdowns showing only valid options.
 - **Symbol Management**: A slide-out panel lists all symbols currently on the map, with controls to quickly locate, edit, or delete them.

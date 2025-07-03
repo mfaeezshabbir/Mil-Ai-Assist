@@ -1,7 +1,13 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef } from "react";
-import type { MapRef, MapLayerMouseEvent } from "react-map-gl";
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+  useCallback,
+} from "react";
+import type { MapRef, MapLayerMouseEvent, ViewState } from "react-map-gl";
 import Map, {
   Marker,
   NavigationControl,
@@ -23,15 +29,19 @@ export type MapViewProps = {
   ) => void;
   features?: any;
   onFeaturesChange?: (features: any) => void;
+  mapStyle?: string;
+  onViewStateChange?: (viewState: ViewState) => void;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 // Military-inspired map styles
-const SATELLITE_MAP_STYLE = "mapbox://styles/mapbox/satellite-v9";
-const TACTICAL_MAP_STYLE = "mapbox://styles/mapbox/dark-v11";
-const TERRAIN_MAP_STYLE = "mapbox://styles/mapbox/outdoors-v12";
-const MILITARY_MAP_STYLE = TACTICAL_MAP_STYLE;
+export const MAP_STYLES = {
+  SATELLITE: "mapbox://styles/mapbox/satellite-v9",
+  TACTICAL: "mapbox://styles/mapbox/dark-v11",
+  TERRAIN: "mapbox://styles/mapbox/outdoors-v12",
+  STREETS: "mapbox://styles/mapbox/streets-v12",
+};
 
 export const MapView = forwardRef<MapRef, MapViewProps>(
   (
@@ -42,10 +52,17 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
       onSymbolDragEnd,
       features,
       onFeaturesChange,
+      mapStyle = MAP_STYLES.TACTICAL,
+      onViewStateChange,
     },
     ref
   ) => {
     const mapRefInternal = useRef<MapRef>(null);
+    const [viewState, setViewState] = useState({
+      longitude: 73.09,
+      latitude: 33.72,
+      zoom: 10,
+    });
 
     // Forward ref methods to parent component
     useImperativeHandle(
@@ -57,7 +74,8 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               mapRefInternal.current.flyTo(options);
             }
           },
-        }) as MapRef
+          getMap: () => mapRefInternal.current,
+        }) as unknown as MapRef
     );
 
     const handleMapDoubleClick = (e: MapLayerMouseEvent) => {
@@ -69,23 +87,34 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
       }
     };
 
+    const handleMove = useCallback(
+      (evt: { viewState: ViewState }) => {
+        setViewState(evt.viewState);
+        if (onViewStateChange) {
+          onViewStateChange(evt.viewState);
+        }
+      },
+      [onViewStateChange]
+    );
+
     return (
       <div className="w-full h-full relative">
         <Map
           ref={mapRefInternal}
           initialViewState={{
-            longitude: 73.09,
-            latitude: 33.72,
+            longitude: 74.3587,
+            latitude: 31.5204,
             zoom: 10,
           }}
-          mapStyle={MILITARY_MAP_STYLE}
+          {...viewState}
+          onMove={handleMove}
+          mapStyle={mapStyle}
           mapboxAccessToken={MAPBOX_TOKEN}
           onDblClick={handleMapDoubleClick}
           attributionControl={false}
           terrain={{ source: "mapbox-dem", exaggeration: 1.5 }}
           doubleClickZoom={false}
           style={{}}
-          className="map-tactical"
         >
           {/* Military-styled Navigation Controls */}
           <div className="absolute right-3 top-3 flex flex-col gap-2">
@@ -93,19 +122,40 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               showCompass
               showZoom
               visualizePitch
-              className="navigation-tactical border border-primary/30 shadow-tactical"
+              position="bottom-right"
+              style={{
+                color: "white",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                borderRadius: "4px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
             />
-            <FullscreenControl className="fullscreen-tactical border border-primary/30 shadow-tactical" />
+            <FullscreenControl
+              style={{
+                color: "white",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                borderRadius: "4px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
+            />
           </div>
           <div className="absolute left-3 top-3">
             <GeolocateControl
               positionOptions={{ enableHighAccuracy: true }}
               trackUserLocation
-              className="geolocate-tactical border border-primary/30 shadow-tactical"
+              style={{
+                color: "white",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                borderRadius: "4px",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+              }}
             />
           </div>
           <div className="absolute left-3 top-16 w-[300px]">
-            <Geocoder mapboxAccessToken={MAPBOX_TOKEN!} mapRef={mapRefInternal} />
+            <Geocoder
+              mapboxAccessToken={MAPBOX_TOKEN!}
+              mapRef={mapRefInternal}
+            />
           </div>
 
           {features && onFeaturesChange && (
