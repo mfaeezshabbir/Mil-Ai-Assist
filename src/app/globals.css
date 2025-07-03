@@ -30,40 +30,84 @@
     --chart-5: 340 75% 55%;
     --radius: 0.3rem;
   }
- 
+
   .dark {
-    --background: 220 15% 12%;
-    --foreground: 60 10% 95%;
-    --card: 220 15% 17%;
-    --card-foreground: 60 10% 95%;
-    --popover: 220 15% 12%;
-    --popover-foreground: 60 10% 95%;
-    --primary: 35 90% 55%;
-    --primary-foreground: 40 10% 10%;
-    --secondary: 90 10% 25%;
-    --secondary-foreground: 60 10% 95%;
-    --muted: 90 10% 25%;
-    --muted-foreground: 60 10% 65%;
-    --accent: 90 10% 30%;
-    --accent-foreground: 60 10% 95%;
-    --destructive: 0 70% 50%;
+    /* Military-inspired dark theme */
+    --background: 120 6% 10%; /* Dark olive-green background */
+    --foreground: 60 15% 95%; /* Off-white text for contrast */
+    --card: 120 8% 14%; /* Slightly lighter olive-green for cards */
+    --card-foreground: 60 15% 95%;
+    --popover: 120 6% 10%;
+    --popover-foreground: 60 15% 95%;
+    --primary: 105 40% 40%; /* Military green for primary actions */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 32 70% 50%; /* Military gold/tan for secondary elements */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 120 5% 20%; /* Subtle olive background for muted elements */
+    --muted-foreground: 60 10% 80%;
+    --accent: 38 60% 40%; /* Khaki/tan accent */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 50%; /* Keep red for destructive actions */
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 25%;
-    --input: 220 15% 22%;
-    --ring: 35 90% 55%;
-    --chart-1: 35 90% 55%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 210 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --border: 120 8% 25%; /* Darker border color */
+    --input: 120 8% 20%;
+    --ring: 105 40% 40%;
+    --chart-1: 105 40% 40%; /* Military green */
+    --chart-2: 38 60% 40%; /* Khaki/tan */
+    --chart-3: 0 60% 50%; /* Red */
+    --chart-4: 210 70% 40%; /* Blue */
+    --chart-5: 280 40% 40%; /* Purple */
+
+    /* Added tactical colors */
+    --tactical-red: 0 70% 50%;
+    --tactical-blue: 210 70% 40%;
+    --tactical-amber: 45 100% 50%;
+    --tactical-green: 120 70% 40%;
+  }
+
+  /* Custom scrollbar for military look */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted));
+    border-radius: var(--radius);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--accent));
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
+}
+
+/* Military-inspired utilities */
+.border-tactical {
+  border-style: dashed;
+  border-width: 2px;
+}
+
+.grid-tactical {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.mapboxgl-ctrl-logo {
+  display: none !important;
 }

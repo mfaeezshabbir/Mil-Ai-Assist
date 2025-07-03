@@ -65,23 +65,16 @@ const initialSymbols: SymbolData[] = [
     uniqueDesignation: "Enemy Armor",
     context: "Reality",
     symbolStandardIdentity: "Hostile",
-    status: "Damaged",
+    status: "Present",
     hqtfd: "Not Applicable",
     symbolSet: "Land Unit",
-    functionId: "120500", // Armour
+    functionId: "170100", // Armor
     modifier1: "00",
     modifier2: "00",
-    symbolEchelon: "Battalion",
-    latitude: 33.68,
-    longitude: 73.04,
+    symbolEchelon: "Company",
+    latitude: 33.69,
+    longitude: 73.12,
   },
-];
-
-const samplePrompts = [
-  "Friendly infantry company 'Raptors' at 33.72, 73.09",
-  "Damaged hostile armored battalion 'Thunder Run' at 33.68, 73.04",
-  "Draw an air corridor for an F-16 from Lahore to Delhi",
-  "Show a main attack route from the Khyber Pass to Kabul",
 ];
 
 function CommandForm() {
@@ -146,7 +139,7 @@ export function MilAssistLayout() {
         status: metadata?.status || "Present",
         hqtfd: metadata?.hqtfd || "Not Applicable",
         symbolSet: metadata?.symbolSet || "Land Unit",
-        functionId: metadata?.functionId || "000000",
+        functionId: findFunctionId(metadata?.functionId || "") || "",
         modifier1: "00",
         modifier2: "00",
         symbolEchelon: metadata?.echelon || "Unit",
@@ -247,7 +240,6 @@ export function MilAssistLayout() {
             </div>
 
             <MapView
-              ref={mapRef}
               symbols={symbols}
               onSymbolClick={(symbol) => {
                 setActiveSymbol(symbol);
@@ -317,7 +309,7 @@ export function MilAssistLayout() {
         open={listSheetOpen}
         onOpenChange={setListSheetOpen}
         symbols={symbols}
-        onSymbolSelect={(symbol: SymbolData) => {
+        onSymbolSelect={(symbol) => {
           setListSheetOpen(false);
           setActiveSymbol(symbol);
           setEditSheetOpen(true);

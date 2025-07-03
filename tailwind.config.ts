@@ -1,11 +1,11 @@
-import type {Config} from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ['class'],
+  darkMode: ["class"],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -18,6 +18,8 @@ export default {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
+        display: ["var(--font-display)", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -53,35 +55,50 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Military tactical colors
+        tactical: {
+          red: "hsl(var(--tactical-red))",
+          blue: "hsl(var(--tactical-blue))",
+          amber: "hsl(var(--tactical-amber))",
+          green: "hsl(var(--tactical-green))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      // Military-inspired box shadows
+      boxShadow: {
+        tactical:
+          "0 0 0 1px rgba(0, 255, 0, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.5)",
+        "tactical-glow": "0 0 5px rgba(0, 255, 0, 0.5)",
+        "tactical-inset": "inset 0 1px 3px rgba(0, 0, 0, 0.7)",
+      },
+      // Military-inspired animations
       keyframes: {
-        "accordion-down": {
-          from: {
-            height: '0',
-          },
-          to: {
-            height: 'var(--radix-accordion-content-height)',
-          },
+        "tactical-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
         },
-        'accordion-up': {
-          from: {
-            height: 'var(--radix-accordion-content-height)',
-          },
-          to: {
-            height: '0',
-          },
+        "tactical-scan": {
+          "0%": { backgroundPosition: "0% 0%" },
+          "100%": { backgroundPosition: "100% 100%" },
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        "tactical-pulse":
+          "tactical-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "tactical-scan": "tactical-scan 2s linear infinite",
+      },
+      // Military-inspired backgrounds
+      backgroundImage: {
+        "tactical-grid":
+          "linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px)",
+        "tactical-noise":
+          "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")",
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [],
 } satisfies Config;

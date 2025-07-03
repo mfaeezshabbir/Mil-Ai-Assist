@@ -1,8 +1,8 @@
-import type { SIDCMetadataOutput as AIMetadata } from '@/ai/flows/extract-sidc-metadata';
+import type { SIDCMetadataOutput as AIMetadata } from "@/ai/flows/extract-sidc-metadata";
 
-export type SymbolData = Omit<AIMetadata, 'symbolCategory'> & {
+export type SymbolData = Omit<AIMetadata, "symbolCategory"> & {
   id: string;
-  displayType: 'sidc' | 'image';
+  displayType: "sidc" | "image";
   imageUrl?: string;
   symbolSet: string;
   functionId: string;

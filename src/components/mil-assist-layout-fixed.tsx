@@ -146,7 +146,7 @@ export function MilAssistLayout() {
         status: metadata?.status || "Present",
         hqtfd: metadata?.hqtfd || "Not Applicable",
         symbolSet: metadata?.symbolSet || "Land Unit",
-        functionId: metadata?.functionId || "000000",
+        functionId: findFunctionId(metadata?.functionId) ?? "",
         modifier1: "00",
         modifier2: "00",
         symbolEchelon: metadata?.echelon || "Unit",
@@ -247,7 +247,6 @@ export function MilAssistLayout() {
             </div>
 
             <MapView
-              ref={mapRef}
               symbols={symbols}
               onSymbolClick={(symbol) => {
                 setActiveSymbol(symbol);
@@ -292,9 +291,11 @@ export function MilAssistLayout() {
         open={editSheetOpen}
         onOpenChange={setEditSheetOpen}
         symbol={activeSymbol}
-        onSave={(updatedSymbol) => {
-          setSymbols((prev) =>
-            prev.map((s) => (s.id === updatedSymbol.id ? updatedSymbol : s))
+        onSave={(updatedSymbol: SymbolData) => {
+          setSymbols((prev: SymbolData[]) =>
+            prev.map((s: SymbolData) =>
+              s.id === updatedSymbol.id ? updatedSymbol : s
+            )
           );
           setEditSheetOpen(false);
           toast({
@@ -302,8 +303,10 @@ export function MilAssistLayout() {
             description: `Updated symbol for ${updatedSymbol.uniqueDesignation}`,
           });
         }}
-        onDelete={(symbolId) => {
-          setSymbols((prev) => prev.filter((s) => s.id !== symbolId));
+        onDelete={(symbolId: string) => {
+          setSymbols((prev: SymbolData[]) =>
+            prev.filter((s: SymbolData) => s.id !== symbolId)
+          );
           setEditSheetOpen(false);
           toast({
             title: "Symbol Removed",
@@ -317,7 +320,7 @@ export function MilAssistLayout() {
         open={listSheetOpen}
         onOpenChange={setListSheetOpen}
         symbols={symbols}
-        onSymbolSelect={(symbol: SymbolData) => {
+        onSymbolSelect={(symbol) => {
           setListSheetOpen(false);
           setActiveSymbol(symbol);
           setEditSheetOpen(true);

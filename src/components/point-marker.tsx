@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { MilitarySymbol } from './military-symbol';
-import type { SymbolData } from '@/types';
-import Image from 'next/image';
+import { MilitarySymbol } from "./military-symbol";
+import type { SymbolData } from "@/types";
+import Image from "next/image";
 
 type PointMarkerProps = {
   symbol: SymbolData;
@@ -13,10 +13,10 @@ export function PointMarker({ symbol }: PointMarkerProps) {
     <div className="relative flex flex-col items-center cursor-pointer">
       {/* The icon (either SIDC or custom image) */}
       <div className="absolute bottom-full mb-1 drop-shadow-lg">
-        {symbol.displayType === 'image' && symbol.imageUrl ? (
+        {symbol.displayType === "image" && symbol.imageUrl ? (
           <Image
             src={symbol.imageUrl}
-            alt={symbol.uniqueDesignation || 'Custom Icon'}
+            alt={symbol.uniqueDesignation || "Custom Icon"}
             width={40}
             height={40}
             className="object-contain"

@@ -1,17 +1,20 @@
-'use server';
+"use server";
 
-import { processCommand, type MapFeature } from '@/ai/flows/process-command-flow';
-import type { SIDCMetadataOutput } from '@/ai/flows/extract-sidc-metadata';
-import { geocode } from '@/services/geocoding';
+import {
+  processCommand,
+  type MapFeature,
+} from "@/ai/flows/process-command-flow";
+import type { SIDCMetadataOutput } from "@/ai/flows/extract-sidc-metadata";
+import { geocode } from "@/services/geocoding";
 
 // Define the output shapes for the client
 type SymbolResult = {
-  type: 'symbol';
+  type: "symbol";
   data: SIDCMetadataOutput;
 };
 
 type RouteResult = {
-  type: 'route';
+  type: "route";
   data: {
     start: { lat: number; lng: number };
     end: { lat: number; lng: number };
@@ -29,37 +32,40 @@ export async function getMapFeatureFromCommand(
   prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const command = formData.get('command') as string;
+  const command = formData.get("command") as string;
   if (!command) {
-    return { feature: null, error: 'Command cannot be empty.' };
+    return { feature: null, error: "Command cannot be empty." };
   }
 
   try {
     const extractedFeature = await processCommand({ command });
 
-    if (extractedFeature.type === 'symbol') {
+    if (extractedFeature.type === "symbol") {
       return {
         feature: {
-          type: 'symbol',
+          type: "symbol",
           data: extractedFeature.data,
         },
         error: null,
       };
-    } else if (extractedFeature.type === 'route') {
-      const { startLocationName, endLocationName, ...rest } = extractedFeature.data;
-      
+    } else if (extractedFeature.type === "route") {
+      const { startLocationName, endLocationName, ...rest } =
+        extractedFeature.data;
+
       const [startCoords, endCoords] = await Promise.all([
         geocode(startLocationName),
         geocode(endLocationName),
       ]);
 
       if (!startCoords || !endCoords) {
-        throw new Error(`Could not find coordinates for "${startLocationName}" or "${endLocationName}".`);
+        throw new Error(
+          `Could not find coordinates for "${startLocationName}" or "${endLocationName}".`
+        );
       }
 
       return {
         feature: {
-          type: 'route',
+          type: "route",
           data: {
             ...rest,
             start: { lat: startCoords.latitude, lng: startCoords.longitude },
@@ -69,14 +75,18 @@ export async function getMapFeatureFromCommand(
         error: null,
       };
     }
-    
-    return { feature: null, error: 'Unrecognized feature type from AI.' };
 
+    return { feature: null, error: "Unrecognized feature type from AI." };
   } catch (e) {
     console.error(e);
-    let errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
-    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
-      errorMessage = 'The AI model is currently busy. Please try your command again shortly.';
+    let errorMessage =
+      e instanceof Error ? e.message : "An unknown error occurred.";
+    if (
+      errorMessage.includes("503") ||
+      errorMessage.toLowerCase().includes("overloaded")
+    ) {
+      errorMessage =
+        "The AI model is currently busy. Please try your command again shortly.";
     } else {
       errorMessage = `Failed to process command: ${errorMessage}`;
     }

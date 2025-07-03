@@ -4,12 +4,12 @@ MilAIAssist is a web-based mission planning assistant that leverages generative 
 
 ## Features
 
--   **Natural Language Commands**: Describe units, their status, and locations in plain English (e.g., "Friendly infantry company 'Raptors' at 33.72, 73.09"). The AI extracts the necessary metadata to create a compliant symbol.
--   **Interactive Map**: Powered by Mapbox, the map allows for intuitive placement and adjustment of units. Users can double-click to set coordinates and drag-and-drop symbols to new locations.
--   **MIL-STD-2525D Compliant Symbols**: Symbols are generated using the `milsymbol` library, ensuring they conform to military standards for symbology.
--   **Detailed Symbol Editor**: A comprehensive editor allows users to fine-tune every aspect of a symbol, from its identity and status to specific function IDs and modifiers, with dynamic dropdowns showing only valid options.
--   **Symbol Management**: A slide-out panel lists all symbols currently on the map, with controls to quickly locate, edit, or delete them.
--   **Modern Tech Stack**: Built with Next.js, React, ShadCN UI, Tailwind CSS, and Genkit for AI functionality.
+- **Natural Language Commands**: Describe units, their status, and locations in plain English (e.g., "Friendly infantry company 'Raptors' at 33.72, 73.09"). The AI extracts the necessary metadata to create a compliant symbol.
+- **Interactive Map**: Powered by Mapbox, the map allows for intuitive placement and adjustment of units. Users can double-click to set coordinates and drag-and-drop symbols to new locations.
+- **MIL-STD-2525D Compliant Symbols**: Symbols are generated using the `milsymbol` library, ensuring they conform to military standards for symbology.
+- **Detailed Symbol Editor**: A comprehensive editor allows users to fine-tune every aspect of a symbol, from its identity and status to specific function IDs and modifiers, with dynamic dropdowns showing only valid options.
+- **Symbol Management**: A slide-out panel lists all symbols currently on the map, with controls to quickly locate, edit, or delete them.
+- **Modern Tech Stack**: Built with Next.js, React, ShadCN UI, Tailwind CSS, and Genkit for AI functionality.
 
 ## Getting Started
 

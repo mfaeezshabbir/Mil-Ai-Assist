@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import type { MapRef } from 'react-map-gl';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Search } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
+import { useState } from "react";
+import type { MapRef } from "react-map-gl";
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Search } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
 
 type GeocoderProps = {
   mapboxAccessToken: string;
@@ -13,7 +13,7 @@ type GeocoderProps = {
 };
 
 export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -32,7 +32,7 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
       const data = await response.json();
       setResults(data.features || []);
     } catch (error) {
-      console.error('Error fetching geocoding data:', error);
+      console.error("Error fetching geocoding data:", error);
       setResults([]);
     }
   };
@@ -75,7 +75,11 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
             </Card>
           )}
         </div>
-        <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90 shrink-0 shadow-lg">
+        <Button
+          type="submit"
+          size="icon"
+          className="bg-primary hover:bg-primary/90 shrink-0 shadow-lg"
+        >
           <Search />
         </Button>
       </form>
