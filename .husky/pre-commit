@@ -1,0 +1,2 @@
+# Run format check and lint before committing
+npm run format:check && npm run lint

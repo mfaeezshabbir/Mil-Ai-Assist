@@ -131,16 +131,22 @@ export function MilAssistLayout() {
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
-  const [currentMapStyle, setCurrentMapStyle] = useState<string>(MAP_STYLES.TACTICAL);
-  const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
-  const [symbolSize, setSymbolSize] = useState<'small' | 'medium' | 'large' | 'xxl'>('medium');
+  const [currentMapStyle, setCurrentMapStyle] = useState<string>(
+    MAP_STYLES.TACTICAL
+  );
+  const [currentTime, setCurrentTime] = useState<string>(
+    new Date().toLocaleTimeString()
+  );
+  const [symbolSize, setSymbolSize] = useState<
+    "small" | "medium" | "large" | "xxl"
+  >("medium");
   const [viewState, setViewState] = useState<ViewState>({
     longitude: 73.09,
     latitude: 33.72,
     zoom: 10,
     bearing: 0,
     pitch: 0,
-    padding: { top: 0, bottom: 0, left: 0, right: 0 }
+    padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
   const mapRef = useRef<MapRef>(null);
   const { toast } = useToast();
@@ -154,7 +160,7 @@ export function MilAssistLayout() {
     const timer = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
-    
+
     return () => clearInterval(timer);
   }, []);
 
@@ -253,16 +259,24 @@ export function MilAssistLayout() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.TACTICAL)}>
+                <DropdownMenuItem
+                  onClick={() => setCurrentMapStyle(MAP_STYLES.TACTICAL)}
+                >
                   Tactical (Dark)
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.SATELLITE)}>
+                <DropdownMenuItem
+                  onClick={() => setCurrentMapStyle(MAP_STYLES.SATELLITE)}
+                >
                   Satellite
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.TERRAIN)}>
+                <DropdownMenuItem
+                  onClick={() => setCurrentMapStyle(MAP_STYLES.TERRAIN)}
+                >
                   Terrain
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setCurrentMapStyle(MAP_STYLES.STREETS)}>
+                <DropdownMenuItem
+                  onClick={() => setCurrentMapStyle(MAP_STYLES.STREETS)}
+                >
                   Streets
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -295,7 +309,10 @@ export function MilAssistLayout() {
               <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm px-2 py-1 text-xs font-mono text-primary/70 rounded-sm border border-primary/20">
                 <div className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
-                  <span>{formatCoordinate(viewState.latitude)}°N, {formatCoordinate(viewState.longitude)}°E</span>
+                  <span>
+                    {formatCoordinate(viewState.latitude)}°N,{" "}
+                    {formatCoordinate(viewState.longitude)}°E
+                  </span>
                 </div>
               </div>
               <div className="absolute bottom-2 left-2 bg-background/80 backdrop-blur-sm px-2 py-1 text-xs font-mono text-primary/70 rounded-sm border border-primary/20">

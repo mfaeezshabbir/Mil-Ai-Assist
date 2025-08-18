@@ -134,6 +134,7 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               showCompass
               showZoom
               visualizePitch
+              position="bottom-left"
               style={{
                 color: "white",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -271,3 +272,6 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
     );
   }
 );
+
+// Add displayName to satisfy react/display-name ESLint rule
+MapView.displayName = "MapView";

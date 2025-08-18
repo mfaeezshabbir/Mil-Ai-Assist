@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import type { SymbolData } from "@/types";
 import MS from "milsymbol";
-import { generateSIDC, validateSIDC, getSIDCMetadata } from "@/lib/sidc-generator";
+import {
+  generateSIDC,
+  validateSIDC,
+  getSIDCMetadata,
+} from "@/lib/sidc-generator";
 import { toTitleCase } from "@/lib/utils";
 import { getFunctionIdName } from "@/lib/sidc-mappings";
 
@@ -24,7 +28,7 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
     try {
       const generatedSidc = generateSIDC(symbol);
       setSidc(generatedSidc);
-      
+
       // Validate the SIDC using milsymbol
       const isValidSidc = validateSIDC(generatedSidc);
       setIsValid(isValidSidc);
@@ -54,11 +58,11 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
       });
 
       setSvgHtml(milSymbol.asSVG());
-      
+
       // Log metadata for debugging in development
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         const metadata = getSIDCMetadata(generatedSidc);
-        console.log('SIDC Metadata:', metadata);
+        console.log("SIDC Metadata:", metadata);
       }
     } catch (e) {
       console.error("Error creating military symbol:", e, symbol);
@@ -92,14 +96,14 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
     <div
       title={title}
       aria-label={title}
-      className={`drop-shadow-lg military-symbol-container military-symbol-preview ${!isValid ? 'ring-2 ring-red-500 ring-opacity-50 rounded' : ''}`}
-      style={{ 
-        width: `${size}px`, 
+      className={`drop-shadow-lg military-symbol-container military-symbol-preview ${!isValid ? "ring-2 ring-red-500 ring-opacity-50 rounded" : ""}`}
+      style={{
+        width: `${size}px`,
         height: `${size}px`,
-        flexShrink: 0 
+        flexShrink: 0,
       }}
     >
-      <div 
+      <div
         className="w-full h-full flex items-center justify-center"
         dangerouslySetInnerHTML={{ __html: svgHtml }}
       />

@@ -87,15 +87,15 @@ export function getSIDCMetadata(sidc: string) {
   try {
     const symbol = new MS.Symbol(sidc, { size: 35 }) as any;
     return {
-      affiliation: symbol.metadata?.affiliation || 'Unknown',
-      context: symbol.metadata?.context || 'Unknown',
-      dimension: symbol.metadata?.dimension || 'Unknown',
+      affiliation: symbol.metadata?.affiliation || "Unknown",
+      context: symbol.metadata?.context || "Unknown",
+      dimension: symbol.metadata?.dimension || "Unknown",
       echelon: symbol.metadata?.echelon,
       headquarters: symbol.metadata?.headquarters || false,
       taskForce: symbol.metadata?.taskForce || false,
       activity: symbol.metadata?.activity || false,
       civilian: symbol.metadata?.civilian || false,
-      condition: symbol.metadata?.condition || '',
+      condition: symbol.metadata?.condition || "",
       valid: symbol.validIcon || false,
     };
   } catch (error) {

@@ -39,19 +39,18 @@ To enable the interactive map, you need a Mapbox access token.
 
 The application uses Genkit to define an AI flow that processes natural language commands. A Zod schema defines the expected output, which the AI uses as a function-calling tool to extract structured data. This data is then used to generate a Symbol Identification Code (SIDC) and render the corresponding symbol on the map.
 
-
 ## Tech Stack
 
 ```js
 [
-    "Next.js",
-    "React",
-    "TypeScript",
-    "ShadCN UI",
-    "Tailwind CSS",
-    "Mapbox GL JS",
-    "milsymbol",
-    "Genkit",
-    "Zod"
-]
+  "Next.js",
+  "React",
+  "TypeScript",
+  "ShadCN UI",
+  "Tailwind CSS",
+  "Mapbox GL JS",
+  "milsymbol",
+  "Genkit",
+  "Zod",
+];
 ```

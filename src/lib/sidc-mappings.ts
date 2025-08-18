@@ -24,15 +24,15 @@ export class SIDCValidator {
     try {
       const symbol = new MS.Symbol(sidc, { size: 35 }) as any;
       return {
-        affiliation: symbol.metadata?.affiliation || 'Unknown',
-        context: symbol.metadata?.context || 'Unknown',
-        dimension: symbol.metadata?.dimension || 'Unknown',
+        affiliation: symbol.metadata?.affiliation || "Unknown",
+        context: symbol.metadata?.context || "Unknown",
+        dimension: symbol.metadata?.dimension || "Unknown",
         echelon: symbol.metadata?.echelon,
         headquarters: symbol.metadata?.headquarters || false,
         taskForce: symbol.metadata?.taskForce || false,
         activity: symbol.metadata?.activity || false,
         civilian: symbol.metadata?.civilian || false,
-        condition: symbol.metadata?.condition || '',
+        condition: symbol.metadata?.condition || "",
         valid: symbol.validIcon || false,
       };
     } catch (error) {
@@ -45,18 +45,20 @@ export class SIDCValidator {
    */
   static parse(sidc: string) {
     if (sidc.length !== 20) {
-      throw new Error(`Invalid SIDC length: ${sidc.length}. Expected 20 characters.`);
+      throw new Error(
+        `Invalid SIDC length: ${sidc.length}. Expected 20 characters.`
+      );
     }
 
     return {
       version: sidc.substring(0, 2),
-      context: sidc.substring(2, 3), 
+      context: sidc.substring(2, 3),
       standardIdentity: sidc.substring(3, 4),
       symbolSet: sidc.substring(4, 6),
       status: sidc.substring(6, 7),
       hqtfd: sidc.substring(7, 8),
       echelonMobilityTowedArray: sidc.substring(8, 10),
-      functionId: sidc.substring(10, 16), 
+      functionId: sidc.substring(10, 16),
       modifier1: sidc.substring(16, 18),
       modifier2: sidc.substring(18, 20),
     };
@@ -2532,43 +2534,43 @@ export const symbolSetData: Record<
 // Enhanced symbol set name mapping to handle different naming conventions
 const symbolSetNameMapping: Record<string, string> = {
   // SIDC enum style to human readable
-  "UNKNOWN": "Unknown",
-  "AIR": "Air", 
-  "AIR_MISSILE": "Air Missile",
-  "SPACE": "Space",
-  "SPACE_MISSILE": "Space Missile",
-  "LAND_UNIT": "Land Unit",
-  "LAND_CIVILIAN": "Land Civilian", 
-  "LAND_EQUIPMENT": "Land Equipment",
-  "LAND_INSTALLATION": "Land Installation",
-  "CONTROL_MEASURE": "Control Measure",
-  "DISMOUNTED_INDIVIDUAL": "Dismounted Individual",
-  "SEA_SURFACE": "Sea Surface",
-  "SUBSURFACE": "Subsurface", 
-  "SEA_MINE": "Sea Mine",
-  "ACTIVITIES": "Activities",
-  "SIGINT_AIR": "SIGINT Air",
-  "SIGINT_SPACE": "SIGINT Space",
-  "SIGINT_LAND": "SIGINT Land", 
-  "SIGINT_SURFACE": "SIGINT Surface",
-  "SIGINT_SUBSURFACE": "SIGINT Subsurface",
-  "CYBERSPACE": "Cyberspace",
-  
+  UNKNOWN: "Unknown",
+  AIR: "Air",
+  AIR_MISSILE: "Air Missile",
+  SPACE: "Space",
+  SPACE_MISSILE: "Space Missile",
+  LAND_UNIT: "Land Unit",
+  LAND_CIVILIAN: "Land Civilian",
+  LAND_EQUIPMENT: "Land Equipment",
+  LAND_INSTALLATION: "Land Installation",
+  CONTROL_MEASURE: "Control Measure",
+  DISMOUNTED_INDIVIDUAL: "Dismounted Individual",
+  SEA_SURFACE: "Sea Surface",
+  SUBSURFACE: "Subsurface",
+  SEA_MINE: "Sea Mine",
+  ACTIVITIES: "Activities",
+  SIGINT_AIR: "SIGINT Air",
+  SIGINT_SPACE: "SIGINT Space",
+  SIGINT_LAND: "SIGINT Land",
+  SIGINT_SURFACE: "SIGINT Surface",
+  SIGINT_SUBSURFACE: "SIGINT Subsurface",
+  CYBERSPACE: "Cyberspace",
+
   // Alternative common names
   "Land Unit": "Land Unit",
   "Sea Surface": "Sea Surface",
   "Air Missile": "Air Missile",
   "Space Missile": "Space Missile",
-  "Control Measure": "Control Measure", 
+  "Control Measure": "Control Measure",
   "Dismounted Individual": "Dismounted Individual",
   "Land Civilian": "Land Civilian",
-  "Land Equipment": "Land Equipment", 
+  "Land Equipment": "Land Equipment",
   "Land Installation": "Land Installation",
   "Sea Mine": "Sea Mine",
   "SIGINT Air": "SIGINT Air",
   "SIGINT Space": "SIGINT Space",
   "SIGINT Land": "SIGINT Land",
-  "SIGINT Surface": "SIGINT Surface", 
+  "SIGINT Surface": "SIGINT Surface",
   "SIGINT Subsurface": "SIGINT Subsurface",
 };
 
@@ -2577,36 +2579,37 @@ const symbolSetNameMapping: Record<string, string> = {
  */
 export function getSymbolSetData(symbolSetName: string) {
   if (!symbolSetName) return emptySet;
-  
+
   // First try direct lookup
   if (symbolSetData[symbolSetName]) {
     return symbolSetData[symbolSetName];
   }
-  
+
   // Try normalized lookup
   const normalizedName = symbolSetName.replace(/\s+/g, "_").toUpperCase();
   const mappedName = symbolSetNameMapping[normalizedName];
   if (mappedName && symbolSetData[mappedName]) {
     return symbolSetData[mappedName];
   }
-  
+
   // Try alternative mappings
   const altMappedName = symbolSetNameMapping[symbolSetName];
   if (altMappedName && symbolSetData[altMappedName]) {
     return symbolSetData[altMappedName];
   }
-  
+
   // Fallback to partial match
   const keys = Object.keys(symbolSetData);
-  const partialMatch = keys.find(key => 
-    key.toLowerCase().includes(symbolSetName.toLowerCase()) ||
-    symbolSetName.toLowerCase().includes(key.toLowerCase())
+  const partialMatch = keys.find(
+    (key) =>
+      key.toLowerCase().includes(symbolSetName.toLowerCase()) ||
+      symbolSetName.toLowerCase().includes(key.toLowerCase())
   );
-  
+
   if (partialMatch) {
     return symbolSetData[partialMatch];
   }
-  
+
   return emptySet;
 }
 
@@ -2645,21 +2648,33 @@ export function getFunctionIdName(
 }
 
 /**
- * Get modifier options for a symbol set  
+ * Get modifier options for a symbol set
  */
 export function getModifier1Options(symbolSet: string) {
-  return getSymbolSetData(symbolSet).modifier1 || [{ name: "Unspecified", code: "00" }];
+  return (
+    getSymbolSetData(symbolSet).modifier1 || [
+      { name: "Unspecified", code: "00" },
+    ]
+  );
 }
 
 export function getModifier2Options(symbolSet: string) {
-  return getSymbolSetData(symbolSet).modifier2 || [{ name: "Unspecified", code: "00" }];
+  return (
+    getSymbolSetData(symbolSet).modifier2 || [
+      { name: "Unspecified", code: "00" },
+    ]
+  );
 }
 
 /**
  * Get main icon options for a symbol set
  */
 export function getMainIconOptions(symbolSet: string) {
-  return getSymbolSetData(symbolSet).mainIcons || [{ name: "Unspecified", code: "000000" }];
+  return (
+    getSymbolSetData(symbolSet).mainIcons || [
+      { name: "Unspecified", code: "000000" },
+    ]
+  );
 }
 
 /**
@@ -2676,7 +2691,7 @@ export function getSymbolSetDisplayName(symbolSetCode: string): string {
   const codeToNameMap: Record<string, string> = {
     "00": "Unknown",
     "01": "Air",
-    "02": "Air Missile", 
+    "02": "Air Missile",
     "05": "Space",
     "06": "Space Missile",
     "10": "Land Unit",
@@ -2692,11 +2707,11 @@ export function getSymbolSetDisplayName(symbolSetCode: string): string {
     "50": "SIGINT Air",
     "51": "SIGINT Space",
     "52": "SIGINT Land",
-    "53": "SIGINT Surface", 
+    "53": "SIGINT Surface",
     "54": "SIGINT Subsurface",
     "60": "Cyberspace",
   };
-  
+
   return codeToNameMap[symbolSetCode] || "Unknown";
 }
 
