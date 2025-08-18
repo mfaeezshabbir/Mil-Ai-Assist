@@ -1,96 +1,79 @@
 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Square badge (rounded) -->
-    <rect
-        x="18" y="6" width="84" height="108" rx="10" ry="10"
+    <!-- Star badge (rounded) -->
+    <polygon
+        points="60,16 70.45,44.55 101,47.64 77.5,67.45 84.9,97.36 60,81 35.1,97.36 42.5,67.45 19,47.64 49.55,44.55"
         fill="url(#shieldGradient)"
         stroke="url(#borderGradient)"
         stroke-width="0.5"
-        />
+        style="filter: drop-shadow(0 0 2px #C2B28044);"
+    />
 
-    <!-- Inner glow as inset rounded rect -->
-    <rect
-        x="24" y="12" width="72" height="96" rx="8" ry="8"
+    <!-- Inner glow as inset star (slightly smaller) -->
+    <polygon
+        points="60,22 68.5,46.5 95,49.5 75,66 81,92 60,78 39,92 45,66 25,49.5 51.5,46.5"
         fill="none"
         stroke="url(#innerGlow)"
         stroke-width="1"
         opacity="0.3"
-        />
+    />
 
     <!-- Gradient definitions -->
     <defs>
-        <!-- Main shield gradient (uses system logo variables with fallbacks) -->
+        <!-- Main shield gradient (military greens) -->
         <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color: hsl(var(--logo-shield-0, 252 70% 52%)); stop-opacity:1" />
-            <stop offset="50%" style="stop-color: hsl(var(--logo-shield-50, 282 60% 48%)); stop-opacity:1" />
-            <stop offset="100%" style="stop-color: hsl(var(--logo-shield-100, 216 70% 35%)); stop-opacity:1" />
+            <stop offset="0%" style="stop-color: #556B2F; stop-opacity:1" />
+            <stop offset="50%" style="stop-color: #6B8E23; stop-opacity:1" />
+            <stop offset="100%" style="stop-color: #3B5323; stop-opacity:1" />
         </linearGradient>
 
-        <!-- Border gradient (new) -->
+        <!-- Border gradient (dark olive) -->
         <linearGradient id="borderGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style="stop-color: hsl(var(--logo-border, 240 35% 12%)); stop-opacity:1" />
-            <stop offset="100%" style="stop-color: hsl(var(--logo-border, 240 35% 12%)); stop-opacity:1" />
+            <stop offset="0%" style="stop-color: #2E3D19; stop-opacity:1" />
+            <stop offset="100%" style="stop-color: #2E3D19; stop-opacity:1" />
         </linearGradient>
         
-       <!-- Inner glow (uses system variables) -->
+       <!-- Inner glow (light khaki) -->
         <linearGradient id="innerGlow" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color: hsl(var(--logo-inner-glow-0, 0 0% 95%)); stop-opacity:0.6" />
-            <stop offset="100%" style="stop-color: hsl(var(--logo-inner-glow-100, 230 80% 94%)); stop-opacity:0.2" />
+            <stop offset="0%" style="stop-color: #F5F5DC; stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color: #C2B280; stop-opacity:0.2" />
         </linearGradient>
         
-        <!-- AI core gradient (uses system variables) -->
+        <!-- AI core gradient (sand to olive) -->
         <radialGradient id="aiCore" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" style="stop-color: hsl(var(--logo-ai-core-0, 0 0% 98%)); stop-opacity:0.95" />
-            <stop offset="70%" style="stop-color: hsl(var(--logo-ai-core-70, 210 50% 94%)); stop-opacity:0.9" />
-            <stop offset="100%" style="stop-color: hsl(var(--logo-ai-core-100, 210 20% 90%)); stop-opacity:0.85" />
+            <stop offset="0%" style="stop-color: #F5F5DC; stop-opacity:0.95" />
+            <stop offset="70%" style="stop-color: #BDB76B; stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color: #6B8E23; stop-opacity:0.85" />
         </radialGradient>
         
-        <!-- Neural glow effect -->
-        <filter id="neuralGlow">
-            <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
-            <feMerge> 
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-        </filter>
     </defs>
 
-    <!-- Advanced AI neural network -->
-    <g>
+    <!-- Simple AI core (unicolor) -->
+    <g transform="translate(60,60) scale(0.8) translate(-60,-60)">
         <!-- Main AI core -->
-        <circle cx="60" cy="55" r="22" fill="url(#aiCore)" stroke="hsl(var(--logo-ai-core-100, 210 20% 90%))" stroke-width="0.5"/>
-        
-        <!-- Primary neural nodes (use system neural colors) -->
-        <circle cx="48" cy="45" r="3" fill="hsl(var(--logo-neural-1, 252 70% 50%))" filter="url(#neuralGlow)" opacity="0.9"/>
-        <circle cx="72" cy="45" r="3" fill="hsl(var(--logo-neural-2, 276 60% 45%))" filter="url(#neuralGlow)" opacity="0.9"/>
-        <circle cx="42" cy="58" r="2.5" fill="hsl(var(--logo-neural-3, 212 85% 55%))" filter="url(#neuralGlow)" opacity="0.8"/>
-        <circle cx="60" cy="65" r="3" fill="hsl(var(--logo-neural-1, 252 70% 50%))" filter="url(#neuralGlow)" opacity="0.9"/>
-        <circle cx="78" cy="58" r="2.5" fill="hsl(var(--logo-neural-2, 276 60% 45%))" filter="url(#neuralGlow)" opacity="0.8"/>
-        
-        <!-- Secondary neural nodes -->
-        <circle cx="55" cy="48" r="1.5" fill="hsl(var(--logo-neural-4, 240 65% 50%))" opacity="0.7"/>
-        <circle cx="65" cy="48" r="1.5" fill="hsl(var(--logo-neural-3, 212 85% 55%))" opacity="0.7"/>
-        <circle cx="50" cy="62" r="1.5" fill="hsl(var(--logo-neural-5, 38 60% 40%))" opacity="0.7"/>
-        <circle cx="70" cy="62" r="1.5" fill="hsl(var(--logo-neural-4, 240 65% 50%))" opacity="0.7"/>
-        
-        <!-- Advanced neural connections (stroke colors use system variables) -->
-        <g stroke-linecap="round" opacity="0.6">
-            <path d="M48 45 Q55 50 60 65" stroke="hsl(var(--logo-neural-1, 252 70% 50%))" stroke-width="1.2" fill="none"/>
-            <path d="M72 45 Q65 50 60 65" stroke="hsl(var(--logo-neural-2, 276 60% 45%))" stroke-width="1.2" fill="none"/>
-            <path d="M42 58 Q51 61 60 65" stroke="hsl(var(--logo-neural-3, 212 85% 55%))" stroke-width="1" fill="none"/>
-            <path d="M78 58 Q69 61 60 65" stroke="hsl(var(--logo-neural-2, 276 60% 45%))" stroke-width="1" fill="none"/>
-            <path d="M48 45 Q45 51 42 58" stroke="hsl(var(--logo-neural-4, 240 65% 50%))" stroke-width="0.8" fill="none"/>
-            <path d="M72 45 Q75 51 78 58" stroke="hsl(var(--logo-neural-5, 38 60% 40%))" stroke-width="0.8" fill="none"/>
+        <circle cx="60" cy="60" r="20" fill="#f5f5dca6" stroke="#2E3D19" stroke-width="1"/>
+        <!-- Four nodes -->
+        <circle cx="60" cy="45" r="3" fill="#2E3D19"/>
+        <circle cx="75" cy="60" r="3" fill="#2E3D19"/>
+        <circle cx="60" cy="75" r="3" fill="#2E3D19"/>
+        <circle cx="45" cy="60" r="3" fill="#2E3D19"/>
+        <!-- Center node -->
+        <circle cx="60" cy="60" r="3" fill="#2E3D19"/>
+        <!-- Connections -->
+        <g stroke-linecap="round">
+            <path d="M60 45 Q66 52 75 60" stroke="#2E3D19" stroke-width="1" fill="none"/>
+            <path d="M75 60 Q68 68 60 75" stroke="#2E3D19" stroke-width="1" fill="none"/>
+            <path d="M60 75 Q52 68 45 60" stroke="#2E3D19" stroke-width="1" fill="none"/>
+            <path d="M45 60 Q52 52 60 45" stroke="#2E3D19" stroke-width="1" fill="none"/>
         </g>
-        
     </g>
 
-    <!-- Enhanced typography (uses system text color) -->
-    <text x="60" y="90" text-anchor="middle" 
+    <!-- Enhanced typography (military stencil style color) -->
+    <text x="60" y="110" text-anchor="middle" 
           font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" 
-          font-size="12" 
-          fill="hsl(var(--logo-text, 60 15% 95%))" 
+          font-size="10" 
+          fill="#F5F5DC" 
           font-weight="700"
           letter-spacing="0.5px">
-        MilAI
+        MilAIAssist
     </text> 
 </svg>
