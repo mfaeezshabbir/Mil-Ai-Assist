@@ -299,10 +299,10 @@ export function MilAssistLayout() {
             <MapView
               ref={mapRef}
               symbols={symbols}
-              onSymbolClick={(symbol) => {
-                setActiveSymbol(symbol);
-                setEditSheetOpen(true);
-              }}
+              onSymbolClick={(symbol: SymbolData) => {
+                  setActiveSymbol(symbol);
+                  setEditSheetOpen(true);
+                }}
               mapStyle={currentMapStyle}
               onViewStateChange={handleViewStateChange}
               symbolSize={symbolSize}
