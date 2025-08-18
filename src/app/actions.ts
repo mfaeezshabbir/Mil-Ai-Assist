@@ -9,8 +9,16 @@ import { geocode } from "@/services/geocoding";
 
 // Define the output shapes for the client
 type SymbolResult = {
-  type: "symbol";
-  data: SIDCMetadataOutput;
+  // GeoJSON-like feature representing the symbol location
+  feature: {
+    type: string;
+    geometry: {
+      type: string;
+      coordinates: [number, number];
+    };
+    properties?: Record<string, any>;
+  };
+  metadata: SIDCMetadataOutput;
 };
 
 type RouteResult = {
@@ -39,15 +47,34 @@ export async function getMapFeatureFromCommand(
 
   try {
     const extractedFeature = await processCommand({ command });
-
     if (extractedFeature.type === "symbol") {
-      return {
-        feature: {
-          type: "symbol",
-          data: extractedFeature.data,
+      // Build a GeoJSON-like point feature for the map and return SIDC metadata separately
+      const { latitude, longitude, ...meta } = extractedFeature.data as any;
+      if (typeof latitude !== "number" || typeof longitude !== "number") {
+        throw new Error("Symbol data missing coordinates.");
+      }
+
+      const geoFeature = {
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [longitude, latitude],
         },
+        properties: {
+          // include main icon and sidc if present for debugging
+          mainIconId: (extractedFeature.data as any).mainIconId,
+          sidc: (extractedFeature.data as any).sidc,
+        },
+      };
+
+      const result: ActionResult = {
+        feature: {
+          feature: geoFeature,
+          metadata: meta,
+        } as any,
         error: null,
       };
+      return result;
     } else if (extractedFeature.type === "route") {
       const { startLocationName, endLocationName, ...rest } =
         extractedFeature.data;

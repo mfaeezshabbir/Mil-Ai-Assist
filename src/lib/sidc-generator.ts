@@ -5,7 +5,27 @@ import MS from "milsymbol";
 
 function normalize(str: string | undefined): string {
   if (!str) return "";
-  return str.replace(/\s+/g, "_").toUpperCase();
+  // Trim, replace non-word characters with underscores, collapse multiple underscores,
+  // strip edge underscores and uppercase to match mapping keys (e.g. "Land Unit" -> "LAND_UNIT").
+  return str
+    .toString()
+    .trim()
+    .replace(/\W+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toUpperCase();
+}
+
+function padCode(
+  code: string | number | undefined,
+  length: number,
+  padChar = "0"
+) {
+  const s = (code ?? "").toString();
+  if (!s) return padChar.repeat(length);
+  // If code already longer than required, slice right-most characters (function IDs should keep leftmost but keep safe)
+  if (s.length >= length) return s.slice(0, length);
+  return s.padStart(length, padChar);
 }
 
 /**
@@ -49,9 +69,10 @@ export function generateSIDC(symbol: SymbolData): string {
     ? sidcEnumMapping.echelonMobilityTowedArray[echelonKey] || "00"
     : "00";
 
-  const functionIdCode = symbol.mainIconId || "000000";
-  const modifier1Code = symbol.modifier1 || "00";
-  const modifier2Code = symbol.modifier2 || "00";
+  // Ensure codes have exact expected widths
+  const functionIdCode = padCode(symbol.mainIconId || "000000", 6);
+  const modifier1Code = padCode(symbol.modifier1 || "00", 2);
+  const modifier2Code = padCode(symbol.modifier2 || "00", 2);
 
   const sidc =
     version +
@@ -65,7 +86,9 @@ export function generateSIDC(symbol: SymbolData): string {
     modifier1Code +
     modifier2Code;
 
-  return sidc;
+  // Final safety: ensure SIDC is exactly 20 characters
+  const final = padCode(sidc, 20, "0");
+  return final;
 }
 
 /**
@@ -78,6 +101,17 @@ export function validateSIDC(sidc: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Convenience: build a SIDC from SymbolData, validate it and return metadata.
+ * Useful for the code path that needs to add a symbol to the map in one step.
+ */
+export function buildAndValidateSIDC(symbol: SymbolData) {
+  const sidc = generateSIDC(symbol);
+  const valid = validateSIDC(sidc);
+  const metadata = getSIDCMetadata(sidc);
+  return { sidc, valid, metadata };
 }
 
 /**

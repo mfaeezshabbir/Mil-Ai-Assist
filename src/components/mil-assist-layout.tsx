@@ -50,39 +50,6 @@ const initialState: { feature: any; error: string | null } = {
   error: null,
 };
 
-const initialSymbols: SymbolData[] = [
-  {
-    id: "initial-1",
-    displayType: "sidc",
-    context: "Reality",
-    symbolStandardIdentity: "Friend",
-    status: "Present",
-    hqtfd: "Not Applicable",
-    symbolSet: "Land Unit",
-    mainIconId: "121100", // Infantry
-    modifier1: "00",
-    modifier2: "00",
-    symbolEchelon: "Company",
-    latitude: 33.72,
-    longitude: 73.09,
-  },
-  {
-    id: "initial-2",
-    displayType: "sidc",
-    context: "Reality",
-    symbolStandardIdentity: "Hostile",
-    status: "Damaged",
-    hqtfd: "Not Applicable",
-    symbolSet: "Land Unit",
-    mainIconId: "120500", // Armour
-    modifier1: "00",
-    modifier2: "00",
-    symbolEchelon: "Battalion",
-    latitude: 33.68,
-    longitude: 73.04,
-  },
-];
-
 const samplePrompts = [
   "Friendly infantry company 'Raptors' at 33.72, 73.09",
   "Damaged hostile armored battalion 'Thunder Run' at 33.68, 73.04",
@@ -127,7 +94,7 @@ function CommandForm() {
 }
 
 export function MilAssistLayout() {
-  const [symbols, setSymbols] = useState<SymbolData[]>(initialSymbols);
+  const [symbols, setSymbols] = useState<SymbolData[]>([]);
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
@@ -141,8 +108,8 @@ export function MilAssistLayout() {
     "small" | "medium" | "large" | "xxl"
   >("medium");
   const [viewState, setViewState] = useState<ViewState>({
-    longitude: 73.09,
-    latitude: 33.72,
+    longitude: 0,
+    latitude: 0,
     zoom: 10,
     bearing: 0,
     pitch: 0,
@@ -186,7 +153,7 @@ export function MilAssistLayout() {
       const symbolData: SymbolData = {
         id: `sym-${Date.now()}`,
         displayType: "sidc",
-        uniqueDesignation: metadata?.uniqueDesignation || "Unknown",
+        aiLabel: metadata?.aiLabel || undefined,
         context: "Reality",
         symbolStandardIdentity: metadata?.standardIdentity || "Friend",
         status: metadata?.status || "Present",
@@ -203,7 +170,7 @@ export function MilAssistLayout() {
       setSymbols((prev) => [...prev, symbolData]);
       toast({
         title: "Symbol Added",
-        description: `Added symbol for ${symbolData.uniqueDesignation}`,
+        description: `Added symbol${symbolData.aiLabel ? ` for ${symbolData.aiLabel}` : ""}`,
       });
     }
 
@@ -386,7 +353,7 @@ export function MilAssistLayout() {
           setEditSheetOpen(false);
           toast({
             title: "Symbol Updated",
-            description: `Updated symbol for ${updatedSymbol.uniqueDesignation}`,
+            description: `Updated symbol${updatedSymbol.aiLabel ? ` for ${updatedSymbol.aiLabel}` : ""}`,
           });
         }}
         onDelete={(symbolId) => {

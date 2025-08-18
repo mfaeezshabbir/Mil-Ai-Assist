@@ -2912,10 +2912,10 @@ export const amplifierData = [
     maxLength: 24,
   },
   {
-    amplifierId: "uniqueDesignation",
-    label: "Unique Designation",
+    amplifierId: "aiLabel",
+    label: "AI Label",
     description:
-      "A text amplifier for units, equipment and installations that uniquely identifies a particular symbol or track number",
+      "AI-provided label for units, equipment and installations that uniquely identifies a particular symbol or track number",
     field: "T",
     maxLength: 21,
   },

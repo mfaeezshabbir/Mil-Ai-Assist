@@ -1,6 +1,7 @@
 // src/ai/flows/extract-sidc-metadata.ts
-"use server";
-
+// This module defines schemas and tools for extracting SIDC metadata.
+// It must not be marked with `"use server"` because it exports objects (schemas/tools)
+// which Next.js considers invalid in server modules. Keep it a regular module.
 /**
  * @fileOverview This file defines the Genkit flow for extracting and validating SIDC metadata.
  * It uses AI tools to extract metadata from natural language descriptions and convert them
@@ -89,11 +90,11 @@ export const SIDCMetadataSchema = z.object({
     .describe(
       "The second modifier for the symbol, if applicable (e.g., 'Heavy', 'Light'). Use Title Case."
     ),
-  uniqueDesignation: z
+  aiLabel: z
     .string()
     .optional()
     .describe(
-      'A unique name or designation for the unit, if specified (e.g., "Alpha-1", "Task Force Bravo"). Max length 21.'
+      'AI-provided label or designation for the unit (e.g., "Alpha-1", "Task Force Bravo"). Max length 21.'
     ),
   latitude: z.number().describe("Latitude of the unit"),
   longitude: z.number().describe("Longitude of the unit"),

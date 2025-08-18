@@ -20,7 +20,7 @@ export type SymbolData = Omit<AIMetadata, "symbolCategory"> & {
   higherFormation?: string;
   dtg?: string;
   type?: string;
-  uniqueDesignation?: string;
+  aiLabel?: string;
   evaluationRating?: string;
   combatEffectiveness?: string;
   signatureEquipment?: string;
