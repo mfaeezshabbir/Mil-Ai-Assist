@@ -81,7 +81,7 @@ export function SymbolListSheet({
               symbols.map((symbol) => {
                 const displayName =
                   symbol.uniqueDesignation ||
-                  getFunctionIdName(symbol.symbolSet, symbol.functionId);
+                  getFunctionIdName(symbol.symbolSet, symbol.mainIconId);
                 const subText = `${symbol.symbolStandardIdentity} / ${
                   symbol.symbolEchelon || "No Echelon"
                 }`;

@@ -60,7 +60,7 @@ const initialSymbols: SymbolData[] = [
     status: "Present",
     hqtfd: "Not Applicable",
     symbolSet: "Land Unit",
-    functionId: "121100", // Infantry
+    mainIconId: "121100", // Infantry
     modifier1: "00",
     modifier2: "00",
     symbolEchelon: "Company",
@@ -76,7 +76,7 @@ const initialSymbols: SymbolData[] = [
     status: "Damaged",
     hqtfd: "Not Applicable",
     symbolSet: "Land Unit",
-    functionId: "120500", // Armour
+    mainIconId: "120500", // Armour
     modifier1: "00",
     modifier2: "00",
     symbolEchelon: "Battalion",
@@ -188,7 +188,7 @@ export function MilAssistLayout() {
         status: metadata?.status || "Present",
         hqtfd: metadata?.hqtfd || "Not Applicable",
         symbolSet: metadata?.symbolSet || "Land Unit",
-        functionId: metadata?.functionId || "000000",
+        mainIconId: metadata?.mainIconId || "000000",
         modifier1: "00",
         modifier2: "00",
         symbolEchelon: metadata?.echelon || "Unit",

@@ -12,16 +12,18 @@ type PointMarkerProps = {
 export function PointMarker({ symbol, size = 40 }: PointMarkerProps) {
   // Determine size class based on size value
   const getSizeClass = (size: number) => {
-    if (size <= 16) return 'symbol-marker-small';
-    if (size <= 22) return 'symbol-marker-medium';
-    if (size <= 32) return 'symbol-marker-large';
-    return 'symbol-marker-xxl';
+    if (size <= 96) return "symbol-marker-small";
+    if (size <= 128) return "symbol-marker-medium";
+    if (size <= 156) return "symbol-marker-large";
+    return "symbol-marker-xxl";
   };
 
   return (
     <div className="relative flex flex-col items-center cursor-pointer">
       {/* The icon (either SIDC or custom image) */}
-      <div className={`absolute bottom-full mb-1 drop-shadow-lg symbol-marker-container ${getSizeClass(size)}`}>
+      <div
+        className={`absolute bottom-full mb-1 drop-shadow-lg symbol-marker-container ${getSizeClass(size)}`}
+      >
         {symbol.displayType === "image" && symbol.imageUrl ? (
           <Image
             src={symbol.imageUrl}
@@ -36,7 +38,7 @@ export function PointMarker({ symbol, size = 40 }: PointMarkerProps) {
       </div>
 
       {/* The base point on the map */}
-      <div className="w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-md"></div>
+      <div className="w-3 h-3 bg-primary border-2 border-white rounded-full shadow-md"></div>
     </div>
   );
 }

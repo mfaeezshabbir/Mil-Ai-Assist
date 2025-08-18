@@ -2492,12 +2492,12 @@ const mainIconData: Record<string, Record<string, string>> = {
 
 export function getFunctionIdName(
   symbolSet: string,
-  functionId: string
+  mainIconId: string
 ): string {
   const set = symbolSetData[symbolSet]?.mainIcons;
   if (!set) return "Unknown Function";
 
-  const entry = set.find((item) => item.code === functionId);
+  const entry = set.find((item) => item.code === mainIconId);
   return entry ? entry.name : "Unknown Function";
 }
 

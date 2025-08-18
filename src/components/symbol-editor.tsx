@@ -104,7 +104,7 @@ export function SymbolEditor({
     const newSymbol = { ...editedSymbol, [field]: value };
 
     if (field === "symbolSet") {
-      newSymbol.functionId = "000000";
+      newSymbol.mainIconId = "000000";
       newSymbol.modifier1 = "00";
       newSymbol.modifier2 = "00";
       newSymbol.symbolEchelon = undefined;
@@ -260,7 +260,7 @@ export function SymbolEditor({
               <p className="font-bold text-sm">
                 {getFunctionIdName(
                   editedSymbol.symbolSet,
-                  editedSymbol.functionId
+                  editedSymbol.mainIconId
                 )}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -343,10 +343,10 @@ export function SymbolEditor({
 
                     {currentSetData &&
                       renderComplexSelectGroup(
-                        "Function ID",
-                        "functionId",
+                        "Main icon",
+                        "mainIconId",
                         currentSetData.mainIcons,
-                        "Select Function ID"
+                        "Select Main icon"
                       )}
                     {currentSetData?.modifier1 &&
                       currentSetData.modifier1.length > 1 &&

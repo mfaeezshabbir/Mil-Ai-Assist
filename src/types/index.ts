@@ -5,7 +5,7 @@ export type SymbolData = Omit<AIMetadata, "symbolCategory"> & {
   displayType: "sidc" | "image";
   imageUrl?: string;
   symbolSet: string;
-  functionId: string;
+  mainIconId: string;
   modifier1: string;
   modifier2: string;
   context: string;

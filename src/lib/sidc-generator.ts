@@ -45,7 +45,7 @@ export function generateSIDC(symbol: SymbolData): string {
     ? sidcEnumMapping.echelonMobilityTowedArray[echelonKey] || "00"
     : "00";
 
-  const functionIdCode = symbol.functionId || "000000";
+  const functionIdCode = symbol.mainIconId || "000000";
 
   const modifier1Code = symbol.modifier1 || "00";
   const modifier2Code = symbol.modifier2 || "00";
