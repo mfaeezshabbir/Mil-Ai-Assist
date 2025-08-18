@@ -217,15 +217,28 @@ const extractSidcMetadataTool = ai.defineTool(
     outputSchema: SIDCMetadataSchema,
   },
   async (input) => {
-    // This is a mock implementation since in a real implementation this would connect to an AI model
-    // The actual implementation would process the input.description and return valid SIDC metadata
-    // For now, we just return a placeholder structure that conforms to the schema
+    // Lightweight mock extraction: try to extract a quoted name (aiLabel) and a simple 'at <place>' location.
+    const desc = (input && (input as any).description) || "";
+    const quotedMatch = desc.match(/['\"]([^'\"]{1,21})['\"]/);
+    const aiLabel = quotedMatch ? quotedMatch[1].trim() : undefined;
+
+    // Try to extract a place name after 'at' or 'in' for a simple geocode (real extractor would call geocode
+    // or use an AI model to resolve coordinates). We return 0,0 if not available so the caller can fallback.
+    const locMatch = desc.match(/(?:at|in)\s+([A-Za-z\s\,]+)/i);
+    const latitude = 0;
+    const longitude = 0;
+    if (locMatch) {
+      // In the mock, we won't call external services. Leave coords at 0 so downstream fallback
+      // can attempt geocode when running in the app.
+    }
+
     return {
       symbolStandardIdentity: "Friend" as const,
       symbolSet: "Land Unit",
       symbolCategory: "Infantry",
-      latitude: 0,
-      longitude: 0,
+      latitude,
+      longitude,
+      aiLabel,
     };
   }
 );

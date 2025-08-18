@@ -251,7 +251,7 @@ const drawMapFeaturesTool = ai.defineTool(
       "Draw features on the map. This can be a single symbol or a route between two locations.",
     // Accept anything at the tool boundary; validate/parse inside the handler.
     inputSchema: z.any(),
-    outputSchema: MapFeatureSchema,
+    outputSchema: z.any(),
   },
   async (input) => {
     try {
@@ -306,22 +306,29 @@ const processCommandPrompt = ai.definePrompt({
 - For routes, you must extract both a start and an end location name.
 - Your response must be a call to the drawMapFeatures tool.
 
-Command: {{{command}}}`,
+Command: {{{command}}}
+
+If a unique name or designation is included in the user's command (for example: 'Raptors', "Thunder Run", or Alpha-1), set the aiLabel field in the symbol data to that exact text (max 21 characters). If no name is provided, omit aiLabel (do not insert a default like 'Unknown').`,
 });
+// Note: aiLabel instruction is embedded directly in the prompt above.
 
 // The main flow that gets executed by the server action.
 const processCommandFlow = ai.defineFlow(
   {
     name: "processCommandFlow",
     inputSchema: z.object({ command: z.string() }),
-    outputSchema: MapFeatureSchema,
+    // Accept any output at the flow boundary and validate/parse inside the handler.
+    outputSchema: z.any(),
   },
   async (input) => {
     const { output } = await processCommandPrompt(input);
 
-    // If the AI returned a valid feature, return it
-    if (output && (output as any).type) {
-      return output;
+    // Try to validate the AI output against our MapFeatureSchema.
+    try {
+      const parsed = MapFeatureSchema.parse(output);
+      return parsed;
+    } catch (err) {
+      // If validation failed, continue to fallbacks below.
     }
 
     // Fallback: try extracting SIDC metadata directly from the command
@@ -371,6 +378,10 @@ const processCommandFlow = ai.defineFlow(
         }
       }
 
+      // Try to extract a quoted aiLabel from the command (e.g., 'Raptors', "Thunder Run")
+      const quotedMatch = cmd.match(/['\"]([^'\"]{1,21})['\"]/);
+      const aiLabel = quotedMatch ? quotedMatch[1].trim() : undefined;
+
       if (latitude !== null && longitude !== null) {
         // Build normalized symbol data
         const symbolCategory = unitMatch
@@ -402,7 +413,7 @@ const processCommandFlow = ai.defineFlow(
           modifier2: "00",
           latitude,
           longitude,
-          aiLabel: undefined,
+          aiLabel,
         };
         if (echelon) symbolData.symbolEchelon = echelon;
 

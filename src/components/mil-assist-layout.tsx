@@ -288,7 +288,7 @@ export function MilAssistLayout() {
                   <span>SCALE: {formatScale(viewState.zoom)}</span>
                 </div>
               </div>
-              <div className="absolute bottom-2 right-2 bg-destructive/20 backdrop-blur-sm px-2 py-1 text-xs font-mono text-destructive rounded-sm border border-destructive/30">
+              <div className="absolute bottom-2 right-12 bg-destructive/20 backdrop-blur-sm px-2 py-1 text-xs font-mono text-destructive rounded-sm border border-destructive/30">
                 <div className="flex items-center gap-1">
                   <AlertTriangle className="h-3 w-3" />
                   <span>EXERCISE // NOT ACTUAL</span>

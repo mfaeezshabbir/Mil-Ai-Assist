@@ -109,6 +109,7 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
       [onViewStateChange]
     );
 
+    const [showSymbolSize, setShowSymbolSize] = useState(false);
     return (
       <div className="w-full h-full relative">
         <Map
@@ -134,7 +135,7 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               showCompass
               showZoom
               visualizePitch
-              position="bottom-left"
+              position="bottom-right"
               style={{
                 color: "white",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -143,6 +144,7 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               }}
             />
             <FullscreenControl
+              position="bottom-right"
               style={{
                 color: "white",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -153,34 +155,77 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
 
             {/* Symbol Size Control */}
             {onSymbolSizeChange && (
-              <div className="bg-black/50 backdrop-blur-sm rounded border border-white/20 p-1">
-                <div className="text-xs text-white/70 mb-1 px-2 font-mono uppercase">
-                  Symbol Size
-                </div>
-                <div className="flex flex-col gap-1">
-                  {Object.entries(SYMBOL_SIZES).map(([size, pixels]) => (
-                    <button
-                      key={size}
-                      onClick={() =>
-                        onSymbolSizeChange(size as keyof typeof SYMBOL_SIZES)
-                      }
-                      className={`px-2 py-1 text-xs font-mono uppercase rounded transition-colors ${
-                        symbolSize === size
-                          ? "bg-white/20 text-white"
-                          : "text-white/70 hover:bg-white/10 hover:text-white"
-                      }`}
-                    >
-                      {size} ({pixels}px)
-                    </button>
-                  ))}
-                </div>
+              <div className="relative">
+                <button
+                  className="bg-primary/60 backdrop-blur-md rounded-full border border-white/30 p-2 shadow-lg flex items-center justify-center hover:bg-primary/80 transition"
+                  onClick={() => setShowSymbolSize((prev) => !prev)}
+                  aria-label="Change Symbol Size"
+                  type="button"
+                >
+                  <svg width={20} height={20} fill="none" viewBox="0 0 20 20">
+                    <circle
+                      cx={10}
+                      cy={10}
+                      r={8}
+                      stroke="white"
+                      strokeWidth={2}
+                      fill="none"
+                    />
+                    <path
+                      d="M10 5v10M5 10h10"
+                      stroke="white"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+                {showSymbolSize && (
+                  <div className="absolute right-0 mt-2 z-20 bg-black/60 backdrop-blur-md rounded-lg border border-white/30 p-2 shadow-lg flex flex-col items-center">
+                    <div className="text-[10px] text-white/60 mb-2 px-2 font-mono tracking-widest uppercase">
+                      Symbol Size
+                    </div>
+                    <div className="flex flex-row gap-2 justify-center items-center">
+                      {Object.entries(SYMBOL_SIZES).map(([size, pixels]) => (
+                        <button
+                          key={size}
+                          onClick={() => {
+                            onSymbolSizeChange(
+                              size as keyof typeof SYMBOL_SIZES
+                            );
+                            setShowSymbolSize(false);
+                          }}
+                          className={`flex flex-col items-center px-2 py-1 rounded-lg transition-all border border-transparent
+                            ${
+                              symbolSize === size
+                                ? "bg-white/20 text-white border-white/40 shadow"
+                                : "text-white/70 hover:bg-white/10 hover:text-white"
+                            }`}
+                          style={{ minWidth: 48 }}
+                        >
+                          <span
+                            className="inline-block mb-1 rounded-full border border-white/30"
+                            style={{
+                              width: pixels / 2,
+                              height: pixels / 2,
+                              background: "rgba(255,255,255,0.15)",
+                            }}
+                          />
+                          <span className="text-[11px] font-mono uppercase">
+                            {size}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-          <div className="absolute left-3 top-3">
+            {/* </div>
+          <div className="absolute left-3 top-3"> */}
             <GeolocateControl
               positionOptions={{ enableHighAccuracy: true }}
               trackUserLocation
+              position="bottom-right"
               style={{
                 color: "white",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
