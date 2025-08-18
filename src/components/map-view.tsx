@@ -31,6 +31,8 @@ export type MapViewProps = {
   onFeaturesChange?: (features: any) => void;
   mapStyle?: string;
   onViewStateChange?: (viewState: ViewState) => void;
+  symbolSize?: "small" | "medium" | "large" | "xxl";
+  onSymbolSizeChange?: (size: "small" | "medium" | "large" | "xxl") => void;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -43,6 +45,14 @@ export const MAP_STYLES = {
   STREETS: "mapbox://styles/mapbox/streets-v12",
 };
 
+// Symbol size mapping
+export const SYMBOL_SIZES = {
+  small: 96,
+  medium: 128,
+  large: 156,
+  xxl: 192,
+} as const;
+
 export const MapView = forwardRef<MapRef, MapViewProps>(
   (
     {
@@ -54,6 +64,8 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
       onFeaturesChange,
       mapStyle = MAP_STYLES.TACTICAL,
       onViewStateChange,
+      symbolSize = "medium",
+      onSymbolSizeChange,
     },
     ref
   ) => {
@@ -117,12 +129,11 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
           style={{}}
         >
           {/* Military-styled Navigation Controls */}
-          <div className="absolute right-3 top-3 flex flex-col gap-2">
+          <div className="absolute right-3 top-10 flex flex-col gap-2">
             <NavigationControl
               showCompass
               showZoom
               visualizePitch
-              position="bottom-right"
               style={{
                 color: "white",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -138,6 +149,32 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
                 border: "1px solid rgba(255, 255, 255, 0.2)",
               }}
             />
+
+            {/* Symbol Size Control */}
+            {onSymbolSizeChange && (
+              <div className="bg-black/50 backdrop-blur-sm rounded border border-white/20 p-1">
+                <div className="text-xs text-white/70 mb-1 px-2 font-mono uppercase">
+                  Symbol Size
+                </div>
+                <div className="flex flex-col gap-1">
+                  {Object.entries(SYMBOL_SIZES).map(([size, pixels]) => (
+                    <button
+                      key={size}
+                      onClick={() =>
+                        onSymbolSizeChange(size as keyof typeof SYMBOL_SIZES)
+                      }
+                      className={`px-2 py-1 text-xs font-mono uppercase rounded transition-colors ${
+                        symbolSize === size
+                          ? "bg-white/20 text-white"
+                          : "text-white/70 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      {size} ({pixels}px)
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <div className="absolute left-3 top-3">
             <GeolocateControl
@@ -175,12 +212,14 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
                 });
               }}
               onUpdate={(e) => {
-                const updatedFeatures = features.features.map((f: any) => {
-                  if (f.id === e.features[0].id) {
-                    return e.features[0];
+                const updatedFeatures = features.features.map(
+                  (f: { id: string }) => {
+                    if (f.id === (e.features[0] as { id: string }).id) {
+                      return e.features[0];
+                    }
+                    return f;
                   }
-                  return f;
-                });
+                );
                 onFeaturesChange({
                   ...features,
                   features: updatedFeatures,
@@ -188,7 +227,11 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               }}
               onDelete={(e) => {
                 const updatedFeatures = features.features.filter(
-                  (f: any) => !e.features.some((ef) => ef.id === f.id)
+                  (f: any) =>
+                    !e.features.some(
+                      (ef: any) =>
+                        (ef as { id: string }).id === (f as { id: string }).id
+                    )
                 );
                 onFeaturesChange({
                   ...features,
@@ -214,7 +257,7 @@ export const MapView = forwardRef<MapRef, MapViewProps>(
               }}
             >
               <div onClick={() => onSymbolClick(symbol)}>
-                <PointMarker symbol={symbol} />
+                <PointMarker symbol={symbol} size={SYMBOL_SIZES[symbolSize]} />
               </div>
             </Marker>
           ))}

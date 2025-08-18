@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapView, MAP_STYLES } from "@/components/map-view";
+import { MapView, MAP_STYLES, SYMBOL_SIZES } from "@/components/map-view";
 import { Separator } from "./ui/separator";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
@@ -135,6 +135,7 @@ export function MilAssistLayout() {
   const [listSheetOpen, setListSheetOpen] = useState(false);
   const [currentMapStyle, setCurrentMapStyle] = useState<string>(MAP_STYLES.TACTICAL);
   const [currentTime, setCurrentTime] = useState<string>(new Date().toLocaleTimeString());
+  const [symbolSize, setSymbolSize] = useState<'small' | 'medium' | 'large' | 'xxl'>('medium');
   const [viewState, setViewState] = useState<ViewState>({
     longitude: 73.09,
     latitude: 33.72,
@@ -322,6 +323,8 @@ export function MilAssistLayout() {
               }}
               mapStyle={currentMapStyle}
               onViewStateChange={handleViewStateChange}
+              symbolSize={symbolSize}
+              onSymbolSizeChange={setSymbolSize}
             />
           </div>
 

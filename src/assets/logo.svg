@@ -1,35 +1,108 @@
 <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <!-- Outer shield shape -->
+    <!-- Advanced shield shape with subtle curves -->
+    <path
+        d="M60 6
+             L88 16
+             Q98 22 98 38
+             L98 68
+             Q98 88 60 110
+             Q22 88 22 68
+             L22 38
+             Q22 22 32 16
+             L60 6
+             Z"
+        fill="url(#shieldGradient)"
+        stroke="url(#borderGradient)"
+        stroke-width="0.5"
+        />
+    
+    <!-- Inner glow effect -->
     <path
         d="M60 10
-             Q90 20 100 40
-             Q110 70 60 110
-             Q10 70 20 40
-             Q30 20 60 10
+             L84 19
+             Q92 24 92 38
+             L92 66
+             Q92 82 60 102
+             Q28 82 28 66
+             L28 38
+             Q28 24 36 19
+             L60 10
              Z"
-        fill="#4A6572"
-        stroke="#E27D60"
-        stroke-width="3"
+              fill="none" 
+        stroke="url(#innerGlow)"
+        stroke-width="1"
+        opacity="0.3"
         />
-    <!-- Inner tactical grid -->
-    <g opacity="0.25">
-        <rect x="25" y="25" width="70" height="70" fill="none" stroke="#E27D60" stroke-width="1"/>
-        <line x1="25" y1="45" x2="95" y2="45" stroke="#E27D60" stroke-width="1"/>
-        <line x1="25" y1="65" x2="95" y2="65" stroke="#E27D60" stroke-width="1"/>
-        <line x1="45" y1="25" x2="45" y2="95" stroke="#E27D60" stroke-width="1"/>
-        <line x1="65" y1="25" x2="65" y2="95" stroke="#E27D60" stroke-width="1"/>
-    </g>
-    <!-- Central AI circuit (stylized brain) -->
+
+    <!-- Gradient definitions -->
+    <defs>
+        <!-- Main shield gradient -->
+        <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+            <stop offset="50%" style="stop-color:#7c3aed;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+        </linearGradient>
+        
+       <!-- Inner glow -->
+        <linearGradient id="innerGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+            <stop offset="100%" style="stop-color:#e0e7ff;stop-opacity:0.2" />
+        </linearGradient>
+        
+        <!-- AI core gradient -->
+        <radialGradient id="aiCore" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95" />
+            <stop offset="70%" style="stop-color:#f1f5f9;stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#e2e8f0;stop-opacity:0.85" />
+        </radialGradient>
+        
+        <!-- Neural glow effect -->
+        <filter id="neuralGlow">
+            <feGaussianBlur stdDeviation="1" result="coloredBlur"/>
+            <feMerge> 
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+
+    <!-- Advanced AI neural network -->
     <g>
-        <ellipse cx="60" cy="60" rx="18" ry="14" fill="#E8E8E8" stroke="#4A6572" stroke-width="2"/>
-        <path d="M60 46 v28" stroke="#4A6572" stroke-width="2" stroke-linecap="round"/>
-        <path d="M52 54 Q60 60 52 66" stroke="#4A6572" stroke-width="2" fill="none"/>
-        <path d="M68 54 Q60 60 68 66" stroke="#4A6572" stroke-width="2" fill="none"/>
-        <circle cx="60" cy="53" r="2" fill="#E27D60"/>
-        <circle cx="60" cy="67" r="2" fill="#E27D60"/>
+        <!-- Main AI core -->
+        <circle cx="60" cy="55" r="22" fill="url(#aiCore)" stroke="#e2e8f0" stroke-width="0.5"/>
+        
+        <!-- Primary neural nodes -->
+        <circle cx="48" cy="45" r="3" fill="#4f46e5" filter="url(#neuralGlow)" opacity="0.9"/>
+        <circle cx="72" cy="45" r="3" fill="#7c3aed" filter="url(#neuralGlow)" opacity="0.9"/>
+        <circle cx="42" cy="58" r="2.5" fill="#3b82f6" filter="url(#neuralGlow)" opacity="0.8"/>
+        <circle cx="60" cy="65" r="3" fill="#4f46e5" filter="url(#neuralGlow)" opacity="0.9"/>
+        <circle cx="78" cy="58" r="2.5" fill="#7c3aed" filter="url(#neuralGlow)" opacity="0.8"/>
+        
+        <!-- Secondary neural nodes -->
+        <circle cx="55" cy="48" r="1.5" fill="#8b5cf6" opacity="0.7"/>
+        <circle cx="65" cy="48" r="1.5" fill="#6366f1" opacity="0.7"/>
+        <circle cx="50" cy="62" r="1.5" fill="#3b82f6" opacity="0.7"/>
+        <circle cx="70" cy="62" r="1.5" fill="#8b5cf6" opacity="0.7"/>
+        
+        <!-- Advanced neural connections -->
+        <g stroke-linecap="round" opacity="0.6">
+            <path d="M48 45 Q55 50 60 65" stroke="#4f46e5" stroke-width="1.2" fill="none"/>
+            <path d="M72 45 Q65 50 60 65" stroke="#7c3aed" stroke-width="1.2" fill="none"/>
+            <path d="M42 58 Q51 61 60 65" stroke="#3b82f6" stroke-width="1" fill="none"/>
+            <path d="M78 58 Q69 61 60 65" stroke="#7c3aed" stroke-width="1" fill="none"/>
+            <path d="M48 45 Q45 51 42 58" stroke="#6366f1" stroke-width="0.8" fill="none"/>
+            <path d="M72 45 Q75 51 78 58" stroke="#8b5cf6" stroke-width="0.8" fill="none"/>
+        </g>
+        
     </g>
-    <!-- "MilAIAssist" text, military style -->
-    <text x="60" y="118" text-anchor="middle" font-family="Orbitron, 'JetBrains Mono', monospace" font-size="13" fill="#4A6572" letter-spacing="2" font-weight="bold">
-        MilAIAssist
-    </text>
+
+    <!-- Enhanced typography -->
+    <text x="60" y="90" text-anchor="middle" 
+          font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" 
+          font-size="12" 
+          fill="#e9e9e9" 
+          font-weight="700"
+          letter-spacing="0.5px">
+        MilAI
+    </text> 
 </svg>

@@ -79,8 +79,17 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
     <div
       title={title}
       aria-label={title}
-      className="drop-shadow-lg"
-      dangerouslySetInnerHTML={{ __html: svgHtml }}
-    />
+      className="drop-shadow-lg military-symbol-container military-symbol-preview"
+      style={{ 
+        width: `${size}px`, 
+        height: `${size}px`,
+        flexShrink: 0 
+      }}
+    >
+      <div 
+        className="w-full h-full flex items-center justify-center"
+        dangerouslySetInnerHTML={{ __html: svgHtml }}
+      />
+    </div>
   );
 }
