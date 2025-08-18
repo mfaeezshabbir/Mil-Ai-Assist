@@ -300,9 +300,9 @@ export function MilAssistLayout() {
               ref={mapRef}
               symbols={symbols}
               onSymbolClick={(symbol: SymbolData) => {
-                  setActiveSymbol(symbol);
-                  setEditSheetOpen(true);
-                }}
+                setActiveSymbol(symbol);
+                setEditSheetOpen(true);
+              }}
               mapStyle={currentMapStyle}
               onViewStateChange={handleViewStateChange}
               symbolSize={symbolSize}

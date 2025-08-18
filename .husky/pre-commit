@@ -1,2 +1,4 @@
 # Run format check and lint before committing
 npm run format && npm run lint
+
+git add .

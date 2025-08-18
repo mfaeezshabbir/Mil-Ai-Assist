@@ -12,7 +12,12 @@ type MarkersProps = {
   symbolSize?: "small" | "medium" | "large" | "xxl";
 };
 
-export default function Markers({ symbols, onSymbolClick, onSymbolDragEnd, symbolSize = "medium" }: MarkersProps) {
+export default function Markers({
+  symbols,
+  onSymbolClick,
+  onSymbolDragEnd,
+  symbolSize = "medium",
+}: MarkersProps) {
   return (
     <>
       {symbols.map((symbol) => (
@@ -23,7 +28,10 @@ export default function Markers({ symbols, onSymbolClick, onSymbolDragEnd, symbo
           draggable={!!onSymbolDragEnd}
           onDragEnd={(e) => {
             if (onSymbolDragEnd) {
-              onSymbolDragEnd(symbol.id, { lng: e.lngLat.lng, lat: e.lngLat.lat });
+              onSymbolDragEnd(symbol.id, {
+                lng: e.lngLat.lng,
+                lat: e.lngLat.lat,
+              });
             }
           }}
         >
