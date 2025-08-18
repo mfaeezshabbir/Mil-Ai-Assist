@@ -112,27 +112,6 @@
   display: none !important;
 }
 
-/* Dynamic symbol marker sizing */
-.symbol-marker-small {
-  width: 16px;
-  height: 16px;
-}
-
-.symbol-marker-medium {
-  width: 22px;
-  height: 22px;
-}
-
-.symbol-marker-large {
-  width: 32px;
-  height: 32px;
-}
-
-.symbol-marker-xxl {
-  width: 48px;
-  height: 48px;
-}
-
 .symbol-marker-container {
   display: flex;
   align-items: center;

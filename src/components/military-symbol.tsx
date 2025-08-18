@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { SymbolData } from "@/types";
 import MS from "milsymbol";
-import { generateSIDC } from "@/lib/sidc-generator";
+import { generateSIDC, validateSIDC, getSIDCMetadata } from "@/lib/sidc-generator";
 import { toTitleCase } from "@/lib/utils";
 import { getFunctionIdName } from "@/lib/sidc-mappings";
 
@@ -15,6 +15,7 @@ type MilitarySymbolProps = {
 export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
   const [svgHtml, setSvgHtml] = useState("");
   const [sidc, setSidc] = useState("");
+  const [isValid, setIsValid] = useState(true);
 
   useEffect(() => {
     // milsymbol is a client-side library, so we only run it in the browser
@@ -23,6 +24,10 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
     try {
       const generatedSidc = generateSIDC(symbol);
       setSidc(generatedSidc);
+      
+      // Validate the SIDC using milsymbol
+      const isValidSidc = validateSIDC(generatedSidc);
+      setIsValid(isValidSidc);
 
       const {
         id,
@@ -49,8 +54,15 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
       });
 
       setSvgHtml(milSymbol.asSVG());
+      
+      // Log metadata for debugging in development
+      if (process.env.NODE_ENV === 'development') {
+        const metadata = getSIDCMetadata(generatedSidc);
+        console.log('SIDC Metadata:', metadata);
+      }
     } catch (e) {
       console.error("Error creating military symbol:", e, symbol);
+      setIsValid(false);
       // Fallback to a simple placeholder if milsymbol fails
       setSvgHtml(
         `<svg width="${size}" height="${size}"><rect x="0" y="0" width="${size}" height="${size}" fill="red" /></svg>`
@@ -69,6 +81,7 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
     symbol.hqtfd !== "Not Applicable" ? `(${toTitleCase(symbol.hqtfd)})` : "",
     `at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}`,
     `\nSIDC: ${sidc}`,
+    !isValid ? "\n⚠️ Invalid SIDC" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -79,7 +92,7 @@ export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
     <div
       title={title}
       aria-label={title}
-      className="drop-shadow-lg military-symbol-container military-symbol-preview"
+      className={`drop-shadow-lg military-symbol-container military-symbol-preview ${!isValid ? 'ring-2 ring-red-500 ring-opacity-50 rounded' : ''}`}
       style={{ 
         width: `${size}px`, 
         height: `${size}px`,

@@ -54,7 +54,6 @@ const initialSymbols: SymbolData[] = [
   {
     id: "initial-1",
     displayType: "sidc",
-    uniqueDesignation: "Alpha Company",
     context: "Reality",
     symbolStandardIdentity: "Friend",
     status: "Present",
@@ -70,7 +69,6 @@ const initialSymbols: SymbolData[] = [
   {
     id: "initial-2",
     displayType: "sidc",
-    uniqueDesignation: "Enemy Armor",
     context: "Reality",
     symbolStandardIdentity: "Hostile",
     status: "Damaged",

@@ -47,10 +47,10 @@ export const MAP_STYLES = {
 
 // Symbol size mapping
 export const SYMBOL_SIZES = {
-  small: 96,
-  medium: 128,
-  large: 156,
-  xxl: 192,
+  small: 30,
+  medium: 40,
+  large: 50,
+  xxl: 60,
 } as const;
 
 export const MapView = forwardRef<MapRef, MapViewProps>(

@@ -34,6 +34,10 @@ import {
   getFunctionIdName,
   amplifierData,
   getEmtOptionsForSymbolSet,
+  getSymbolSetData,
+  getMainIconOptions,
+  getModifier1Options,
+  getModifier2Options,
 } from "@/lib/sidc-mappings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MilitarySymbol } from "./military-symbol";
@@ -90,7 +94,7 @@ export function SymbolEditor({
 
   if (!editedSymbol) return null;
 
-  const currentSetData = symbolSetData[editedSymbol.symbolSet || ""];
+  const currentSetData = getSymbolSetData(editedSymbol.symbolSet || "");
   const currentSetCode =
     sidcEnumMapping.symbolSet[
       normalize(
