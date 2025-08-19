@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "../ui/textarea";
 function CommandInput({ action }: { action: any }) {
   const { pending } = useFormStatus();
 
@@ -15,9 +16,19 @@ function CommandInput({ action }: { action: any }) {
       <span className="hidden md:flex items-center justify-center rounded-full bg-primary/10 p-2 mr-0 sm:mr-2 mb-2 sm:mb-0 self-start sm:self-auto">
         <Crosshair className="h-5 w-5 text-primary" />
       </span>
+      {/* Show textarea on mobile, input on sm+ screens */}
+      <Textarea
+        name="command"
+        className="block sm:hidden flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base resize rounded-md min-h-[44px] max-h-32"
+        placeholder="Enter tactical command..."
+        disabled={pending}
+        required
+        autoFocus
+        rows={5}
+      />
       <Input
         name="command"
-        className="flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base"
+        className="hidden sm:block flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base"
         placeholder="Enter tactical command..."
         disabled={pending}
         required

@@ -9,6 +9,7 @@ import {
 import { Geocoder } from "@/components/geocoder";
 import type { MapRef } from "react-map-gl";
 import { SYMBOL_SIZES } from "./MapView";
+import { ImageUpscale } from "lucide-react";
 
 type ControlsProps = {
   mapRef: React.RefObject<MapRef>;
@@ -31,47 +32,18 @@ export default function Controls({
           showZoom
           visualizePitch
           position="bottom-right"
-          style={{
-            color: "white",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            borderRadius: "4px",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-          }}
         />
-        <FullscreenControl
-          position="bottom-right"
-          style={{
-            color: "white",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            borderRadius: "4px",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-          }}
-        />
+        <FullscreenControl position="bottom-right" />
 
         {onSymbolSizeChange && (
           <div className="relative">
             <button
-              className="bg-primary/60 backdrop-blur-md rounded-full border border-white/30 p-2 shadow-lg flex items-center justify-center hover:bg-primary/80 transition"
+              className="bg-primary/60 backdrop-blur-md rounded-lg border border-white/30 p-[2px] shadow-lg flex items-center justify-center hover:bg-primary/80 transition"
               onClick={() => setShowSymbolSize((prev) => !prev)}
               aria-label="Change Symbol Size"
               type="button"
             >
-              <svg width={20} height={20} fill="none" viewBox="0 0 20 20">
-                <circle
-                  cx={10}
-                  cy={10}
-                  r={8}
-                  stroke="white"
-                  strokeWidth={2}
-                  fill="none"
-                />
-                <path
-                  d="M10 5v10M5 10h10"
-                  stroke="white"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                />
-              </svg>
+              <ImageUpscale className="h-6 w-6 text-white" />
             </button>
             {showSymbolSize && (
               <div className="absolute right-0 mt-2 z-20 bg-black/60 backdrop-blur-md rounded-lg border border-white/30 p-2 shadow-lg flex flex-col items-center">
@@ -119,7 +91,7 @@ export default function Controls({
           position="bottom-right"
           style={{
             color: "white",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: "#528F3D",
             borderRadius: "4px",
             border: "1px solid rgba(255, 255, 255, 0.2)",
           }}
