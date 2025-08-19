@@ -1,52 +1,18 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useFormState, useFormStatus } from "react-dom";
-import {
-  Loader2,
-  Send,
-  Target,
-  Shield,
-  Radio,
-  AlertTriangle,
-  Clock,
-  Info,
-  MapPin,
-  Crosshair,
-  Map as MapIcon,
-  Layers,
-} from "lucide-react";
+import { useFormState } from "react-dom";
 import type { MapRef, ViewState } from "react-map-gl";
 import { getMapFeatureFromCommand } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { SymbolData } from "@/types";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapView, MAP_STYLES, SYMBOL_SIZES } from "@/components/map-view";
+import { MapView, MAP_STYLES } from "@/components/map-view";
 import PlannerHeader from "@/components/mil-layout/PlannerHeader";
 import MapOverlay from "@/components/mil-layout/MapOverlay";
-import CommandInput from "@/components/mil-layout/CommandInput";
-import { Separator } from "./ui/separator";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
-import { Badge } from "./ui/badge";
-import { findFunctionId } from "@/lib/sidc-mappings";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+import CommandInputPanel from "@/components/mil-layout/CommandInput";
+import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 
 const initialState: { feature: any; error: string | null } = {
   feature: null,
@@ -60,42 +26,6 @@ const samplePrompts = [
   "Show a main attack route from the Khyber Pass to Kabul",
 ];
 
-function CommandForm() {
-  const { pending } = useFormStatus();
-
-  return (
-    <div className="relative">
-      <div className="absolute left-3 top-3">
-        <Crosshair className="h-4 w-4 text-muted-foreground" />
-      </div>
-      <Input
-        name="command"
-        className="pl-10 pr-3 md:pr-20 h-12 bg-card/70 font-mono border-primary/30 shadow-tactical-inset focus-visible:ring-primary"
-        placeholder="ENTER TACTICAL COMMAND..."
-        disabled={pending}
-        required
-      />
-      <Button
-        className="md:absolute md:right-1 md:top-1 h-10 font-mono tracking-wide w-full md:w-auto mt-2 md:mt-0"
-        size="sm"
-        disabled={pending}
-      >
-        {pending ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            PROCESSING
-          </>
-        ) : (
-          <>
-            EXECUTE
-            <Send className="ml-2 h-4 w-4" />
-          </>
-        )}
-      </Button>
-    </div>
-  );
-}
-
 export function MilAssistLayout() {
   const [symbols, setSymbols] = useState<SymbolData[]>([]);
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
@@ -104,15 +34,13 @@ export function MilAssistLayout() {
   const [currentMapStyle, setCurrentMapStyle] = useState<string>(
     MAP_STYLES.TACTICAL
   );
-  const [currentTime, setCurrentTime] = useState<string>(
-    new Date().toLocaleTimeString()
-  );
+  const [currentTime, setCurrentTime] = useState<string>("");
   const [symbolSize, setSymbolSize] = useState<
     "small" | "medium" | "large" | "xxl"
   >("medium");
   const [viewState, setViewState] = useState<ViewState>({
-    longitude: 0,
-    latitude: 0,
+    longitude: 73.09,
+    latitude: 33.72,
     zoom: 10,
     bearing: 0,
     pitch: 0,
@@ -125,14 +53,30 @@ export function MilAssistLayout() {
     initialState
   );
 
-  // Live time update
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString());
-    }, 1000);
+  // Time now reflects timezone based on map center longitude
+  const tzOffsetHoursFromLongitude = (longitude: number) => {
+    // 15° longitude per hour
+    let offset = Math.round(longitude / 15);
+    if (offset < -12) offset = -12;
+    if (offset > 14) offset = 14;
+    return offset;
+  };
 
+  const formatTimeForLongitude = (longitude: number) => {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const offsetHours = tzOffsetHoursFromLongitude(longitude);
+    const target = new Date(utc + offsetHours * 3600 * 1000);
+    return target.toLocaleTimeString();
+  };
+
+  useEffect(() => {
+    const update = () =>
+      setCurrentTime(formatTimeForLongitude(viewState.longitude));
+    update();
+    const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [viewState.longitude]);
 
   const handleViewStateChange = (newViewState: ViewState) => {
     setViewState(newViewState);
@@ -219,34 +163,12 @@ export function MilAssistLayout() {
             />
           </div>
 
-          {/* Command input area with military styling */}
-          <div className="p-4 border-t border-tactical border-primary/30 bg-background/90 backdrop-blur-sm">
-            <form action={formAction} className="space-y-2">
-              <div className="flex items-center justify-between mb-2">
-                <Label
-                  htmlFor="command"
-                  className="text-sm font-display uppercase tracking-wide text-primary"
-                >
-                  TACTICAL COMMAND INPUT
-                </Label>
-                <Badge
-                  variant="outline"
-                  className="font-mono text-xs border-primary/30"
-                >
-                  <Radio className="h-3 w-3 mr-1 animate-tactical-pulse" />
-                  SECURE CHANNEL
-                </Badge>
-              </div>
-              <CommandInput action={formAction} />
-
-              <div className="text-xs text-muted-foreground font-mono mt-1">
-                Example:{" "}
-                <span className="text-primary/80">
-                  "Place an infantry platoon at grid 31TDF0826973541"
-                </span>
-              </div>
-            </form>
+          {/* Keep inline command input on larger screens if desired */}
+          <div className="hidden lg:block">
+            <CommandInputPanel formAction={formAction} />
           </div>
+          {/* Floating command button + sheet for mobile and quick access */}
+          <FloatingCommand formAction={formAction} />
         </div>
       </div>
 

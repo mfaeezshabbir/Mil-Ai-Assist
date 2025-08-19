@@ -35,6 +35,8 @@
     --tactical-blue: 210 70% 40%;
     --tactical-amber: 45 100% 50%;
     --tactical-green: 120 70% 40%;
+
+    --radius: 0.375rem;
   }
 
   /* Custom scrollbar for military look */
