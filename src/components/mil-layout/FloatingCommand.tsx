@@ -5,7 +5,13 @@ import { Brain, X } from "lucide-react";
 import CommandInputPanel from "@/components/mil-layout/CommandInput";
 import { Button } from "../ui/button";
 
-const FloatingCommand = ({ formAction }: { formAction: any }) => {
+const FloatingCommand = ({
+  formAction,
+  inline = false,
+}: {
+  formAction: any;
+  inline?: boolean;
+}) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -18,11 +24,13 @@ const FloatingCommand = ({ formAction }: { formAction: any }) => {
 
   return (
     <>
-      {/* Floating button - hidden on large screens */}
+      {/* Floating / inline button */}
       <div
         aria-label={open ? "Close command input" : "Open command input"}
         className={
-          "fixed bottom-48 right-3 border-2 border-primary h-10 w-10 lg:hidden rounded-lg bg-gradient-to-br from-accent to-primary text-white shadow-2xl flex items-center justify-center transform transition-transform duration-200 p-[2px]"
+          inline
+            ? "inline-flex items-center gap-2 rounded-md px-3 py-2 bg-gradient-to-br from-accent to-primary text-white shadow-md cursor-pointer"
+            : "border-2 border-primary h-10 w-10 lg:hidden rounded-lg bg-gradient-to-br from-accent to-primary text-white shadow-2xl flex items-center justify-center transform transition-transform duration-200 p-[2px]"
         }
         onClick={() => setOpen((s) => !s)}
       >

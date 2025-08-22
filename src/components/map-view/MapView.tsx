@@ -125,6 +125,7 @@ const MapView = forwardRef<MapRef, MapViewProps>(
               mapRef={mapRefInternal}
               symbolSize={symbolSize}
               onSymbolSizeChange={onSymbolSizeChange}
+              symbols={symbols}
             />
 
             {features && onFeaturesChange && (
