@@ -57,12 +57,6 @@ export function SymbolListSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="shrink-0">
-          <List className="h-4 w-4" />
-          <span className="sr-only">View All Symbols ({symbols.length})</span>
-        </Button>
-      </SheetTrigger>
       <SheetContent className="w-[400px] sm:w-[540px] flex flex-col p-0">
         <SheetHeader className="p-6 pb-4">
           <SheetTitle>Symbols on Map</SheetTitle>
