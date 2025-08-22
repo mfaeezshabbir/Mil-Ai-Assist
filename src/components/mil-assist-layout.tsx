@@ -12,7 +12,7 @@ import MapOverlay from "@/components/mil-layout/MapOverlay";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
 import CommandInputPanel from "@/components/mil-layout/CommandInput";
-import FloatingCommand from "@/components/mil-layout/FloatingCommand";
+// import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 
 const initialState: { feature: any; error: string | null } = {
   feature: null,
@@ -168,7 +168,7 @@ export function MilAssistLayout() {
             <CommandInputPanel formAction={formAction} />
           </div>
           {/* Floating command button + sheet for mobile and quick access */}
-          <FloatingCommand formAction={formAction} />
+          {/* <FloatingCommand formAction={formAction} /> */}
         </div>
       </div>
 
