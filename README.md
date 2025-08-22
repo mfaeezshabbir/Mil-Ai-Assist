@@ -1,45 +1,72 @@
 # MilAIAssist: AI-Powered Mission Planner
 
-MilAIAssist is a web-based mission planning assistant that leverages generative AI to interpret natural language commands and generate standard military symbology on an interactive map. This tool is designed to accelerate the planning cycle by allowing operators to quickly visualize the operational picture.
+[![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-20232a?logo=react&logoColor=61dafb)](https://react.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Mapbox](https://img.shields.io/badge/Mapbox-000000?logo=mapbox&logoColor=white)](https://mapbox.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Features
+**MilAIAssist** is a web-based mission planning assistant that uses **Generative AI** to interpret natural language commands and generate **MIL-STD-2525D-compliant military symbology** on an interactive map.  
+It accelerates planning by transforming plain English inputs into **visual operational pictures**.
 
-- **Natural Language Commands**: Describe units, their status, and locations in plain English (e.g., "Friendly infantry company 'Raptors' at 33.72, 73.09"). The AI extracts the necessary metadata to create a compliant symbol.
-- **Live Situational Awareness**: The interface displays real-time information including current time, exact coordinates of the map center, and map scale.
-- **Multiple Map Styles**: Choose between tactical (dark), satellite, terrain, and street map views depending on mission requirements.
-- **Interactive Map**: Powered by Mapbox, the map allows for intuitive placement and adjustment of units. Users can double-click to set coordinates and drag-and-drop symbols to new locations. Multiple map styles are available including Tactical (dark), Satellite, Terrain, and Streets.
-- **MIL-STD-2525D Compliant Symbols**: Symbols are generated using the `milsymbol` library, ensuring they conform to military standards for symbology.
-- **Detailed Symbol Editor**: A comprehensive editor allows users to fine-tune every aspect of a symbol, from its identity and status to specific function IDs and modifiers, with dynamic dropdowns showing only valid options.
-- **Symbol Management**: A slide-out panel lists all symbols currently on the map, with controls to quickly locate, edit, or delete them.
-- **Modern Tech Stack**: Built with Next.js, React, ShadCN UI, Tailwind CSS, and Genkit for AI functionality.
+---
 
-## Getting Started
+## 📑 Table of Contents
 
-The application is composed of two main parts:
+- [Features](#-features)
+- [Getting Started](#-getting-started)
+  - [Environment Setup](#environment-setup)
+- [How It Works](#-how-it-works)
+- [Tech Stack](#-tech-stack)
+- [Recent Improvements](#-recent-improvements)
+- [Planner Overview](#-planner-overview)
+- [Developer Setup](#-developer-setup)
+- [Quick Test](#-quick-test-command-flow)
+- [Next Improvements](#-next-improvements)
 
-1.  **Landing Page (`/`)**: An introduction to the application and its features.
-2.  **Planner (`/planner`)**: The main mission planning interface.
+---
 
-To start using the planner, navigate to the `/planner` route.
+## 🚀 Features
+
+- **Natural Language Commands** – Generate units, locations, and statuses from plain text.
+- **Live Situational Awareness** – Real-time clock, coordinates, and map scale.
+- **Multiple Map Styles** – Tactical (dark), Satellite, Terrain, and Streets.
+- **Interactive Map (Mapbox-powered)** – Double-click to place units, drag-and-drop to reposition.
+- **MIL-STD-2525D Symbology** – Powered by [`milsymbol`](https://github.com/spatialillusions/milsymbol).
+- **Advanced Symbol Editor** – Customize identity, status, and modifiers with valid-only options.
+- **Symbol Management** – Slide-out panel for locating, editing, or deleting symbols.
+- **Modern Tech Stack** – Built with Next.js, React, Tailwind, ShadCN UI, and Genkit AI.
+
+---
+
+## 🛠 Getting Started
+
+The app has two main modules:
+
+1. **Landing Page (`/`)** – Overview and introduction.
+2. **Planner (`/planner`)** – Core mission planning interface.
 
 ### Environment Setup
 
-To enable the interactive map, you need a Mapbox access token.
+1. Create a free [Mapbox account](https://www.mapbox.com).
+2. Retrieve your **access token**.
+3. Add it to `.env.local`:
 
-1.  Create a free account at [mapbox.com](https://www.mapbox.com).
-2.  Find your access token on your account page.
-3.  Create a `.env.local` file in the root of the project.
-4.  Add your token to the file:
+   ```bash
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
+   ```
 
-    ```
-    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
-    ```
+---
 
-## How It Works
+## ⚙️ How It Works
 
-The application uses Genkit to define an AI flow that processes natural language commands. A Zod schema defines the expected output, which the AI uses as a function-calling tool to extract structured data. This data is then used to generate a Symbol Identification Code (SIDC) and render the corresponding symbol on the map.
+- **Genkit AI Flow** – Processes natural language inputs.
+- **Zod Schema** – Validates and structures AI output.
+- **SIDC Generation** – Produces a Symbol Identification Code to render compliant symbology on the map.
 
-## Tech Stack
+---
+
+## 🧩 Tech Stack
 
 ```js
 [
@@ -54,3 +81,74 @@ The application uses Genkit to define an AI flow that processes natural language
   "Zod",
 ];
 ```
+
+---
+
+## 📌 Recent Improvements
+
+- **Responsive Design** – Mobile-first enhancements for planner and landing pages.
+- **Refactored Components** – Modularized (`PlannerHeader`, `MapOverlay`, `CommandInput`, etc.).
+- **Command Input Fixes** – Unified form handling and new `FloatingCommand` (inline or floating modes).
+- **Controls Consolidation** – Geocoder, Symbol Sizer, and Command Trigger unified into a single compact column.
+- **Map Enhancements** – Full-container rendering and center-based time approximation.
+- **Documentation** – Added Security Policy and User Manual.
+
+---
+
+## 🔎 Planner Overview
+
+- **MapView** – Renders Mapbox map, overlays, and symbols.
+- **Controls** – Unified floating column (Geocoder, SymbolSizer, FloatingCommand).
+- **CommandInputPanel** – Submits prompts via server actions.
+- **SymbolEditor / SymbolListSheet** – Edit and manage placed symbols.
+
+---
+
+## 👨‍💻 Developer Setup
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Add environment variables:
+
+   ```bash
+   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
+   ```
+
+3. Run locally:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Type-check after edits:
+
+   ```bash
+   npm run typecheck
+   ```
+
+---
+
+## 🧪 Quick Test (Command Flow)
+
+1. Open `/planner`.
+2. Use inline input (desktop) or footer button (mobile).
+3. Try sample commands:
+   - `Friendly infantry company 'Raptors' at 33.72, 73.09`
+   - `Draw an air corridor for an F-16 from Lahore to Delhi`
+4. Submit – AI parses – Symbol appears on the map.
+
+---
+
+## 🔮 Next Improvements
+
+- ✅ Replace longitude-based clock with **IANA timezone lookup** (`tz-lookup`).
+- ✅ Add **Playwright E2E tests** for mission workflows.
+- ✅ Add **micro-animations** for smoother UX.
+
+---
+
+✨ **MilAIAssist empowers planners with faster, AI-driven situational visualization—transforming natural language into operational clarity.**
