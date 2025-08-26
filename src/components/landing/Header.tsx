@@ -1,13 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { Shield, ArrowRight, Menu } from "lucide-react";
+import { Shield, ArrowRight, Menu, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import SysLogo from "../Logo";
 
 export default function LandingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { data: session, status } = useSession();
+
+  const handleSignOut = () => {
+    signOut();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-tactical border-primary/50 bg-background/95 backdrop-blur-sm shadow-tactical">
@@ -36,17 +50,64 @@ export default function LandingHeader() {
           >
             MISSION PLANNER
           </Link>
-          <Button
-            asChild
-            size="sm"
-            variant="secondary"
-            className="font-mono tracking-wide"
-          >
-            <Link href="/planner">
-              LAUNCH TACTICAL VIEW
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+
+          {session ? (
+            <div className="flex items-center gap-3">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    <span className="font-mono text-xs">
+                      {session.user?.name}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="font-mono text-xs">
+                    {session.user?.email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="cursor-pointer"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                asChild
+                size="sm"
+                variant="secondary"
+                className="font-mono tracking-wide"
+              >
+                <Link href="/planner">
+                  LAUNCH TACTICAL VIEW
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="font-mono tracking-wide"
+              >
+                <Link href="/auth/signin">
+                  <Shield className="mr-2 h-4 w-4" />
+                  AUTHENTICATE
+                </Link>
+              </Button>
+            </div>
+          )}
         </nav>
         {/* Mobile menu button */}
         <button
@@ -69,18 +130,51 @@ export default function LandingHeader() {
             >
               MISSION PLANNER
             </Link>
-            <Button
-              asChild
-              size="sm"
-              variant="secondary"
-              className="font-mono tracking-wide w-full"
-              onClick={() => setMenuOpen(false)}
-            >
-              <Link href="/planner">
-                LAUNCH TACTICAL VIEW
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+
+            {session ? (
+              <>
+                <div className="text-xs font-mono text-muted-foreground py-1">
+                  {session.user?.name} ({session.user?.email})
+                </div>
+                <Button
+                  asChild
+                  size="sm"
+                  variant="secondary"
+                  className="font-mono tracking-wide w-full"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Link href="/planner">
+                    LAUNCH TACTICAL VIEW
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  onClick={() => {
+                    handleSignOut();
+                    setMenuOpen(false);
+                  }}
+                  size="sm"
+                  variant="outline"
+                  className="font-mono tracking-wide w-full"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  SIGN OUT
+                </Button>
+              </>
+            ) : (
+              <Button
+                asChild
+                size="sm"
+                variant="outline"
+                className="font-mono tracking-wide w-full"
+                onClick={() => setMenuOpen(false)}
+              >
+                <Link href="/auth/signin">
+                  <Shield className="mr-2 h-4 w-4" />
+                  AUTHENTICATE
+                </Link>
+              </Button>
+            )}
           </nav>
         </div>
       )}
