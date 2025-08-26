@@ -123,14 +123,6 @@ const MapView = forwardRef<MapRef, MapViewProps>(
             doubleClickZoom={false}
             style={{ position: "relative", width: "100%", height: "100%" }}
           >
-            <Controls
-              mapRef={mapRefInternal}
-              symbolSize={symbolSize}
-              onSymbolSizeChange={onSymbolSizeChange}
-              symbols={symbols}
-              onAddSymbol={onAddSymbol}
-            />
-
             {features && onFeaturesChange && (
               <DrawControl
                 position="top-right"
@@ -190,6 +182,15 @@ const MapView = forwardRef<MapRef, MapViewProps>(
             <div className="w-full h-full bg-tactical-grid opacity-10"></div>
           </div>
         </div>
+
+        {/* Controls outside map so they render even if map fails */}
+        <Controls
+          mapRef={mapRefInternal}
+          symbolSize={symbolSize}
+          onSymbolSizeChange={onSymbolSizeChange}
+          symbols={symbols}
+          onAddSymbol={onAddSymbol}
+        />
       </div>
     );
   }

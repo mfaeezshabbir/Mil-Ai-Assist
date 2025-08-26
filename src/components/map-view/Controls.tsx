@@ -1,11 +1,6 @@
 "use client";
 
 import React from "react";
-import {
-  NavigationControl,
-  GeolocateControl,
-  FullscreenControl,
-} from "react-map-gl";
 import { Geocoder } from "@/components/geocoder";
 import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 import type { MapRef } from "react-map-gl";
@@ -35,26 +30,6 @@ export default function Controls({
 
   return (
     <>
-      <NavigationControl
-        showCompass
-        showZoom
-        visualizePitch
-        position="bottom-right"
-      />
-      <FullscreenControl position="bottom-right" />
-
-      <GeolocateControl
-        positionOptions={{ enableHighAccuracy: true }}
-        trackUserLocation
-        position="bottom-right"
-        style={{
-          color: "white",
-          backgroundColor: "#528F3D",
-          borderRadius: "4px",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
-      />
-
       <div className="fixed right-3 top-20 flex flex-col gap-2">
         {/* Add Symbol Button */}
         <Button
