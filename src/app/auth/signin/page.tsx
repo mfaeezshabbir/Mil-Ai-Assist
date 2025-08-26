@@ -118,14 +118,6 @@ export default function SignInPage() {
                 {loading ? "AUTHENTICATING..." : "AUTHENTICATE"}
               </Button>
             </form>
-
-            <div className="mt-6 pt-4 border-t border-tactical">
-              <div className="text-xs text-muted-foreground font-mono space-y-1">
-                <p>Demo Credentials:</p>
-                <p>Admin: admin / admin123</p>
-                <p>Operator: operator / operator123</p>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
