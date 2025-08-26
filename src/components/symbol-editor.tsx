@@ -52,6 +52,9 @@ export type SymbolEditorProps = {
   onUpdate?: (symbol: SymbolData) => void;
   onSave: (symbol: SymbolData) => void;
   onDelete: (symbolId: string) => void;
+  // For creating new symbols
+  createMode?: boolean;
+  defaultCoordinates?: { lng: number; lat: number };
 };
 
 const contexts = Object.keys(sidcEnumMapping.context).map((key) =>
@@ -74,6 +77,27 @@ const symbolSets = Object.keys(sidcEnumMapping.symbolSet).map((key) => ({
   ],
 }));
 
+// Organize symbol sets by category for better UX
+const symbolSetCategories = {
+  "Mapping & Control": [
+    "Control Measure",
+    "Land Installation",
+    "Activities",
+    "Land Civilian",
+  ],
+  "Military Units": ["Land Unit", "Land Equipment", "Dismounted Individual"],
+  "Air & Space": ["Air", "Air Missile", "Space", "Space Missile"],
+  Naval: ["Sea Surface", "Subsurface", "Sea Mine"],
+  Intelligence: [
+    "Sigint Air",
+    "Sigint Land",
+    "Sigint Space",
+    "Sigint Surface",
+    "Sigint Subsurface",
+    "Cyberspace",
+  ],
+};
+
 function normalize(str: string | undefined): string {
   if (!str) return "";
   return str.replace(/\s+/g, "_").toUpperCase();
@@ -85,12 +109,38 @@ export function SymbolEditor({
   onOpenChange,
   onSave,
   onDelete,
+  createMode = false,
+  defaultCoordinates,
 }: SymbolEditorProps) {
-  const [editedSymbol, setEditedSymbol] = useState<SymbolData | null>(symbol);
+  // Create default symbol for create mode
+  const createDefaultSymbol = (): SymbolData => ({
+    id: `sym-${Date.now()}`,
+    displayType: "sidc",
+    context: "Reality",
+    symbolStandardIdentity: "Friend",
+    status: "Present",
+    hqtfd: "Not Applicable",
+    symbolSet: "Control Measure", // Default to mapping elements
+    mainIconId: "000000",
+    modifier1: "00",
+    modifier2: "00",
+    symbolEchelon: "Company",
+    latitude: defaultCoordinates?.lat || 33.72,
+    longitude: defaultCoordinates?.lng || 73.09,
+    aiLabel: "New Symbol",
+  });
+
+  const [editedSymbol, setEditedSymbol] = useState<SymbolData | null>(
+    createMode && !symbol ? createDefaultSymbol() : symbol
+  );
 
   useEffect(() => {
-    setEditedSymbol(symbol);
-  }, [symbol]);
+    if (createMode && !symbol) {
+      setEditedSymbol(createDefaultSymbol());
+    } else {
+      setEditedSymbol(symbol);
+    }
+  }, [symbol, createMode, defaultCoordinates]);
 
   if (!editedSymbol) return null;
 
@@ -241,10 +291,13 @@ export function SymbolEditor({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl bg-background/80 backdrop-blur-md">
         <DialogHeader>
-          <DialogTitle>Symbol Editor</DialogTitle>
+          <DialogTitle>
+            {createMode ? "Create New Symbol" : "Symbol Editor"}
+          </DialogTitle>
           <DialogDescription>
-            Modify the symbol's properties and see a live preview. Click save
-            when you're done.
+            {createMode
+              ? "Configure your new symbol's properties and place it on the map."
+              : "Modify the symbol's properties and see a live preview. Click save when you're done."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-6 p-1">
@@ -328,11 +381,46 @@ export function SymbolEditor({
                         </SelectTrigger>
                         <SelectContent>
                           <ScrollArea className="h-72">
-                            {symbolSets.map((item) => (
-                              <SelectItem key={item.code} value={item.name}>
-                                {item.name}
-                              </SelectItem>
-                            ))}
+                            {Object.entries(symbolSetCategories).map(
+                              ([category, sets]) => (
+                                <div key={category}>
+                                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground bg-muted/50 sticky top-0">
+                                    {category}
+                                  </div>
+                                  {sets.map((setName) => {
+                                    const setData = symbolSets.find(
+                                      (s) => s.name === setName
+                                    );
+                                    return setData ? (
+                                      <SelectItem
+                                        key={setData.code}
+                                        value={setData.name}
+                                      >
+                                        {setData.name}
+                                      </SelectItem>
+                                    ) : null;
+                                  })}
+                                </div>
+                              )
+                            )}
+                            {/* Remaining sets not in categories */}
+                            <div>
+                              <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground bg-muted/50 sticky top-0">
+                                Other
+                              </div>
+                              {symbolSets
+                                .filter(
+                                  (set) =>
+                                    !Object.values(symbolSetCategories)
+                                      .flat()
+                                      .includes(set.name)
+                                )
+                                .map((item) => (
+                                  <SelectItem key={item.code} value={item.name}>
+                                    {item.name}
+                                  </SelectItem>
+                                ))}
+                            </div>
                           </ScrollArea>
                         </SelectContent>
                       </Select>
@@ -425,14 +513,16 @@ export function SymbolEditor({
           </div>
         </div>
         <DialogFooter className="flex justify-between">
-          <Button
-            onClick={handleDelete}
-            variant="destructive"
-            className="font-mono tracking-wide"
-          >
-            DELETE SYMBOL
-          </Button>
-          <div className="flex gap-2">
+          {!createMode && (
+            <Button
+              onClick={handleDelete}
+              variant="destructive"
+              className="font-mono tracking-wide"
+            >
+              DELETE SYMBOL
+            </Button>
+          )}
+          <div className={`flex gap-2 ${createMode ? "ml-auto" : ""}`}>
             <Button
               onClick={onOpenChange.bind(null, false)}
               variant="outline"
@@ -445,7 +535,7 @@ export function SymbolEditor({
               variant="tactical"
               className="font-mono tracking-wide"
             >
-              SAVE CHANGES
+              {createMode ? "CREATE SYMBOL" : "SAVE CHANGES"}
             </Button>
           </div>
         </DialogFooter>

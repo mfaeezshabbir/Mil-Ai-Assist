@@ -11,6 +11,8 @@ import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
+import { Button } from "@/components/ui/button";
+import { MapPin } from "lucide-react";
 
 type ControlsProps = {
   mapRef: React.RefObject<MapRef>;
@@ -18,6 +20,7 @@ type ControlsProps = {
   onSymbolSizeChange?: (s: "small" | "medium" | "large" | "xxl") => void;
   symbols?: SymbolData[];
   formAction?: any;
+  onAddSymbol?: () => void;
 };
 
 export default function Controls({
@@ -26,6 +29,7 @@ export default function Controls({
   onSymbolSizeChange,
   symbols,
   formAction,
+  onAddSymbol,
 }: ControlsProps) {
   const [showSymbolSize, setShowSymbolSize] = React.useState(false);
 
@@ -52,6 +56,17 @@ export default function Controls({
       />
 
       <div className="fixed right-3 top-20 flex flex-col gap-2">
+        {/* Add Symbol Button */}
+        <Button
+          onClick={onAddSymbol}
+          size="sm"
+          variant="outline"
+          className="bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10 text-foreground"
+          title="Add Symbol"
+        >
+          <MapPin className="h-4 w-4" />
+        </Button>
+
         {symbols && symbols.length > 0 && (
           <SymbolSizer
             symbolSize={symbolSize}

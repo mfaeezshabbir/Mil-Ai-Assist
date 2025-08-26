@@ -28,6 +28,7 @@ export type MapViewProps = {
   onViewStateChange?: (viewState: ViewState) => void;
   symbolSize?: "small" | "medium" | "large" | "xxl";
   onSymbolSizeChange?: (size: "small" | "medium" | "large" | "xxl") => void;
+  onAddSymbol?: () => void;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -59,6 +60,7 @@ const MapView = forwardRef<MapRef, MapViewProps>(
       onViewStateChange,
       symbolSize = "medium",
       onSymbolSizeChange,
+      onAddSymbol,
     },
     ref
   ) => {
@@ -126,6 +128,7 @@ const MapView = forwardRef<MapRef, MapViewProps>(
               symbolSize={symbolSize}
               onSymbolSizeChange={onSymbolSizeChange}
               symbols={symbols}
+              onAddSymbol={onAddSymbol}
             />
 
             {features && onFeaturesChange && (
