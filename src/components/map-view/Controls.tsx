@@ -7,7 +7,7 @@ import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
 import { Button } from "@/components/ui/button";
-import { MapPin } from "lucide-react";
+import { MapPlus } from "lucide-react";
 
 type ControlsProps = {
   mapRef: React.RefObject<MapRef>;
@@ -39,7 +39,7 @@ export default function Controls({
           className="bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10 text-foreground"
           title="Add Symbol"
         >
-          <MapPin className="h-4 w-4" />
+          <MapPlus className="h-4 w-4" />
         </Button>
 
         {symbols && symbols.length > 0 && (
