@@ -43,20 +43,24 @@ export default function LandingHeader() {
         </div>
         {/* Desktop nav */}
         <nav className="ml-auto items-center gap-4 hidden md:flex">
-          <Link
-            href="/planner"
-            className="text-sm font-medium tracking-wide hover:text-primary transition-colors"
-            prefetch={false}
-          >
-            MISSION PLANNER
-          </Link>
-
           {session ? (
             <div className="flex items-center gap-3">
+              <Button
+                asChild
+                size="sm"
+                variant="secondary"
+                className="font-mono tracking-wide"
+              >
+                <Link href="/planner">
+                  LAUNCH TACTICAL VIEW
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     className="flex items-center gap-2"
                   >
@@ -80,25 +84,13 @@ export default function LandingHeader() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-
-              <Button
-                asChild
-                size="sm"
-                variant="secondary"
-                className="font-mono tracking-wide"
-              >
-                <Link href="/planner">
-                  LAUNCH TACTICAL VIEW
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <Button
                 asChild
                 size="sm"
-                variant="outline"
+                variant="secondary"
                 className="font-mono tracking-wide"
               >
                 <Link href="/auth/signin">
@@ -120,21 +112,12 @@ export default function LandingHeader() {
       </div>
       {/* Mobile nav */}
       {menuOpen && (
-        <div className="md:hidden bg-background border-t border-tactical shadow-tactical">
+        <div className="md:hidden bg-background border-t border-tactical z-50 relative">
           <nav className="flex flex-col gap-2 px-4 py-2">
-            <Link
-              href="/planner"
-              className="text-sm font-medium tracking-wide hover:text-primary transition-colors py-2"
-              prefetch={false}
-              onClick={() => setMenuOpen(false)}
-            >
-              MISSION PLANNER
-            </Link>
-
             {session ? (
               <>
                 <div className="text-xs font-mono text-muted-foreground py-1">
-                  {session.user?.name} ({session.user?.email})
+                  {session.user?.name}
                 </div>
                 <Button
                   asChild
@@ -165,8 +148,7 @@ export default function LandingHeader() {
               <Button
                 asChild
                 size="sm"
-                variant="outline"
-                className="font-mono tracking-wide w-full"
+                variant="secondary"
                 onClick={() => setMenuOpen(false)}
               >
                 <Link href="/auth/signin">
