@@ -24,13 +24,13 @@ const FloatingCommand = ({
 
   return (
     <>
-      {/* Floating / inline button */}
       <div
         aria-label={open ? "Close command input" : "Open command input"}
         className={
-          inline
+          (inline
             ? "inline-flex items-center gap-2 rounded-md p-2 bg-gradient-to-br from-accent to-primary text-white shadow-md cursor-pointer"
-            : "border-2 border-primary h-10 w-10 rounded-lg bg-gradient-to-br from-accent to-primary text-white shadow-2xl flex items-center justify-center transform transition-transform duration-200 p-[2px]"
+            : "border-2 border-primary h-10 w-10 rounded-lg bg-gradient-to-br from-accent to-primary text-white shadow-2xl flex items-center justify-center transform transition-transform duration-200 p-[2px]") +
+          " lg:hidden"
         }
         onClick={() => setOpen((s) => !s)}
       >
