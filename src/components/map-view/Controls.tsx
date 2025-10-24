@@ -8,6 +8,7 @@ import {
 } from "react-map-gl";
 import { Geocoder } from "@/components/geocoder";
 import FloatingCommand from "@/components/mil-layout/FloatingCommand";
+import { AddSymbolDialog } from "@/components/add-symbol-dialog";
 import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
@@ -18,6 +19,8 @@ type ControlsProps = {
   onSymbolSizeChange?: (s: "small" | "medium" | "large" | "xxl") => void;
   symbols?: SymbolData[];
   formAction?: any;
+  onAddSymbol?: (symbol: SymbolData) => void;
+  mapCenter?: { latitude: number; longitude: number };
 };
 
 export default function Controls({
@@ -26,6 +29,8 @@ export default function Controls({
   onSymbolSizeChange,
   symbols,
   formAction,
+  onAddSymbol,
+  mapCenter,
 }: ControlsProps) {
   const [showSymbolSize, setShowSymbolSize] = React.useState(false);
 
@@ -62,6 +67,13 @@ export default function Controls({
           mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!}
           mapRef={mapRef}
         />
+
+        {onAddSymbol && (
+          <AddSymbolDialog
+            onAddSymbol={onAddSymbol}
+            defaultPosition={mapCenter}
+          />
+        )}
 
         <FloatingCommand inline formAction={formAction} />
       </div>

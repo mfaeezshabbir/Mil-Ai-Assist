@@ -50,8 +50,15 @@ export async function getMapFeatureFromCommand(
     if (extractedFeature.type === "symbol") {
       // Build a GeoJSON-like point feature for the map and return SIDC metadata separately
       const { latitude, longitude, ...meta } = extractedFeature.data as any;
-      if (typeof latitude !== "number" || typeof longitude !== "number") {
-        throw new Error("Symbol data missing coordinates.");
+      if (
+        typeof latitude !== "number" ||
+        typeof longitude !== "number" ||
+        latitude === 0 ||
+        longitude === 0
+      ) {
+        throw new Error(
+          "Could not determine coordinates. Please specify a location in your command (e.g., 'at Lahore' or provide coordinates like '33.72, 73.09')."
+        );
       }
 
       const geoFeature = {
