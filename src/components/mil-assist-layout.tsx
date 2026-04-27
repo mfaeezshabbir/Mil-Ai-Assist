@@ -31,6 +31,10 @@ export function MilAssistLayout() {
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
+  const [createMode, setCreateMode] = useState(false);
+  const [defaultCoordinates, setDefaultCoordinates] = useState<
+    { lng: number; lat: number } | undefined
+  >();
   const [currentMapStyle, setCurrentMapStyle] = useState<string>(
     MAP_STYLES.TACTICAL
   );
@@ -130,6 +134,42 @@ export function MilAssistLayout() {
     }
   }, [state, toast]);
 
+  // Handle adding symbol via button click
+  const handleAddSymbol = () => {
+    setActiveSymbol(null);
+    setCreateMode(true);
+    setDefaultCoordinates(undefined); // Will use map center
+    setEditSheetOpen(true);
+  };
+
+  // Handle adding symbol via double-click
+  const handleMapDoubleClick = (coords: { lng: number; lat: number }) => {
+    setActiveSymbol(null);
+    setCreateMode(true);
+    setDefaultCoordinates(coords);
+    setEditSheetOpen(true);
+  };
+
+  // Handle symbol editor save with creation
+  const handleSymbolSave = (symbol: SymbolData) => {
+    if (createMode) {
+      setSymbols((prev) => [...prev, symbol]);
+      toast({
+        title: "Symbol Created",
+        description: `Created symbol${symbol.aiLabel ? ` for ${symbol.aiLabel}` : ""}`,
+      });
+    } else {
+      setSymbols((prev) => prev.map((s) => (s.id === symbol.id ? symbol : s)));
+      toast({
+        title: "Symbol Updated",
+        description: `Updated symbol${symbol.aiLabel ? ` for ${symbol.aiLabel}` : ""}`,
+      });
+    }
+    setCreateMode(false);
+    setDefaultCoordinates(undefined);
+    setEditSheetOpen(false);
+  };
+
   return (
     <div className="flex flex-col h-dvh bg-tactical-grid bg-[size:20px_20px]">
       <PlannerHeader
@@ -154,8 +194,11 @@ export function MilAssistLayout() {
               symbols={symbols}
               onSymbolClick={(symbol: SymbolData) => {
                 setActiveSymbol(symbol);
+                setCreateMode(false);
                 setEditSheetOpen(true);
               }}
+              onMapDoubleClick={handleMapDoubleClick}
+              onAddSymbol={handleAddSymbol}
               mapStyle={currentMapStyle}
               onViewStateChange={handleViewStateChange}
               symbolSize={symbolSize}
@@ -175,21 +218,22 @@ export function MilAssistLayout() {
       {/* Symbol editing interface */}
       <SymbolEditor
         open={editSheetOpen}
-        onOpenChange={setEditSheetOpen}
-        symbol={activeSymbol}
-        onSave={(updatedSymbol) => {
-          setSymbols((prev) =>
-            prev.map((s) => (s.id === updatedSymbol.id ? updatedSymbol : s))
-          );
-          setEditSheetOpen(false);
-          toast({
-            title: "Symbol Updated",
-            description: `Updated symbol${updatedSymbol.aiLabel ? ` for ${updatedSymbol.aiLabel}` : ""}`,
-          });
+        onOpenChange={(open) => {
+          setEditSheetOpen(open);
+          if (!open) {
+            setCreateMode(false);
+            setDefaultCoordinates(undefined);
+          }
         }}
+        symbol={activeSymbol}
+        createMode={createMode}
+        defaultCoordinates={defaultCoordinates}
+        onSave={handleSymbolSave}
         onDelete={(symbolId) => {
           setSymbols((prev) => prev.filter((s) => s.id !== symbolId));
           setEditSheetOpen(false);
+          setCreateMode(false);
+          setDefaultCoordinates(undefined);
           toast({
             title: "Symbol Removed",
             description: "Symbol has been removed from the map",

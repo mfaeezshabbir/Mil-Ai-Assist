@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Crosshair, Send, Loader2, Radio } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
 function CommandInput({ action }: { action: any }) {
   const { pending } = useFormStatus();
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    // Only run in the browser
+    if (typeof window === "undefined") return;
+    if (pending) return;
+
+    const mq = window.matchMedia("(min-width: 640px)");
+    const isSmOrUp = mq.matches;
+    const el = isSmOrUp ? inputRef.current : textareaRef.current;
+    if (el) el.focus();
+  }, [pending]);
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 bg-card/80 rounded-lg shadow-lg px-3 sm:px-4 py-2 sm:py-3 border border-primary/20 w-full">
@@ -19,20 +32,20 @@ function CommandInput({ action }: { action: any }) {
       {/* Show textarea on mobile, input on sm+ screens */}
       <Textarea
         name="command"
+        ref={textareaRef}
         className="block sm:hidden flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base resize rounded-md min-h-[44px] max-h-32"
         placeholder="Enter tactical command..."
         disabled={pending}
         required
-        autoFocus
         rows={5}
       />
       <Input
         name="command"
+        ref={inputRef}
         className="hidden sm:block flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base"
         placeholder="Enter tactical command..."
         disabled={pending}
         required
-        autoFocus
       />
       <Button
         type="submit"
