@@ -16,6 +16,7 @@ export async function geocode(
 ): Promise<GeocodeResult | null> {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
   if (!accessToken) {
+    // eslint-disable-next-line no-console
     console.error("Mapbox access token is not configured.");
     return null;
   }
@@ -35,6 +36,7 @@ export async function geocode(
 
     return null;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error("Error fetching geocoding data:", error);
     return null;
   }

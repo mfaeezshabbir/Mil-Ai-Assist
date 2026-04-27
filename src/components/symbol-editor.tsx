@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { SymbolData } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,14 +30,10 @@ import { ScrollArea } from "./ui/scroll-area";
 import { toTitleCase } from "@/lib/utils";
 import {
   sidcEnumMapping,
-  symbolSetData,
   getFunctionIdName,
   amplifierData,
   getEmtOptionsForSymbolSet,
   getSymbolSetData,
-  getMainIconOptions,
-  getModifier1Options,
-  getModifier2Options,
 } from "@/lib/sidc-mappings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MilitarySymbol } from "./military-symbol";
@@ -113,22 +109,25 @@ export function SymbolEditor({
   defaultCoordinates,
 }: SymbolEditorProps) {
   // Create default symbol for create mode
-  const createDefaultSymbol = (): SymbolData => ({
-    id: `sym-${Date.now()}`,
-    displayType: "sidc",
-    context: "Reality",
-    symbolStandardIdentity: "Friend",
-    status: "Present",
-    hqtfd: "Not Applicable",
-    symbolSet: "Control Measure", // Default to mapping elements
-    mainIconId: "000000",
-    modifier1: "00",
-    modifier2: "00",
-    symbolEchelon: "Company",
-    latitude: defaultCoordinates?.lat || 33.72,
-    longitude: defaultCoordinates?.lng || 73.09,
-    aiLabel: "New Symbol",
-  });
+  const createDefaultSymbol = React.useCallback(
+    (): SymbolData => ({
+      id: `sym-${Date.now()}`,
+      displayType: "sidc",
+      context: "Reality",
+      symbolStandardIdentity: "Friend",
+      status: "Present",
+      hqtfd: "Not Applicable",
+      symbolSet: "Control Measure", // Default to mapping elements
+      mainIconId: "000000",
+      modifier1: "00",
+      modifier2: "00",
+      symbolEchelon: "Company",
+      latitude: defaultCoordinates?.lat || 33.72,
+      longitude: defaultCoordinates?.lng || 73.09,
+      aiLabel: "New Symbol",
+    }),
+    [defaultCoordinates]
+  );
 
   const [editedSymbol, setEditedSymbol] = useState<SymbolData | null>(
     createMode && !symbol ? createDefaultSymbol() : symbol
@@ -140,7 +139,7 @@ export function SymbolEditor({
     } else {
       setEditedSymbol(symbol);
     }
-  }, [symbol, createMode, defaultCoordinates]);
+  }, [symbol, createMode, defaultCoordinates, createDefaultSymbol]);
 
   if (!editedSymbol) return null;
 
@@ -154,7 +153,10 @@ export function SymbolEditor({
   const allAmplifiers = amplifierData; // Show all amplifiers regardless of symbol set
   const currentEmtOptions = getEmtOptionsForSymbolSet(currentSetCode);
 
-  const handleChange = (field: keyof SymbolData, value: any) => {
+  const handleChange = (
+    field: keyof SymbolData,
+    value: string | number | undefined
+  ) => {
     const newSymbol = { ...editedSymbol, [field]: value };
 
     if (field === "symbolSet") {

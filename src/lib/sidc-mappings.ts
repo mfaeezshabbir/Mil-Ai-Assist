@@ -3,6 +3,21 @@
 import { toTitleCase } from "./utils";
 import MS from "milsymbol";
 
+interface MSSymbol {
+  validIcon: boolean;
+  metadata?: {
+    affiliation?: string;
+    context?: string;
+    dimension?: string;
+    echelon?: string;
+    headquarters?: boolean;
+    taskForce?: boolean;
+    activity?: boolean;
+    civilian?: boolean;
+    condition?: string;
+  };
+}
+
 // Enhanced SIDC utilities using milsymbol for validation and metadata
 export class SIDCValidator {
   /**
@@ -10,7 +25,7 @@ export class SIDCValidator {
    */
   static validate(sidc: string): boolean {
     try {
-      const symbol = new MS.Symbol(sidc, { size: 35 }) as any;
+      const symbol = new MS.Symbol(sidc, { size: 35 }) as unknown as MSSymbol;
       return symbol.validIcon || false;
     } catch {
       return false;
@@ -22,7 +37,7 @@ export class SIDCValidator {
    */
   static getMetadata(sidc: string) {
     try {
-      const symbol = new MS.Symbol(sidc, { size: 35 }) as any;
+      const symbol = new MS.Symbol(sidc, { size: 35 }) as unknown as MSSymbol;
       return {
         affiliation: symbol.metadata?.affiliation || "Unknown",
         context: symbol.metadata?.context || "Unknown",
