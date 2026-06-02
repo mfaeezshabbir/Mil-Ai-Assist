@@ -203,6 +203,13 @@ export function MilAssistLayout() {
               onViewStateChange={handleViewStateChange}
               symbolSize={symbolSize}
               onSymbolSizeChange={setSymbolSize}
+              onAddSymbol={(symbol: SymbolData) => {
+                setSymbols((prev) => [...prev, symbol]);
+                toast({
+                  title: "Symbol Added",
+                  description: `Added symbol${symbol.aiLabel ? ` for ${symbol.aiLabel}` : ""} manually`,
+                });
+              }}
             />
           </div>
 

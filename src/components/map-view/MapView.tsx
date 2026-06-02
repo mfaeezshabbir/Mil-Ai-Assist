@@ -28,6 +28,7 @@ export type MapViewProps = {
   onViewStateChange?: (viewState: ViewState) => void;
   symbolSize?: "small" | "medium" | "large" | "xxl";
   onSymbolSizeChange?: (size: "small" | "medium" | "large" | "xxl") => void;
+  onAddSymbol?: (symbol: SymbolData) => void;
   onAddSymbol?: () => void;
 };
 
@@ -123,6 +124,18 @@ const MapView = forwardRef<MapRef, MapViewProps>(
             doubleClickZoom={false}
             style={{ position: "relative", width: "100%", height: "100%" }}
           >
+            <Controls
+              mapRef={mapRefInternal}
+              symbolSize={symbolSize}
+              onSymbolSizeChange={onSymbolSizeChange}
+              symbols={symbols}
+              onAddSymbol={onAddSymbol}
+              mapCenter={{
+                latitude: viewState.latitude,
+                longitude: viewState.longitude,
+              }}
+            />
+
             {features && onFeaturesChange && (
               <DrawControl
                 position="top-right"

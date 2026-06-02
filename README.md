@@ -28,7 +28,8 @@ It accelerates planning by transforming plain English inputs into **visual opera
 
 ## 🚀 Features
 
-- **Natural Language Commands** – Generate units, locations, and statuses from plain text.
+- **Natural Language Commands** – Generate units, locations, and statuses from plain text (requires GEMINI_API_KEY).
+- **Manual Symbol Addition** – Add symbols manually using the "+" button without AI.
 - **Live Situational Awareness** – Real-time clock, coordinates, and map scale.
 - **Multiple Map Styles** – Tactical (dark), Satellite, Terrain, and Streets.
 - **Interactive Map (Mapbox-powered)** – Double-click to place units, drag-and-drop to reposition.
@@ -48,13 +49,22 @@ The app has two main modules:
 
 ### Environment Setup
 
-1. Create a free [Mapbox account](https://www.mapbox.com).
-2. Retrieve your **access token**.
-3. Add it to `.env.local`:
+1. **Mapbox Setup** (Required for maps):
+   - Create a free [Mapbox account](https://www.mapbox.com).
+   - Retrieve your **access token**.
+
+2. **Google Gemini Setup** (Required for AI features):
+   - Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+   - This enables natural language command processing.
+
+3. Add both tokens to `.env.local`:
 
    ```bash
    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
+
+   **Note**: If you don't configure `GEMINI_API_KEY`, AI features will use a fallback parser with limited functionality. You can still add symbols manually using the "+" button on the map.
 
 ---
 
@@ -112,10 +122,11 @@ The app has two main modules:
    npm install
    ```
 
-2. Add environment variables:
+2. Add environment variables (see [Environment Setup](#environment-setup)):
 
    ```bash
    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
 3. Run locally:
