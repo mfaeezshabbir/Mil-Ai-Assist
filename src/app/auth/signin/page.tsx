@@ -37,8 +37,32 @@ export default function SignInPage() {
         await getSession();
         router.push("/planner");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSkip = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      // Auto-login with admin credentials in dev
+      const result = await signIn("credentials", {
+        username: "admin",
+        password: "admin123",
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Dev skip failed. Please check your credentials config.");
+      } else {
+        await getSession();
+        router.push("/planner");
+      }
+    } catch {
+      setError("An error occurred during skip.");
     } finally {
       setLoading(false);
     }
@@ -110,13 +134,27 @@ export default function SignInPage() {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full font-mono tracking-wide"
-              >
-                {loading ? "AUTHENTICATING..." : "AUTHENTICATE"}
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full font-mono tracking-wide"
+                >
+                  {loading ? "AUTHENTICATING..." : "AUTHENTICATE"}
+                </Button>
+
+                {process.env.NODE_ENV === "development" && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleSkip}
+                    disabled={loading}
+                    className="w-full font-mono tracking-wide border-primary/20 text-primary/60 hover:text-primary"
+                  >
+                    SKIP AUTH (DEV ONLY)
+                  </Button>
+                )}
+              </div>
             </form>
           </CardContent>
         </Card>

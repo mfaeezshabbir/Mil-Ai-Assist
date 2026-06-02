@@ -91,12 +91,27 @@ export function generateSIDC(symbol: SymbolData): string {
   return final;
 }
 
+interface MSSymbol {
+  validIcon: boolean;
+  metadata?: {
+    affiliation?: string;
+    context?: string;
+    dimension?: string;
+    echelon?: string;
+    headquarters?: boolean;
+    taskForce?: boolean;
+    activity?: boolean;
+    civilian?: boolean;
+    condition?: string;
+  };
+}
+
 /**
  * Validate a SIDC using milsymbol library
  */
 export function validateSIDC(sidc: string): boolean {
   try {
-    const symbol = new MS.Symbol(sidc, { size: 35 }) as any;
+    const symbol = new MS.Symbol(sidc, { size: 35 }) as unknown as MSSymbol;
     return symbol.validIcon || false;
   } catch {
     return false;
@@ -119,7 +134,7 @@ export function buildAndValidateSIDC(symbol: SymbolData) {
  */
 export function getSIDCMetadata(sidc: string) {
   try {
-    const symbol = new MS.Symbol(sidc, { size: 35 }) as any;
+    const symbol = new MS.Symbol(sidc, { size: 35 }) as unknown as MSSymbol;
     return {
       affiliation: symbol.metadata?.affiliation || "Unknown",
       context: symbol.metadata?.context || "Unknown",

@@ -1,17 +1,14 @@
 "use client";
 
 import React from "react";
-import {
-  NavigationControl,
-  GeolocateControl,
-  FullscreenControl,
-} from "react-map-gl";
 import { Geocoder } from "@/components/geocoder";
 import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 import { AddSymbolDialog } from "@/components/add-symbol-dialog";
 import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
+import { Button } from "@/components/ui/button";
+import { MapPlus } from "lucide-react";
 
 type ControlsProps = {
   mapRef: React.RefObject<MapRef>;
@@ -21,6 +18,7 @@ type ControlsProps = {
   formAction?: any;
   onAddSymbol?: (symbol: SymbolData) => void;
   mapCenter?: { latitude: number; longitude: number };
+  onAddSymbol?: () => void;
 };
 
 export default function Controls({
@@ -36,27 +34,18 @@ export default function Controls({
 
   return (
     <>
-      <NavigationControl
-        showCompass
-        showZoom
-        visualizePitch
-        position="bottom-right"
-      />
-      <FullscreenControl position="bottom-right" />
-
-      <GeolocateControl
-        positionOptions={{ enableHighAccuracy: true }}
-        trackUserLocation
-        position="bottom-right"
-        style={{
-          color: "white",
-          backgroundColor: "#528F3D",
-          borderRadius: "4px",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-        }}
-      />
-
       <div className="fixed right-3 top-20 flex flex-col gap-2">
+        {/* Add Symbol Button */}
+        <Button
+          onClick={onAddSymbol}
+          size="sm"
+          variant="outline"
+          className="bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10 text-foreground"
+          title="Add Symbol"
+        >
+          <MapPlus className="h-4 w-4" />
+        </Button>
+
         {symbols && symbols.length > 0 && (
           <SymbolSizer
             symbolSize={symbolSize}
