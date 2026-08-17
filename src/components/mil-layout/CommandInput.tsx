@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Send, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
 import { Textarea } from "../ui/textarea";
@@ -26,7 +26,7 @@ function CommandInput() {
         name="command"
         ref={textareaRef}
         className="flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-sm resize-none min-h-9 max-h-9 p-0 placeholder:text-muted-foreground/70"
-        placeholder="Move Raptors to Kabul"
+        placeholder="Move infantry to the airfield"
         disabled={pending}
         required
         rows={1}
@@ -46,7 +46,6 @@ function CommandInput() {
         ) : (
           <>
             TRANSMIT
-            <Send className="h-4 w-4" />
           </>
         )}
       </Button>
@@ -56,21 +55,21 @@ function CommandInput() {
 
 const CommandInputPanel = ({
   formAction,
+  compact = false,
 }: {
   formAction?: CommandFormAction;
+  compact?: boolean;
 }) => {
   return (
-    <div className="hud-scan hud-panel border-x-0 border-b-0 px-4 py-3">
+    <div className={compact ? "" : "hud-scan hud-panel border-x-0 border-b-0 px-4 py-3"}>
       <form action={formAction}>
-        <div className="hidden md:flex items-center justify-between mb-2">
-          <div className="font-mono text-[10px] tracking-[0.28em] text-primary uppercase">
-            Orders uplink
+        {!compact && (
+          <div className="hidden md:flex items-center justify-between mb-2">
+            <div className="font-mono text-[10px] tracking-[0.28em] text-primary uppercase">
+              Orders uplink
+            </div>
           </div>
-          <div className="flex items-center gap-2 font-mono text-[10px] tracking-widest text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-tactical-pulse" />
-            CHANNEL LIVE
-          </div>
-        </div>
+        )}
         <CommandInput />
       </form>
     </div>

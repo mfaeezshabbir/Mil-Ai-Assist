@@ -2,19 +2,16 @@
 
 import React from "react";
 import { Geocoder } from "@/components/geocoder";
-import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
 import { MapPlus } from "lucide-react";
-import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 
 type ControlsProps = {
   mapRef: React.RefObject<MapRef | null>;
   symbolSize?: "small" | "medium" | "large" | "xxl";
   onSymbolSizeChange?: (s: "small" | "medium" | "large" | "xxl") => void;
   symbols?: SymbolData[];
-  formAction?: CommandFormAction;
   onOpenCreateEditor?: () => void;
 };
 
@@ -23,7 +20,6 @@ export default function Controls({
   symbolSize,
   onSymbolSizeChange,
   symbols,
-  formAction,
   onOpenCreateEditor,
 }: ControlsProps) {
   return (
@@ -47,8 +43,6 @@ export default function Controls({
         mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? ""}
         mapRef={mapRef}
       />
-
-      <FloatingCommand inline formAction={formAction} />
     </div>
   );
 }

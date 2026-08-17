@@ -9,6 +9,19 @@ import { isCombatUnit, unitLabel, withSimDefaults } from "./units";
 
 export type CombatLogEntry = string;
 
+const NOTE_LABEL: Record<string, string> = {
+  C2: "HQ bonus",
+  OOS: "no supply",
+  overrun: "armor vs infantry",
+  AT: "anti-tank",
+  ADA: "vs helicopter",
+  SAM: "under air defence",
+  CAS: "air strike",
+  raid: "SOF raid",
+  spotted: "recon spotted",
+  depot: "vs depot",
+};
+
 function clampStrength(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
@@ -22,7 +35,7 @@ function shotDamage(attacker: SymbolData, defender: SymbolData, units: SymbolDat
   const raw = profile.attack * 5.2 - def * 0.85;
   return {
     damage: Math.max(4, Math.round(raw)),
-    notes: profile.notes,
+    notes: profile.notes.map((note) => NOTE_LABEL[note] ?? note),
   };
 }
 
@@ -50,13 +63,16 @@ export function resolveCombat(
   const next = units.map(withSimDefaults);
   const log: CombatLogEntry[] = [];
   const incoming = new Map<string, number>();
+  const hpBefore = new Map(
+    next.map((unit) => [unit.id, unit.strength ?? 100] as const)
+  );
 
   const fire = (attacker: SymbolData, defender: SymbolData) => {
     const { damage, notes } = shotDamage(attacker, defender, next);
     incoming.set(defender.id, (incoming.get(defender.id) ?? 0) + damage);
-    const tag = notes.length ? ` [${notes.join("+")}]` : "";
+    const tag = notes.length ? ` (${notes.join(", ")})` : "";
     log.push(
-      `${unitLabel(attacker)} fires on ${unitLabel(defender)} for ${damage}${tag}`
+      `${unitLabel(attacker)} hit ${unitLabel(defender)} for ${damage} dmg${tag}`
     );
   };
 
@@ -89,7 +105,14 @@ export function resolveCombat(
         unit.pieceKind === "fob" ||
         unit.pieceKind === "supply";
       if (!destroyable) return true;
-      if ((unit.strength ?? 0) > 0) return true;
+      const hit = incoming.get(unit.id);
+      if ((unit.strength ?? 0) > 0) {
+        if (hit) {
+          const was = hpBefore.get(unit.id) ?? 100;
+          log.push(`${unitLabel(unit)} now at ${unit.strength} HP (was ${was})`);
+        }
+        return true;
+      }
       log.push(`${unitLabel(unit)} destroyed`);
       return false;
     });

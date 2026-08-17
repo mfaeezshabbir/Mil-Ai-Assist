@@ -12,7 +12,6 @@ import Map, { Layer, Source } from "react-map-gl";
 import type { RouteData, SymbolData } from "@/types";
 import Controls from "./Controls";
 import Markers from "./Markers";
-import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 import { circlePolygon } from "@/lib/sim/geo";
 import { BOARD } from "@/lib/sim/catalog";
 import { isCombatUnit } from "@/lib/sim/units";
@@ -34,7 +33,6 @@ export type MapViewProps = {
   symbolSize?: "small" | "medium" | "large" | "xxl";
   onSymbolSizeChange?: (size: "small" | "medium" | "large" | "xxl") => void;
   onOpenCreateEditor?: () => void;
-  formAction?: CommandFormAction;
 };
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -73,7 +71,6 @@ const MapView = forwardRef<MapRef, MapViewProps>(
       symbolSize = "medium",
       onSymbolSizeChange,
       onOpenCreateEditor,
-      formAction,
     },
     ref
   ) => {
@@ -320,7 +317,6 @@ const MapView = forwardRef<MapRef, MapViewProps>(
           onSymbolSizeChange={onSymbolSizeChange}
           symbols={symbols}
           onOpenCreateEditor={onOpenCreateEditor}
-          formAction={formAction}
         />
       </div>
     );

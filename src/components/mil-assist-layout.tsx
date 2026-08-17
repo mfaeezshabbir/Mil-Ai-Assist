@@ -13,14 +13,23 @@ import type { ForceSide, RouteData, SymbolData } from "@/types";
 import { MapView, MAP_STYLES } from "@/components/map-view";
 import PlannerHeader from "@/components/mil-layout/PlannerHeader";
 import MapOverlay from "@/components/mil-layout/MapOverlay";
+import GameActionBar, {
+  type OrderMode,
+} from "@/components/mil-layout/GameActionBar";
+import BattleTutorial from "@/components/mil-layout/BattleTutorial";
+import TurnReport, {
+  type TurnReportData,
+} from "@/components/mil-layout/TurnReport";
+import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 import WargameTray from "@/components/wargame-tray";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
-import CommandInputPanel from "@/components/mil-layout/CommandInput";
 import { findFunctionId } from "@/lib/sidc-mappings";
 import {
   loadPlannerState,
   savePlannerState,
+  hasCompletedTutorial,
+  markTutorialComplete,
 } from "@/lib/planner-storage";
 import { resolveTurn } from "@/lib/sim/turn";
 import {
@@ -94,6 +103,8 @@ export function MilAssistLayout() {
   const [routes, setRoutes] = useState<RouteData[]>([]);
   const [turn, setTurn] = useState(1);
   const [hydrated, setHydrated] = useState(false);
+  const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [turnReport, setTurnReport] = useState<TurnReportData | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
@@ -107,6 +118,8 @@ export function MilAssistLayout() {
     { lng: number; lat: number } | undefined
   >();
   const [pickingLocation, setPickingLocation] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [orderMode, setOrderMode] = useState<OrderMode>(null);
   const [currentMapStyle, setCurrentMapStyle] = useState<string>(
     MAP_STYLES.TACTICAL
   );
@@ -131,10 +144,14 @@ export function MilAssistLayout() {
   const deployIdRef = useRef(deployId);
   const deploySideRef = useRef(deploySide);
   const pickingLocationRef = useRef(false);
+  const orderModeRef = useRef<OrderMode>(null);
+  const tutorialOpenRef = useRef(false);
   symbolsRef.current = symbols;
   selectedIdRef.current = selectedId;
   deployIdRef.current = deployId;
   deploySideRef.current = deploySide;
+  orderModeRef.current = orderMode;
+  tutorialOpenRef.current = tutorialOpen;
   const { toast } = useToast();
   const [state, formAction] = useActionState(
     getMapFeatureFromCommand,
@@ -182,6 +199,27 @@ export function MilAssistLayout() {
     });
   };
 
+  const holdSelected = () => {
+    const id = selectedIdRef.current;
+    if (!id) return;
+    setSymbols((prev) =>
+      prev.map((unit) =>
+        unit.id === id ? { ...unit, order: undefined } : unit
+      )
+    );
+    setOrderMode("hold");
+    toast({
+      title: "Holding",
+      description: "Unit will stay and fight in place",
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedId(null);
+    setOrderMode(null);
+    setDeployId(null);
+  };
+
   useEffect(() => {
     const snapshot = loadPlannerState();
     if (snapshot) {
@@ -190,6 +228,7 @@ export function MilAssistLayout() {
       setTurn(snapshot.turn);
     }
     setHydrated(true);
+    if (!hasCompletedTutorial()) setTutorialOpen(true);
   }, []);
 
   useEffect(() => {
@@ -214,11 +253,43 @@ export function MilAssistLayout() {
     const canvas = mapRef.current?.getMap()?.getCanvas();
     if (!canvas) return;
     const previous = canvas.style.cursor;
-    canvas.style.cursor = pickingLocation ? "crosshair" : previous;
+    canvas.style.cursor = pickingLocation || orderMode === "move" ? "crosshair" : previous;
     return () => {
       canvas.style.cursor = previous;
     };
-  }, [pickingLocation]);
+  }, [pickingLocation, orderMode]);
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const typing =
+        event.target instanceof HTMLElement &&
+        ["INPUT", "TEXTAREA"].includes(event.target.tagName);
+      if (
+        !typing &&
+        (event.key === "?" || (event.key === "/" && event.shiftKey))
+      ) {
+        setTutorialOpen(true);
+        return;
+      }
+      if (event.key !== "Escape") return;
+      if (tutorialOpenRef.current) {
+        markTutorialComplete();
+        setTutorialOpen(false);
+        return;
+      }
+      if (pickingLocationRef.current) {
+        cancelLocationPick();
+        return;
+      }
+      if (orderModeRef.current === "move") {
+        setOrderMode(null);
+        return;
+      }
+      clearSelection();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   const handleViewStateChange = (newViewState: ViewState) => {
     setViewState(newViewState);
@@ -406,6 +477,14 @@ export function MilAssistLayout() {
       return;
     }
     if (!selectedId) return;
+    if (orderModeRef.current !== "move") {
+      if (mapClickTimer.current) {
+        clearTimeout(mapClickTimer.current);
+        mapClickTimer.current = null;
+      }
+      clearSelection();
+      return;
+    }
     if (mapClickTimer.current) clearTimeout(mapClickTimer.current);
     mapClickTimer.current = setTimeout(() => {
       mapClickTimer.current = null;
@@ -415,6 +494,7 @@ export function MilAssistLayout() {
       const id = selectedIdRef.current;
       if (!id || !unit || !isCombatUnit(unit)) return;
       assignMoveOrder(id, { lat: coords.lat, lng: coords.lng }, unitLabel(unit));
+      setOrderMode(null);
     }, 280);
   };
 
@@ -424,10 +504,15 @@ export function MilAssistLayout() {
       return;
     }
     ignoreMapClickUntil.current = Date.now() + 300;
+    if (selectedIdRef.current === symbol.id) {
+      clearSelection();
+      return;
+    }
     setDeployId(null);
     setSelectedId(symbol.id);
     setCreateMode(false);
     setEditSheetOpen(false);
+    setOrderMode(null);
   };
 
   const handleSymbolSave = (symbol: SymbolData) => {
@@ -467,22 +552,28 @@ export function MilAssistLayout() {
   };
 
   const handleResolveTurn = () => {
+    const before = countForces(symbols);
     const result = resolveTurn(symbols);
+    const after = countForces(result.units);
     setSymbols(result.units);
     setTurn((prev) => prev + 1);
     const summary = result.log[result.log.length - 1] ?? "No contact this turn";
     setLastCombatLine(summary);
-    setAar(result.log.slice(-4));
+    setAar(result.log.slice(-6));
+    setTurnReport({
+      turn,
+      friendBefore: before.friend,
+      friendAfter: after.friend,
+      hostileBefore: before.hostile,
+      hostileAfter: after.hostile,
+      destroyed: result.log
+        .filter((line) => line.toLowerCase().includes("destroyed"))
+        .map((line) => line.replace(/\s+destroyed$/i, "")),
+      lines: result.log,
+    });
     if (selectedId && !result.units.some((unit) => unit.id === selectedId)) {
       setSelectedId(null);
     }
-    toast({
-      title: `Turn resolved`,
-      description:
-        result.log.length > 0
-          ? result.log.slice(0, 2).join(" · ")
-          : "Forces moved. No engagement.",
-    });
     if (result.victor === "friend") {
       toast({
         title:
@@ -504,6 +595,31 @@ export function MilAssistLayout() {
     }
   };
 
+  const loadSampleBattle = () => {
+    const pieces = sampleBattle();
+    setSymbols(pieces);
+    setTurn(1);
+    setSelectedId(null);
+    setOrderMode(null);
+    setDeployId(null);
+    setLastCombatLine(null);
+    setAar([]);
+    setTurnReport(null);
+    mapRef.current?.flyTo({
+      center: [73.09, 33.71],
+      zoom: 10.4,
+    });
+    toast({
+      title: "Sample battle loaded",
+      description: "Two forces, two objectives, mines and a FOB",
+    });
+  };
+
+  const closeTutorial = () => {
+    markTutorialComplete();
+    setTutorialOpen(false);
+  };
+
   return (
     <div className="flex flex-col h-dvh bg-background bg-tactical-grid bg-[size:24px_24px]">
       <PlannerHeader
@@ -516,7 +632,7 @@ export function MilAssistLayout() {
         objTotal={objectives.total}
         onChangeMapStyle={(s) => setCurrentMapStyle(s)}
         onOpenList={() => setListSheetOpen(true)}
-        onResolveTurn={handleResolveTurn}
+        onOpenHelp={() => setTutorialOpen(true)}
       />
 
       <div className="flex flex-1 min-h-0 overflow-hidden p-2 pt-0">
@@ -536,7 +652,6 @@ export function MilAssistLayout() {
               onViewStateChange={handleViewStateChange}
               symbolSize={symbolSize}
               onSymbolSizeChange={setSymbolSize}
-              formAction={formAction}
             />
 
             <WargameTray
@@ -544,44 +659,57 @@ export function MilAssistLayout() {
               deploySide={deploySide}
               onDeployId={setDeployId}
               onDeploySide={setDeploySide}
-              onLoadSample={() => {
-                const pieces = sampleBattle();
-                setSymbols(pieces);
-                setTurn(1);
-                setSelectedId(null);
-                setDeployId(null);
-                setLastCombatLine(null);
-                setAar([]);
-                mapRef.current?.flyTo({
-                  center: [73.09, 33.71],
-                  zoom: 10.4,
-                });
-                toast({
-                  title: "Sample battle loaded",
-                  description: "Two forces, two objectives, mines and a FOB",
-                });
-              }}
+              onLoadSample={loadSampleBattle}
             />
 
             <MapOverlay
               viewState={viewState}
               formatCoordinate={formatCoordinate}
               formatScale={formatScale}
-              selectedUnit={selectedUnit}
-              units={symbols}
-              lastCombatLine={lastCombatLine}
-              aar={aar}
+              lastCombatLine={turnReport ? null : lastCombatLine}
+              aar={turnReport ? [] : aar}
               placing={!!deployId}
               pickingLocation={pickingLocation}
+              moving={orderMode === "move" && !!selectedUnit && isCombatUnit(selectedUnit)}
               onCancelPick={cancelLocationPick}
+              onCancelMove={() => setOrderMode(null)}
             />
-          </div>
 
-          <div className="hidden lg:block">
-            <CommandInputPanel formAction={formAction} />
+            <TurnReport
+              report={turnReport}
+              onClose={() => setTurnReport(null)}
+            />
+
+            <GameActionBar
+              selectedUnit={selectedUnit}
+              turn={turn}
+              queuedMoves={symbols.filter((unit) => unit.order?.type === "move").length}
+              orderMode={orderMode}
+              onOrderMode={(mode) =>
+                setOrderMode((current) => (current === mode ? null : mode))
+              }
+              onHold={holdSelected}
+              onClear={clearSelection}
+              onEdit={() => {
+                if (!selectedUnit) return;
+                setActiveSymbol(selectedUnit);
+                setCreateMode(false);
+                setEditSheetOpen(true);
+              }}
+              onOpenAi={() => setAiOpen(true)}
+              onEndTurn={handleResolveTurn}
+              forceLine={`Blue ${forces.friend} · Red ${forces.hostile}`}
+            />
           </div>
         </div>
       </div>
+
+      <FloatingCommand
+        formAction={formAction}
+        open={aiOpen}
+        onOpenChange={setAiOpen}
+        hideTrigger
+      />
 
       <SymbolEditor
         open={editSheetOpen}
@@ -631,6 +759,12 @@ export function MilAssistLayout() {
             zoom: 14,
           });
         }}
+      />
+
+      <BattleTutorial
+        open={tutorialOpen}
+        onClose={closeTutorial}
+        onLoadSample={loadSampleBattle}
       />
     </div>
   );

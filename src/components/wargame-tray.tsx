@@ -51,9 +51,9 @@ export default function WargameTray({
   const board = CATALOG.filter((entry) => entry.group === "board");
 
   return (
-    <div className="absolute left-3 top-24 z-20 pointer-events-auto w-[11.5rem] hud-panel p-2 max-h-[calc(100%-7rem)] overflow-y-auto">
+    <div className="absolute left-3 top-3 z-20 pointer-events-auto w-[11.5rem] hud-panel p-2 max-h-[calc(100%-8.5rem)] overflow-y-auto">
       <div className="font-mono text-[10px] tracking-[0.22em] text-primary uppercase mb-2">
-        Pieces
+        Deploy
       </div>
       <div className="grid grid-cols-2 gap-1 mb-2">
         <button

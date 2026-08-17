@@ -2,6 +2,7 @@ import type { RouteData, SymbolData, UnitOrder } from "@/types";
 import { withSimDefaults } from "@/lib/sim/units";
 
 const STORAGE_KEY = "milaiassist.sim.v1";
+const TUTORIAL_KEY = "milaiassist.tutorial.v1";
 
 export type PlannerSnapshot = {
   symbols: SymbolData[];
@@ -66,6 +67,24 @@ export function savePlannerState(snapshot: PlannerSnapshot): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  } catch {
+    // Ignore quota / private-mode failures.
+  }
+}
+
+export function hasCompletedTutorial(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    return window.localStorage.getItem(TUTORIAL_KEY) === "done";
+  } catch {
+    return true;
+  }
+}
+
+export function markTutorialComplete(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(TUTORIAL_KEY, "done");
   } catch {
     // Ignore quota / private-mode failures.
   }

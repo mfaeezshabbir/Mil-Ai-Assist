@@ -7,12 +7,21 @@ import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 
 const FloatingCommand = ({
   formAction,
-  inline = false,
+  open: openProp,
+  onOpenChange,
+  hideTrigger = false,
 }: {
   formAction?: CommandFormAction;
-  inline?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  hideTrigger?: boolean;
 }) => {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = openProp ?? internalOpen;
+  const setOpen = (next: boolean) => {
+    onOpenChange?.(next);
+    if (openProp === undefined) setInternalOpen(next);
+  };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -24,31 +33,34 @@ const FloatingCommand = ({
 
   return (
     <>
-      <button
-        type="button"
-        aria-label={open ? "Close command input" : "Open command input"}
-        className={`hud-rail-btn lg:hidden ${inline ? "" : ""}`}
-        onClick={() => setOpen((s) => !s)}
-      >
-        {open ? <X className="h-4 w-4" /> : <Radio className="h-4 w-4" />}
-      </button>
+      {!hideTrigger && (
+        <button
+          type="button"
+          aria-label={open ? "Close command input" : "Open command input"}
+          className="hud-rail-btn"
+          onClick={() => setOpen(!open)}
+        >
+          {open ? <X className="h-4 w-4" /> : <Radio className="h-4 w-4" />}
+        </button>
+      )}
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center lg:items-center">
+        <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div
-            className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70"
             onClick={() => setOpen(false)}
             aria-hidden
           />
-
-          <div className="relative w-full max-w-md mx-4 mb-6 lg:mb-0">
+          <div className="relative w-full max-w-lg mx-4 mb-6 sm:mb-0">
             <div className="hud-panel overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-primary/20">
-                <div className="flex items-center gap-3">
-                  <div className="h-1.5 w-1.5 bg-primary animate-tactical-pulse" />
-                  <h3 className="text-xs font-mono uppercase tracking-[0.22em] text-primary">
-                    Orders uplink
-                  </h3>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-primary/20">
+                <div>
+                  <div className="font-display text-sm tracking-[0.16em] uppercase text-primary">
+                    AI orders
+                  </div>
+                  <div className="font-mono text-[10px] tracking-widest text-muted-foreground uppercase">
+                    Optional command · not required to play
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -59,9 +71,8 @@ const FloatingCommand = ({
                   <X className="h-5 w-5" />
                 </button>
               </div>
-
-              <div className="p-2">
-                <CommandInputPanel formAction={formAction} />
+              <div className="p-3">
+                <CommandInputPanel formAction={formAction} compact />
               </div>
             </div>
           </div>
