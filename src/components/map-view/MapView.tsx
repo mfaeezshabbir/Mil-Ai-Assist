@@ -17,7 +17,9 @@ import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 export type MapViewProps = {
   symbols: SymbolData[];
   routes?: RouteData[];
+  selectedSymbolId?: string | null;
   onMapDoubleClick?: (coords: { lng: number; lat: number }) => void;
+  onMapClick?: (coords: { lng: number; lat: number }) => void;
   onSymbolClick: (symbol: SymbolData) => void;
   onSymbolDragEnd?: (
     symbolId: string,
@@ -57,7 +59,9 @@ const MapView = forwardRef<MapRef, MapViewProps>(
     {
       symbols,
       routes = [],
+      selectedSymbolId,
       onMapDoubleClick,
+      onMapClick,
       onSymbolClick,
       onSymbolDragEnd,
       mapStyle = MAP_STYLES.TACTICAL,
@@ -86,6 +90,15 @@ const MapView = forwardRef<MapRef, MapViewProps>(
         }) as unknown as MapRef
     );
 
+    const handleMapClick = (event: {
+      lngLat: { lng: number; lat: number };
+    }) => {
+      onMapClick?.({
+        lng: event.lngLat.lng,
+        lat: event.lngLat.lat,
+      });
+    };
+
     const handleMapDoubleClick = (event: {
       lngLat: { lng: number; lat: number };
     }) => {
@@ -93,6 +106,23 @@ const MapView = forwardRef<MapRef, MapViewProps>(
         lng: event.lngLat.lng,
         lat: event.lngLat.lat,
       });
+    };
+
+    const orderCollection = {
+      type: "FeatureCollection" as const,
+      features: symbols
+        .filter((unit) => unit.order?.type === "move")
+        .map((unit) => ({
+          type: "Feature" as const,
+          properties: { id: unit.id },
+          geometry: {
+            type: "LineString" as const,
+            coordinates: [
+              [unit.longitude, unit.latitude],
+              [unit.order!.destLng, unit.order!.destLat],
+            ],
+          },
+        })),
     };
 
     const handleMove = useCallback(
@@ -132,6 +162,7 @@ const MapView = forwardRef<MapRef, MapViewProps>(
             onMove={handleMove}
             mapStyle={mapStyle}
             mapboxAccessToken={MAPBOX_TOKEN}
+            onClick={handleMapClick}
             onDblClick={handleMapDoubleClick}
             attributionControl={false}
             doubleClickZoom={false}
@@ -151,8 +182,24 @@ const MapView = forwardRef<MapRef, MapViewProps>(
               </Source>
             )}
 
+            {orderCollection.features.length > 0 && (
+              <Source id="queued-orders" type="geojson" data={orderCollection}>
+                <Layer
+                  id="queued-orders-line"
+                  type="line"
+                  paint={{
+                    "line-color": "#7dd3fc",
+                    "line-width": 2,
+                    "line-dasharray": [2, 2],
+                    "line-opacity": 0.95,
+                  }}
+                />
+              </Source>
+            )}
+
             <Markers
               symbols={symbols}
+              selectedSymbolId={selectedSymbolId}
               onSymbolClick={onSymbolClick}
               onSymbolDragEnd={onSymbolDragEnd}
               symbolSize={symbolSize}

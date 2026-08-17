@@ -8,6 +8,12 @@ export type RouteData = {
   unitInfo?: string;
 };
 
+export type UnitOrder = {
+  type: "move" | "hold";
+  destLng: number;
+  destLat: number;
+};
+
 export type SymbolData = Omit<
   AIMetadata,
   "symbolCategory" | "latitude" | "longitude"
@@ -25,4 +31,7 @@ export type SymbolData = Omit<
   symbolEchelon?: string;
   latitude: number;
   longitude: number;
+  strength?: number;
+  speedKmPerTurn?: number;
+  order?: UnitOrder;
 };

@@ -14,11 +14,11 @@ export default function Features() {
             CAPABILITIES
           </div>
           <h2 className="text-3xl font-display font-bold tracking-tighter uppercase md:text-4xl/tight">
-            Command and Control Capabilities
+            Army Simulator
           </h2>
           <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-            Our advanced military planning system provides comprehensive tools
-            for mission success
+            Place both sides, issue orders, and fight a simultaneous turn on a
+            live map.
           </p>
         </div>
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 py-12 md:grid-cols-3">
@@ -26,13 +26,13 @@ export default function Features() {
             <CardHeader>
               <Map className="h-10 w-10 text-primary mb-2" />
               <CardTitle className="font-display tracking-wide">
-                TERRAIN ANALYSIS
+                TERRAIN BOARD
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Advanced mapping capabilities with real-time terrain
-                visualization and analysis for optimal tactical positioning.
+                Advanced mapping with satellite, tactical, and terrain styles
+                for a shared theater of operations.
               </p>
             </CardContent>
           </Card>
@@ -41,13 +41,13 @@ export default function Features() {
             <CardHeader>
               <Radio className="h-10 w-10 text-primary mb-2" />
               <CardTitle className="font-display tracking-wide">
-                COMMS INTEGRATION
+                WEGO TURNS
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Secure communication channels with integrated messaging and
-                real-time updates across all command levels.
+                Queue moves for every unit, then resolve one simultaneous turn.
+                Contact within range becomes attrition.
               </p>
             </CardContent>
           </Card>
@@ -61,8 +61,8 @@ export default function Features() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Natural language processing converts commands to standard
-                military symbology with unprecedented speed and accuracy.
+                Natural language still deploys units and queues move orders
+                (“Move Raptors to Kabul”) without teleporting.
               </p>
             </CardContent>
           </Card>
@@ -70,7 +70,7 @@ export default function Features() {
         <div className="flex items-center justify-center">
           <Button asChild size="lg" variant="secondary" className="font-mono">
             <Link href="/planner">
-              ACCESS TACTICAL INTERFACE
+              ENTER SIMULATOR
               <span className="ml-2 inline-block">→</span>
             </Link>
           </Button>

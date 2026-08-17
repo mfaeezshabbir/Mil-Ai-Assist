@@ -1,11 +1,23 @@
-import type { RouteData, SymbolData } from "@/types";
+import type { RouteData, SymbolData, UnitOrder } from "@/types";
+import { withSimDefaults } from "@/lib/sim/units";
 
-const STORAGE_KEY = "milaiassist.planner";
+const STORAGE_KEY = "milaiassist.sim.v1";
 
 export type PlannerSnapshot = {
   symbols: SymbolData[];
   routes: RouteData[];
+  turn: number;
 };
+
+function isOrder(value: unknown): value is UnitOrder {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<UnitOrder>;
+  return (
+    (candidate.type === "move" || candidate.type === "hold") &&
+    typeof candidate.destLng === "number" &&
+    typeof candidate.destLat === "number"
+  );
+}
 
 function isSymbol(value: unknown): value is SymbolData {
   if (!value || typeof value !== "object") return false;
@@ -37,9 +49,13 @@ export function loadPlannerState(): PlannerSnapshot | null {
     const parsed = JSON.parse(raw) as Partial<PlannerSnapshot>;
     return {
       symbols: Array.isArray(parsed.symbols)
-        ? parsed.symbols.filter(isSymbol)
+        ? parsed.symbols.filter(isSymbol).map((unit) => {
+            const next = withSimDefaults(unit);
+            return isOrder(unit.order) ? { ...next, order: unit.order } : next;
+          })
         : [],
       routes: Array.isArray(parsed.routes) ? parsed.routes.filter(isRoute) : [],
+      turn: typeof parsed.turn === "number" && parsed.turn >= 1 ? parsed.turn : 1,
     };
   } catch {
     return null;

@@ -27,7 +27,7 @@ function CommandInput() {
         name="command"
         ref={textareaRef}
         className="flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base resize-y sm:resize-none rounded-md min-h-[44px] sm:min-h-[40px] sm:max-h-10"
-        placeholder="Enter tactical command..."
+        placeholder="Issue order: Move Raptors to Kabul"
         disabled={pending}
         required
         rows={1}
@@ -66,7 +66,7 @@ const CommandInputPanel = ({
           <div className="flex items-center gap-3">
             <div className="h-2 w-2 rounded-full bg-accent shadow-md" />
             <h3 className="text-sm font-display uppercase tracking-wide text-primary">
-              Tactical Command
+              Tactical Orders
             </h3>
           </div>
           <Badge

@@ -7,6 +7,7 @@ import { SYMBOL_SIZES } from "./MapView";
 
 type MarkersProps = {
   symbols: SymbolData[];
+  selectedSymbolId?: string | null;
   onSymbolClick: (s: SymbolData) => void;
   onSymbolDragEnd?: (id: string, coords: { lng: number; lat: number }) => void;
   symbolSize?: "small" | "medium" | "large" | "xxl";
@@ -14,6 +15,7 @@ type MarkersProps = {
 
 export default function Markers({
   symbols,
+  selectedSymbolId,
   onSymbolClick,
   onSymbolDragEnd,
   symbolSize = "medium",
@@ -35,8 +37,17 @@ export default function Markers({
             }
           }}
         >
-          <div onClick={() => onSymbolClick(symbol)}>
-            <PointMarker symbol={symbol} size={SYMBOL_SIZES[symbolSize]} />
+          <div
+            onClick={(event) => {
+              event.stopPropagation();
+              onSymbolClick(symbol);
+            }}
+          >
+            <PointMarker
+              symbol={symbol}
+              size={SYMBOL_SIZES[symbolSize]}
+              selected={symbol.id === selectedSymbolId}
+            />
           </div>
         </Marker>
       ))}

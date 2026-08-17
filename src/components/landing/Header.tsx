@@ -52,7 +52,7 @@ export default function LandingHeader() {
                 className="font-mono tracking-wide"
               >
                 <Link href="/planner">
-                  LAUNCH TACTICAL VIEW
+                  ENTER SIMULATOR
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -127,7 +127,7 @@ export default function LandingHeader() {
                   onClick={() => setMenuOpen(false)}
                 >
                   <Link href="/planner">
-                    LAUNCH TACTICAL VIEW
+                    ENTER SIMULATOR
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

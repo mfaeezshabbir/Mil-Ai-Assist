@@ -70,10 +70,10 @@ export default {
       },
       // Military-inspired box shadows
       boxShadow: {
-        tactical:
-          "0 0 0 1px rgba(0, 255, 0, 0.1), 0 4px 6px -1px rgba(0, 0, 0, 0.5)",
-        "tactical-glow": "0 0 5px rgba(0, 255, 0, 0.5)",
-        "tactical-inset": "inset 0 1px 3px rgba(0, 0, 0, 0.7)",
+        tactical: "0 0 0 1px hsl(186 88% 48% / 0.18), 0 8px 24px rgba(0,0,0,0.55)",
+        "tactical-glow": "0 0 18px hsl(186 88% 48% / 0.35)",
+        "tactical-inset": "inset 0 0 0 1px hsl(186 88% 48% / 0.15)",
+        amber: "0 0 16px hsl(32 94% 52% / 0.45)",
       },
       // Military-inspired animations
       keyframes: {
@@ -94,7 +94,7 @@ export default {
       // Military-inspired backgrounds
       backgroundImage: {
         "tactical-grid":
-          "linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px)",
+          "linear-gradient(hsl(186 88% 48% / 0.04) 1px, transparent 1px), linear-gradient(90deg, hsl(186 88% 48% / 0.04) 1px, transparent 1px)",
         "tactical-noise":
           "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")",
       },

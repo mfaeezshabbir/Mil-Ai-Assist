@@ -12,38 +12,38 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between max-w-screen-xl mx-auto px-4 md:px-6">
           <div className="flex items-center gap-4">
             <div className="px-3 py-1 rounded bg-primary/10 text-primary text-xs font-semibold">
-              Trusted by ops teams
+              WEGO theater sim
             </div>
             <div className="px-3 py-1 rounded bg-muted/60 text-muted-foreground text-xs">
-              MIL-STD compliant
+              MIL-STD-2525D units
             </div>
           </div>
           <div className="text-sm text-muted-foreground">
-            Real-time mapping · NLP driven · Exportable
+            Place forces · Queue orders · Resolve the turn
           </div>
         </div>
 
         <div className="grid max-w-screen-xl gap-6 px-4 mx-auto md:grid-cols-2 md:px-6">
           <div className="flex flex-col justify-center space-y-4">
             <div className="inline-flex px-4 py-1 mb-2 text-xs font-semibold tracking-widest text-primary uppercase rounded-full bg-primary/10 border border-primary/20">
-              TACTICAL DECISION SUPPORT SYSTEM
+              ARMY SIMULATOR
             </div>
             <div className="space-y-2">
               <h1 className="text-3xl font-display font-bold tracking-tighter uppercase sm:text-4xl md:text-5xl xl:text-6xl">
-                Mission Planning,
+                Command a theater.
                 <br />
-                Reimagined
+                Resolve the turn.
               </h1>
               <p className="max-w-[620px] text-muted-foreground md:text-xl">
-                Harness AI to translate natural language commands into MIL-STD
-                symbology. Plan faster, brief smarter, and maintain operational
-                security.
+                Place friendly and hostile forces on a live map, issue move
+                orders in plain language or by clicking, then resolve a
+                simultaneous WEGO turn with simple combat.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="font-mono">
                 <Link href="/planner">
-                  LAUNCH MISSION PLANNER
+                  ENTER SIMULATOR
                   <Target className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
@@ -64,9 +64,9 @@ export default function Hero() {
               <div className="relative overflow-hidden rounded-md border border-primary/50 shadow-tactical">
                 <div className="aspect-video bg-muted flex items-center justify-center">
                   <div className="text-xl text-center p-8 font-mono animate-tactical-pulse">
-                    TACTICAL VISUALIZATION
+                    THEATER VIEW
                     <div className="text-sm mt-2 text-muted-foreground">
-                      Secure Mission Planning Interface
+                      Place forces. Queue orders. Resolve.
                     </div>
                   </div>
                 </div>
@@ -84,31 +84,31 @@ export default function Hero() {
             <div className="p-4 bg-card/70 rounded border border-primary/20">
               <div className="flex items-center gap-3 mb-2">
                 <Bot className="h-6 w-6 text-primary" />
-                <h4 className="font-semibold">Tell the system</h4>
+                <h4 className="font-semibold">Deploy forces</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Enter natural language commands — describe units, locations, and
-                intent.
+                Place Friend and Hostile units with the map, the editor, or a
+                natural-language command.
               </p>
             </div>
             <div className="p-4 bg-card/70 rounded border border-primary/20">
               <div className="flex items-center gap-3 mb-2">
                 <FilePenLine className="h-6 w-6 text-primary" />
-                <h4 className="font-semibold">AI converts to symbology</h4>
+                <h4 className="font-semibold">Queue orders</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Our NLP engine maps your intent to MIL-STD symbols and places
-                them on the map.
+                Select a unit and click a destination, or type “Move Raptors to
+                Kabul”. Orders wait until you resolve.
               </p>
             </div>
             <div className="p-4 bg-card/70 rounded border border-primary/20">
               <div className="flex items-center gap-3 mb-2">
                 <Globe className="h-6 w-6 text-primary" />
-                <h4 className="font-semibold">Share & export</h4>
+                <h4 className="font-semibold">Resolve the turn</h4>
               </div>
               <p className="text-sm text-muted-foreground">
-                Export GeoJSON, snapshot imagery, or brief your team with
-                standard formats.
+                All units move at once. Opposing forces within range fight and
+                take attrition.
               </p>
             </div>
           </div>

@@ -7,9 +7,14 @@ import Image from "next/image";
 type PointMarkerProps = {
   symbol: SymbolData;
   size?: number;
+  selected?: boolean;
 };
 
-export function PointMarker({ symbol, size = 40 }: PointMarkerProps) {
+export function PointMarker({
+  symbol,
+  size = 40,
+  selected = false,
+}: PointMarkerProps) {
   // Determine size class based on size value
   const getSizeClass = (size: number) => {
     if (size <= 96) return "symbol-marker-small";
@@ -19,7 +24,11 @@ export function PointMarker({ symbol, size = 40 }: PointMarkerProps) {
   };
 
   return (
-    <div className="relative flex flex-col items-center cursor-pointer">
+    <div
+      className={`relative flex flex-col items-center cursor-pointer ${
+        selected ? "ring-2 ring-sky-400 rounded-sm" : ""
+      }`}
+    >
       {/* The icon (either SIDC or custom image) */}
       <div
         className={`absolute bottom-full mb-1 drop-shadow-lg symbol-marker-container ${getSizeClass(size)}`}
@@ -45,6 +54,11 @@ export function PointMarker({ symbol, size = 40 }: PointMarkerProps) {
 
       {/* The base point on the map */}
       <div className="w-3 h-3 bg-primary border-2 border-white rounded-full shadow-md"></div>
+      {typeof symbol.strength === "number" && (
+        <div className="mt-0.5 bg-black/70 text-white text-[10px] leading-none px-1 py-0.5 rounded">
+          {symbol.strength}
+        </div>
+      )}
     </div>
   );
 }

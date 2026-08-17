@@ -4,39 +4,37 @@
 
 @layer base {
   :root {
-    /* Military-inspired dark theme */
-    --background: 120 6% 10%; /* Dark olive-green background */
-    --foreground: 60 15% 95%; /* Off-white text for contrast */
-    --card: 120 8% 14%; /* Slightly lighter olive-green for cards */
-    --card-foreground: 60 15% 95%;
-    --popover: 120 6% 10%;
-    --popover-foreground: 60 15% 95%;
-    --primary: 105 40% 40%; /* Military green for primary actions */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 32 70% 50%; /* Military gold/tan for secondary elements */
-    --secondary-foreground: 0 0% 10%;
-    --muted: 120 5% 20%; /* Subtle olive background for muted elements */
-    --muted-foreground: 60 10% 80%;
-    --accent: 38 60% 40%; /* Khaki/tan accent */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 70% 50%; /* Keep red for destructive actions */
+    --background: 222 32% 5%;
+    --foreground: 198 20% 92%;
+    --card: 222 28% 8%;
+    --card-foreground: 198 20% 92%;
+    --popover: 222 32% 6%;
+    --popover-foreground: 198 20% 92%;
+    --primary: 186 88% 48%;
+    --primary-foreground: 222 40% 6%;
+    --secondary: 32 94% 52%;
+    --secondary-foreground: 222 40% 6%;
+    --muted: 222 18% 14%;
+    --muted-foreground: 210 12% 62%;
+    --accent: 32 94% 52%;
+    --accent-foreground: 222 40% 6%;
+    --destructive: 0 78% 52%;
     --destructive-foreground: 0 0% 100%;
-    --border: 120 8% 25%; /* Darker border color */
-    --input: 120 8% 20%;
-    --ring: 105 40% 40%;
-    --chart-1: 105 40% 40%; /* Military green */
-    --chart-2: 38 60% 40%; /* Khaki/tan */
-    --chart-3: 0 60% 50%; /* Red */
-    --chart-4: 210 70% 40%; /* Blue */
-    --chart-5: 280 40% 40%; /* Purple */
+    --border: 200 18% 18%;
+    --input: 222 22% 12%;
+    --ring: 186 88% 48%;
+    --chart-1: 186 88% 48%;
+    --chart-2: 32 94% 52%;
+    --chart-3: 0 78% 52%;
+    --chart-4: 210 70% 48%;
+    --chart-5: 280 40% 48%;
 
-    /* Added tactical colors */
-    --tactical-red: 0 70% 50%;
-    --tactical-blue: 210 70% 40%;
-    --tactical-amber: 45 100% 50%;
-    --tactical-green: 120 70% 40%;
+    --tactical-red: 0 78% 52%;
+    --tactical-blue: 186 88% 48%;
+    --tactical-amber: 32 94% 52%;
+    --tactical-green: 156 70% 42%;
 
-    --radius: 0.375rem;
+    --radius: 0px;
   }
 
   /* Custom scrollbar for military look */

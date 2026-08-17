@@ -12,8 +12,8 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 const display = Orbitron({ subsets: ["latin"], variable: "--font-display" });
 
 export const metadata: Metadata = {
-  title: "MilAIAssist - Military Planning System",
-  description: "AI-Powered Mission Planner for Military Symbology",
+  title: "MilAIAssist - Army Simulator",
+  description: "WEGO army simulator: place forces, queue orders, resolve the turn",
 };
 
 export default function RootLayout({

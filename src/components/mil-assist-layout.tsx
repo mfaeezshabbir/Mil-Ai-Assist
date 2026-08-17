@@ -21,6 +21,12 @@ import {
   loadPlannerState,
   savePlannerState,
 } from "@/lib/planner-storage";
+import { resolveTurn } from "@/lib/sim/turn";
+import {
+  countForces,
+  unitLabel,
+  withSimDefaults,
+} from "@/lib/sim/units";
 
 const initialState: ActionResult = {
   id: null,
@@ -35,6 +41,13 @@ function tzOffsetHoursFromLongitude(longitude: number) {
   return offset;
 }
 
+function findByLabel(units: SymbolData[], label?: string) {
+  if (!label) return undefined;
+  const key = label.trim().toLowerCase();
+  if (!key) return undefined;
+  return units.find((unit) => unit.aiLabel?.trim().toLowerCase() === key);
+}
+
 function symbolFromMetadata(
   metadata: SIDCMetadataOutput,
   latitude: number,
@@ -44,7 +57,7 @@ function symbolFromMetadata(
   const mainIconId =
     findFunctionId(symbolSet, metadata.symbolCategory) || "000000";
 
-  return {
+  return withSimDefaults({
     id: `sym-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     displayType: "sidc",
     aiLabel: metadata.aiLabel,
@@ -68,17 +81,20 @@ function symbolFromMetadata(
     direction: metadata.direction,
     hostile: metadata.hostile,
     commonIdentifier: metadata.commonIdentifier,
-  };
+  });
 }
 
 export function MilAssistLayout() {
   const [symbols, setSymbols] = useState<SymbolData[]>([]);
   const [routes, setRoutes] = useState<RouteData[]>([]);
+  const [turn, setTurn] = useState(1);
   const [hydrated, setHydrated] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
   const [createMode, setCreateMode] = useState(false);
+  const [lastCombatLine, setLastCombatLine] = useState<string | null>(null);
   const [defaultCoordinates, setDefaultCoordinates] = useState<
     { lng: number; lat: number } | undefined
   >();
@@ -99,25 +115,60 @@ export function MilAssistLayout() {
   });
   const mapRef = useRef<MapRef>(null);
   const lastResultId = useRef<string | null>(null);
+  const ignoreMapClickUntil = useRef(0);
+  const mapClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const symbolsRef = useRef(symbols);
+  const selectedIdRef = useRef(selectedId);
+  symbolsRef.current = symbols;
+  selectedIdRef.current = selectedId;
   const { toast } = useToast();
   const [state, formAction] = useActionState(
     getMapFeatureFromCommand,
     initialState
   );
 
+  const selectedUnit = symbols.find((unit) => unit.id === selectedId) ?? null;
+  const forces = countForces(symbols);
+
+  const assignMoveOrder = (
+    unitId: string,
+    dest: { lat: number; lng: number },
+    label?: string
+  ) => {
+    setSymbols((prev) =>
+      prev.map((unit) =>
+        unit.id === unitId
+          ? {
+              ...unit,
+              order: {
+                type: "move",
+                destLat: dest.lat,
+                destLng: dest.lng,
+              },
+            }
+          : unit
+      )
+    );
+    toast({
+      title: "Order queued",
+      description: `${label ?? "Unit"} will move next turn`,
+    });
+  };
+
   useEffect(() => {
     const snapshot = loadPlannerState();
     if (snapshot) {
       setSymbols(snapshot.symbols);
       setRoutes(snapshot.routes);
+      setTurn(snapshot.turn);
     }
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    savePlannerState({ symbols, routes });
-  }, [hydrated, symbols, routes]);
+    savePlannerState({ symbols, routes, turn });
+  }, [hydrated, symbols, routes, turn]);
 
   useEffect(() => {
     const update = () => {
@@ -152,16 +203,28 @@ export function MilAssistLayout() {
     if (state.feature?.type === "symbol") {
       const { feature, metadata } = state.feature;
       const [longitude, latitude] = feature.geometry.coordinates;
-      const symbolData = symbolFromMetadata(metadata, latitude, longitude);
-      setSymbols((prev) => [...prev, symbolData]);
-      mapRef.current?.flyTo({
-        center: [longitude, latitude],
-        zoom: 12,
-      });
-      toast({
-        title: "Symbol Added",
-        description: `Added symbol${symbolData.aiLabel ? ` for ${symbolData.aiLabel}` : ""}`,
-      });
+      const existing = findByLabel(symbolsRef.current, metadata.aiLabel);
+      if (existing) {
+        assignMoveOrder(
+          existing.id,
+          { lat: latitude, lng: longitude },
+          unitLabel(existing)
+        );
+        setSelectedId(existing.id);
+        mapRef.current?.flyTo({ center: [longitude, latitude], zoom: 11 });
+      } else {
+        const symbolData = symbolFromMetadata(metadata, latitude, longitude);
+        setSymbols((prev) => [...prev, symbolData]);
+        setSelectedId(symbolData.id);
+        mapRef.current?.flyTo({
+          center: [longitude, latitude],
+          zoom: 12,
+        });
+        toast({
+          title: "Unit deployed",
+          description: `Placed ${unitLabel(symbolData)}`,
+        });
+      }
     }
 
     if (state.feature?.type === "route") {
@@ -169,6 +232,49 @@ export function MilAssistLayout() {
         id: `route-${state.id}`,
         ...state.feature.data,
       };
+      const match =
+        findByLabel(symbolsRef.current, route.unitInfo) ||
+        (selectedIdRef.current
+          ? symbolsRef.current.find((unit) => unit.id === selectedIdRef.current)
+          : undefined);
+
+      if (match) {
+        assignMoveOrder(
+          match.id,
+          { lat: route.end.lat, lng: route.end.lng },
+          unitLabel(match)
+        );
+        setSelectedId(match.id);
+      } else {
+        const spawned = withSimDefaults({
+          id: `sym-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          displayType: "sidc",
+          aiLabel: route.unitInfo,
+          context: "Reality",
+          symbolStandardIdentity: "Friend",
+          status: "Present",
+          hqtfd: "Not Applicable",
+          symbolSet: "Land Unit",
+          mainIconId: findFunctionId("Land Unit", "Infantry") || "000000",
+          modifier1: "00",
+          modifier2: "00",
+          symbolEchelon: "Company",
+          latitude: route.start.lat,
+          longitude: route.start.lng,
+          order: {
+            type: "move",
+            destLat: route.end.lat,
+            destLng: route.end.lng,
+          },
+        });
+        setSymbols((prev) => [...prev, spawned]);
+        setSelectedId(spawned.id);
+        toast({
+          title: "Unit deployed",
+          description: `${unitLabel(spawned)} ordered along the route`,
+        });
+      }
+
       setRoutes((prev) => [...prev, route]);
       mapRef.current?.fitBounds(
         [
@@ -177,12 +283,6 @@ export function MilAssistLayout() {
         ],
         { padding: 64, duration: 1000 }
       );
-      toast({
-        title: "Route Added",
-        description: route.pathType
-          ? `Drew ${route.pathType}${route.unitInfo ? ` for ${route.unitInfo}` : ""}`
-          : "Drew route on the map",
-      });
     }
 
     if (state.error) {
@@ -192,6 +292,7 @@ export function MilAssistLayout() {
         description: state.error,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- handle each command result once by id
   }, [state, toast]);
 
   const handleAddSymbol = () => {
@@ -205,24 +306,54 @@ export function MilAssistLayout() {
   };
 
   const handleMapDoubleClick = (coords: { lng: number; lat: number }) => {
+    if (mapClickTimer.current) {
+      clearTimeout(mapClickTimer.current);
+      mapClickTimer.current = null;
+    }
     setActiveSymbol(null);
     setCreateMode(true);
     setDefaultCoordinates(coords);
     setEditSheetOpen(true);
   };
 
+  const handleMapClick = (coords: { lng: number; lat: number }) => {
+    if (Date.now() < ignoreMapClickUntil.current) return;
+    if (!selectedId) return;
+    if (mapClickTimer.current) clearTimeout(mapClickTimer.current);
+    mapClickTimer.current = setTimeout(() => {
+      mapClickTimer.current = null;
+      const unit = symbolsRef.current.find(
+        (item) => item.id === selectedIdRef.current
+      );
+      const id = selectedIdRef.current;
+      if (!id || !unit) return;
+      assignMoveOrder(id, { lat: coords.lat, lng: coords.lng }, unitLabel(unit));
+    }, 280);
+  };
+
+  const handleSymbolClick = (symbol: SymbolData) => {
+    ignoreMapClickUntil.current = Date.now() + 300;
+    setSelectedId(symbol.id);
+    setCreateMode(false);
+    setEditSheetOpen(false);
+  };
+
   const handleSymbolSave = (symbol: SymbolData) => {
+    const withDefaults = withSimDefaults(symbol);
     if (createMode) {
-      setSymbols((prev) => [...prev, symbol]);
+      setSymbols((prev) => [...prev, withDefaults]);
+      setSelectedId(withDefaults.id);
       toast({
-        title: "Symbol Created",
-        description: `Created symbol${symbol.aiLabel ? ` for ${symbol.aiLabel}` : ""}`,
+        title: "Unit deployed",
+        description: `Created ${unitLabel(withDefaults)}`,
       });
     } else {
-      setSymbols((prev) => prev.map((s) => (s.id === symbol.id ? symbol : s)));
+      setSymbols((prev) =>
+        prev.map((s) => (s.id === withDefaults.id ? withDefaults : s))
+      );
       toast({
-        title: "Symbol Updated",
-        description: `Updated symbol${symbol.aiLabel ? ` for ${symbol.aiLabel}` : ""}`,
+        title: "Unit updated",
+        description: `Updated ${unitLabel(withDefaults)}`,
       });
     }
     setCreateMode(false);
@@ -243,12 +374,44 @@ export function MilAssistLayout() {
     );
   };
 
+  const handleResolveTurn = () => {
+    const result = resolveTurn(symbols);
+    setSymbols(result.units);
+    setTurn((prev) => prev + 1);
+    const summary = result.log[result.log.length - 1] ?? "No contact this turn";
+    setLastCombatLine(summary);
+    if (selectedId && !result.units.some((unit) => unit.id === selectedId)) {
+      setSelectedId(null);
+    }
+    toast({
+      title: `Turn resolved`,
+      description:
+        result.log.length > 0
+          ? result.log.slice(0, 2).join(" · ")
+          : "Forces moved. No engagement.",
+    });
+    if (result.victor === "friend") {
+      toast({ title: "Friendly force prevails", description: summary });
+    }
+    if (result.victor === "hostile") {
+      toast({
+        variant: "destructive",
+        title: "Hostile force prevails",
+        description: summary,
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col h-dvh bg-tactical-grid bg-[size:20px_20px]">
       <PlannerHeader
         currentTime={currentTime}
+        turn={turn}
+        friendCount={forces.friend}
+        hostileCount={forces.hostile}
         onChangeMapStyle={(s) => setCurrentMapStyle(s)}
         onOpenList={() => setListSheetOpen(true)}
+        onResolveTurn={handleResolveTurn}
       />
 
       <div className="flex flex-1 overflow-hidden">
@@ -258,17 +421,17 @@ export function MilAssistLayout() {
               viewState={viewState}
               formatCoordinate={formatCoordinate}
               formatScale={formatScale}
+              selectedUnit={selectedUnit}
+              lastCombatLine={lastCombatLine}
             />
 
             <MapView
               ref={mapRef}
               symbols={symbols}
               routes={routes}
-              onSymbolClick={(symbol: SymbolData) => {
-                setActiveSymbol(symbol);
-                setCreateMode(false);
-                setEditSheetOpen(true);
-              }}
+              selectedSymbolId={selectedId}
+              onSymbolClick={handleSymbolClick}
+              onMapClick={handleMapClick}
               onMapDoubleClick={handleMapDoubleClick}
               onOpenCreateEditor={handleAddSymbol}
               onSymbolDragEnd={handleSymbolDragEnd}
@@ -304,9 +467,10 @@ export function MilAssistLayout() {
           setEditSheetOpen(false);
           setCreateMode(false);
           setDefaultCoordinates(undefined);
+          if (selectedId === symbolId) setSelectedId(null);
           toast({
-            title: "Symbol Removed",
-            description: "Symbol has been removed from the map",
+            title: "Unit removed",
+            description: "Unit has been removed from the theater",
           });
         }}
       />
@@ -317,7 +481,9 @@ export function MilAssistLayout() {
         symbols={symbols}
         onSymbolSelect={(symbol: SymbolData) => {
           setListSheetOpen(false);
+          setSelectedId(symbol.id);
           setActiveSymbol(symbol);
+          setCreateMode(false);
           setEditSheetOpen(true);
           mapRef.current?.flyTo({
             center: [symbol.longitude, symbol.latitude],
