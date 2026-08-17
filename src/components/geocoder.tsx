@@ -9,7 +9,7 @@ import { Card, CardContent } from "./ui/card";
 
 type GeocoderProps = {
   mapboxAccessToken: string;
-  mapRef: React.RefObject<MapRef>;
+  mapRef: React.RefObject<MapRef | null>;
 };
 
 export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {

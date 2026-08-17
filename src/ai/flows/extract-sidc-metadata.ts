@@ -10,6 +10,7 @@
 
 import { ai } from "@/ai/genkit";
 import { z } from "genkit";
+import { resolveCoordinates } from "@/lib/coordinates";
 
 // Zod schema for the output data structure of SIDC metadata
 export const SIDCMetadataSchema = z.object({
@@ -96,8 +97,20 @@ export const SIDCMetadataSchema = z.object({
     .describe(
       'AI-provided label or designation for the unit (e.g., "Alpha-1", "Task Force Bravo"). Max length 21.'
     ),
-  latitude: z.number().describe("Latitude of the unit"),
-  longitude: z.number().describe("Longitude of the unit"),
+  latitude: z
+    .number()
+    .optional()
+    .describe("Latitude of the unit when known from the command."),
+  longitude: z
+    .number()
+    .optional()
+    .describe("Longitude of the unit when known from the command."),
+  locationName: z
+    .string()
+    .optional()
+    .describe(
+      "Place name to geocode when numeric coordinates were not provided."
+    ),
   // Amplifiers
   additionalInformation: z
     .string()
@@ -201,61 +214,21 @@ export const SIDCMetadataSchema = z.object({
 // Export the TypeScript type from the Zod schema
 export type SIDCMetadataOutput = z.infer<typeof SIDCMetadataSchema>;
 
-// Tool for extracting SIDC metadata from descriptions
-const extractSidcMetadataTool = ai.defineTool(
-  {
-    name: "extractSidcMetadata",
-    description:
-      "Extract detailed SIDC metadata from a military unit or symbol description.",
-    inputSchema: z.object({
-      description: z
-        .string()
-        .describe(
-          "Natural language description of the military unit or symbol"
-        ),
-    }),
-    outputSchema: SIDCMetadataSchema,
-  },
-  async (input) => {
-    // Lightweight mock extraction: try to extract a quoted name (aiLabel) and a simple 'at <place>' location.
-    const desc = (input && (input as any).description) || "";
-    const quotedMatch = desc.match(/['\"]([^'\"]{1,21})['\"]/);
-    const aiLabel = quotedMatch ? quotedMatch[1].trim() : undefined;
-
-    // Try to extract a place name after 'at' or 'in' for a simple geocode (real extractor would call geocode
-    // or use an AI model to resolve coordinates). We return 0,0 if not available so the caller can fallback.
-    const locMatch = desc.match(/(?:at|in)\s+([A-Za-z\s\,]+)/i);
-    const latitude = 0;
-    const longitude = 0;
-    if (locMatch) {
-      // In the mock, we won't call external services. Leave coords at 0 so downstream fallback
-      // can attempt geocode when running in the app.
-    }
-
-    return {
-      symbolStandardIdentity: "Friend" as const,
-      symbolSet: "Land Unit",
-      symbolCategory: "Infantry",
-      latitude,
-      longitude,
-      aiLabel,
-    };
-  }
-);
-
-// The prompt that directs the AI to extract SIDC metadata
 const extractSidcMetadataPrompt = ai.definePrompt({
   name: "extractSidcMetadataPrompt",
-  tools: [extractSidcMetadataTool],
+  output: { schema: SIDCMetadataSchema },
   prompt: `You are an AI assistant specialized in military symbology according to APP-6D standards.
 Extract complete and accurate SIDC metadata from the given description.
 
-Description: {{{description}}}
-  
-Use the extractSidcMetadata tool to return properly formatted data.`,
+Rules:
+- Use numeric latitude/longitude when the description includes coordinates.
+- Otherwise set locationName to the place mentioned (after "at" or "in") and omit coordinates.
+- Copy quoted designations into aiLabel (max 21 characters). Omit aiLabel if none is given.
+- Do not invent a default label like "Unknown".
+
+Description: {{{description}}}`,
 });
 
-// The main flow that gets executed to extract SIDC metadata
 export const extractSidcMetadataFlow = ai.defineFlow(
   {
     name: "extractSidcMetadataFlow",
@@ -267,7 +240,25 @@ export const extractSidcMetadataFlow = ai.defineFlow(
     if (!output) {
       throw new Error("AI model did not return valid SIDC metadata.");
     }
-    return output;
+
+    const coords = await resolveCoordinates({
+      latitude: output.latitude,
+      longitude: output.longitude,
+      locationName: output.locationName,
+      fallbackText: input.description,
+    });
+
+    if (!coords) {
+      throw new Error(
+        "Could not determine coordinates from the symbol description."
+      );
+    }
+
+    return {
+      ...output,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    };
   }
 );
 

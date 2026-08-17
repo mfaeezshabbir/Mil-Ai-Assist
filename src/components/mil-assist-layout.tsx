@@ -1,33 +1,80 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import type { MapRef, ViewState } from "react-map-gl";
-import { getMapFeatureFromCommand } from "@/app/actions";
+import {
+  getMapFeatureFromCommand,
+  type ActionResult,
+} from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
-import type { SymbolData } from "@/types";
+import type { SIDCMetadataOutput } from "@/ai/flows/extract-sidc-metadata";
+import type { RouteData, SymbolData } from "@/types";
 import { MapView, MAP_STYLES } from "@/components/map-view";
 import PlannerHeader from "@/components/mil-layout/PlannerHeader";
 import MapOverlay from "@/components/mil-layout/MapOverlay";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
 import CommandInputPanel from "@/components/mil-layout/CommandInput";
-// import FloatingCommand from "@/components/mil-layout/FloatingCommand";
+import { findFunctionId } from "@/lib/sidc-mappings";
+import {
+  loadPlannerState,
+  savePlannerState,
+} from "@/lib/planner-storage";
 
-const initialState: { feature: any; error: string | null } = {
+const initialState: ActionResult = {
+  id: null,
   feature: null,
   error: null,
 };
 
-const samplePrompts = [
-  "Friendly infantry company 'Raptors' at 33.72, 73.09",
-  "Damaged hostile armored battalion 'Thunder Run' at 33.68, 73.04",
-  "Draw an air corridor for an F-16 from Lahore to Delhi",
-  "Show a main attack route from the Khyber Pass to Kabul",
-];
+function tzOffsetHoursFromLongitude(longitude: number) {
+  let offset = Math.round(longitude / 15);
+  if (offset < -12) offset = -12;
+  if (offset > 14) offset = 14;
+  return offset;
+}
+
+function symbolFromMetadata(
+  metadata: SIDCMetadataOutput,
+  latitude: number,
+  longitude: number
+): SymbolData {
+  const symbolSet = metadata.symbolSet || "Land Unit";
+  const mainIconId =
+    findFunctionId(symbolSet, metadata.symbolCategory) || "000000";
+
+  return {
+    id: `sym-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    displayType: "sidc",
+    aiLabel: metadata.aiLabel,
+    context: metadata.context || "Reality",
+    symbolStandardIdentity: metadata.symbolStandardIdentity || "Friend",
+    status: metadata.status || "Present",
+    hqtfd: metadata.hqtfd || "Not Applicable",
+    symbolSet,
+    mainIconId,
+    modifier1: metadata.modifier1 || "00",
+    modifier2: metadata.modifier2 || "00",
+    symbolEchelon: metadata.symbolEchelon,
+    latitude,
+    longitude,
+    additionalInformation: metadata.additionalInformation,
+    higherFormation: metadata.higherFormation,
+    dtg: metadata.dtg,
+    type: metadata.type,
+    quantity: metadata.quantity,
+    speed: metadata.speed,
+    direction: metadata.direction,
+    hostile: metadata.hostile,
+    commonIdentifier: metadata.commonIdentifier,
+  };
+}
 
 export function MilAssistLayout() {
   const [symbols, setSymbols] = useState<SymbolData[]>([]);
+  const [routes, setRoutes] = useState<RouteData[]>([]);
+  const [hydrated, setHydrated] = useState(false);
   const [activeSymbol, setActiveSymbol] = useState<SymbolData | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
@@ -51,32 +98,35 @@ export function MilAssistLayout() {
     padding: { top: 0, bottom: 0, left: 0, right: 0 },
   });
   const mapRef = useRef<MapRef>(null);
+  const lastResultId = useRef<string | null>(null);
   const { toast } = useToast();
-  const [state, formAction] = useFormState(
+  const [state, formAction] = useActionState(
     getMapFeatureFromCommand,
     initialState
   );
 
-  // Time now reflects timezone based on map center longitude
-  const tzOffsetHoursFromLongitude = (longitude: number) => {
-    // 15° longitude per hour
-    let offset = Math.round(longitude / 15);
-    if (offset < -12) offset = -12;
-    if (offset > 14) offset = 14;
-    return offset;
-  };
-
-  const formatTimeForLongitude = (longitude: number) => {
-    const now = new Date();
-    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-    const offsetHours = tzOffsetHoursFromLongitude(longitude);
-    const target = new Date(utc + offsetHours * 3600 * 1000);
-    return target.toLocaleTimeString();
-  };
+  useEffect(() => {
+    const snapshot = loadPlannerState();
+    if (snapshot) {
+      setSymbols(snapshot.symbols);
+      setRoutes(snapshot.routes);
+    }
+    setHydrated(true);
+  }, []);
 
   useEffect(() => {
-    const update = () =>
-      setCurrentTime(formatTimeForLongitude(viewState.longitude));
+    if (!hydrated) return;
+    savePlannerState({ symbols, routes });
+  }, [hydrated, symbols, routes]);
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date();
+      const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+      const offsetHours = tzOffsetHoursFromLongitude(viewState.longitude);
+      const target = new Date(utc + offsetHours * 3600 * 1000);
+      setCurrentTime(target.toLocaleTimeString());
+    };
     update();
     const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
@@ -91,37 +141,47 @@ export function MilAssistLayout() {
   };
 
   const formatScale = (zoom: number): string => {
-    // Approximate scale calculation based on zoom level
     const scale = Math.round(559082264.028 / Math.pow(2, zoom));
     return `1:${scale.toLocaleString()}`;
   };
 
   useEffect(() => {
-    if (state.feature) {
+    if (!state.id || state.id === lastResultId.current) return;
+    lastResultId.current = state.id;
+
+    if (state.feature?.type === "symbol") {
       const { feature, metadata } = state.feature;
-      if (!feature) return;
-
-      const symbolData: SymbolData = {
-        id: `sym-${Date.now()}`,
-        displayType: "sidc",
-        aiLabel: metadata?.aiLabel || undefined,
-        context: "Reality",
-        symbolStandardIdentity: metadata?.standardIdentity || "Friend",
-        status: metadata?.status || "Present",
-        hqtfd: metadata?.hqtfd || "Not Applicable",
-        symbolSet: metadata?.symbolSet || "Land Unit",
-        mainIconId: metadata?.mainIconId || "000000",
-        modifier1: "00",
-        modifier2: "00",
-        symbolEchelon: metadata?.echelon || "Unit",
-        latitude: feature.geometry.coordinates[1],
-        longitude: feature.geometry.coordinates[0],
-      };
-
+      const [longitude, latitude] = feature.geometry.coordinates;
+      const symbolData = symbolFromMetadata(metadata, latitude, longitude);
       setSymbols((prev) => [...prev, symbolData]);
+      mapRef.current?.flyTo({
+        center: [longitude, latitude],
+        zoom: 12,
+      });
       toast({
         title: "Symbol Added",
         description: `Added symbol${symbolData.aiLabel ? ` for ${symbolData.aiLabel}` : ""}`,
+      });
+    }
+
+    if (state.feature?.type === "route") {
+      const route: RouteData = {
+        id: `route-${state.id}`,
+        ...state.feature.data,
+      };
+      setRoutes((prev) => [...prev, route]);
+      mapRef.current?.fitBounds(
+        [
+          [route.start.lng, route.start.lat],
+          [route.end.lng, route.end.lat],
+        ],
+        { padding: 64, duration: 1000 }
+      );
+      toast({
+        title: "Route Added",
+        description: route.pathType
+          ? `Drew ${route.pathType}${route.unitInfo ? ` for ${route.unitInfo}` : ""}`
+          : "Drew route on the map",
       });
     }
 
@@ -134,15 +194,16 @@ export function MilAssistLayout() {
     }
   }, [state, toast]);
 
-  // Handle adding symbol via button click
   const handleAddSymbol = () => {
     setActiveSymbol(null);
     setCreateMode(true);
-    setDefaultCoordinates(undefined); // Will use map center
+    setDefaultCoordinates({
+      lng: viewState.longitude,
+      lat: viewState.latitude,
+    });
     setEditSheetOpen(true);
   };
 
-  // Handle adding symbol via double-click
   const handleMapDoubleClick = (coords: { lng: number; lat: number }) => {
     setActiveSymbol(null);
     setCreateMode(true);
@@ -150,7 +211,6 @@ export function MilAssistLayout() {
     setEditSheetOpen(true);
   };
 
-  // Handle symbol editor save with creation
   const handleSymbolSave = (symbol: SymbolData) => {
     if (createMode) {
       setSymbols((prev) => [...prev, symbol]);
@@ -170,6 +230,19 @@ export function MilAssistLayout() {
     setEditSheetOpen(false);
   };
 
+  const handleSymbolDragEnd = (
+    symbolId: string,
+    coords: { lng: number; lat: number }
+  ) => {
+    setSymbols((prev) =>
+      prev.map((symbol) =>
+        symbol.id === symbolId
+          ? { ...symbol, longitude: coords.lng, latitude: coords.lat }
+          : symbol
+      )
+    );
+  };
+
   return (
     <div className="flex flex-col h-dvh bg-tactical-grid bg-[size:20px_20px]">
       <PlannerHeader
@@ -179,9 +252,7 @@ export function MilAssistLayout() {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Main content area */}
         <div className="flex-1 flex flex-col">
-          {/* Map area */}
           <div className="flex-1 relative">
             <MapOverlay
               viewState={viewState}
@@ -192,37 +263,29 @@ export function MilAssistLayout() {
             <MapView
               ref={mapRef}
               symbols={symbols}
+              routes={routes}
               onSymbolClick={(symbol: SymbolData) => {
                 setActiveSymbol(symbol);
                 setCreateMode(false);
                 setEditSheetOpen(true);
               }}
               onMapDoubleClick={handleMapDoubleClick}
-              onAddSymbol={handleAddSymbol}
+              onOpenCreateEditor={handleAddSymbol}
+              onSymbolDragEnd={handleSymbolDragEnd}
               mapStyle={currentMapStyle}
               onViewStateChange={handleViewStateChange}
               symbolSize={symbolSize}
               onSymbolSizeChange={setSymbolSize}
-              onAddSymbol={(symbol: SymbolData) => {
-                setSymbols((prev) => [...prev, symbol]);
-                toast({
-                  title: "Symbol Added",
-                  description: `Added symbol${symbol.aiLabel ? ` for ${symbol.aiLabel}` : ""} manually`,
-                });
-              }}
+              formAction={formAction}
             />
           </div>
 
-          {/* Keep inline command input on larger screens if desired */}
           <div className="hidden lg:block">
             <CommandInputPanel formAction={formAction} />
           </div>
-          {/* Floating command button + sheet for mobile and quick access */}
-          {/* <FloatingCommand formAction={formAction} /> */}
         </div>
       </div>
 
-      {/* Symbol editing interface */}
       <SymbolEditor
         open={editSheetOpen}
         onOpenChange={(open) => {
@@ -248,7 +311,6 @@ export function MilAssistLayout() {
         }}
       />
 
-      {/* Symbol list interface */}
       <SymbolListSheet
         open={listSheetOpen}
         onOpenChange={setListSheetOpen}
@@ -257,12 +319,10 @@ export function MilAssistLayout() {
           setListSheetOpen(false);
           setActiveSymbol(symbol);
           setEditSheetOpen(true);
-          if (mapRef.current) {
-            mapRef.current.flyTo({
-              center: [symbol.longitude, symbol.latitude],
-              zoom: 14,
-            });
-          }
+          mapRef.current?.flyTo({
+            center: [symbol.longitude, symbol.latitude],
+            zoom: 14,
+          });
         }}
       />
     </div>

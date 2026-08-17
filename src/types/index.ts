@@ -1,6 +1,17 @@
 import type { SIDCMetadataOutput as AIMetadata } from "@/ai/flows/extract-sidc-metadata";
 
-export type SymbolData = Omit<AIMetadata, "symbolCategory"> & {
+export type RouteData = {
+  id: string;
+  start: { lat: number; lng: number };
+  end: { lat: number; lng: number };
+  pathType?: string;
+  unitInfo?: string;
+};
+
+export type SymbolData = Omit<
+  AIMetadata,
+  "symbolCategory" | "latitude" | "longitude"
+> & {
   id: string;
   displayType: "sidc" | "image";
   imageUrl?: string;
@@ -12,29 +23,6 @@ export type SymbolData = Omit<AIMetadata, "symbolCategory"> & {
   status: string;
   hqtfd: string;
   symbolEchelon?: string;
-  // Text Amplifiers
-  quantity?: string;
-  reinforcedReduced?: string;
-  staffComments?: string;
-  additionalInformation?: string;
-  higherFormation?: string;
-  dtg?: string;
-  type?: string;
-  aiLabel?: string;
-  evaluationRating?: string;
-  combatEffectiveness?: string;
-  signatureEquipment?: string;
-  specialHeadquarters?: string;
-  iffSif?: string;
-  // Graphic Amplifiers
-  altitudeDepth?: string;
-  location?: string;
-  speed?: string;
-  hostile?: string;
-  direction?: string;
-  // New Amplifiers
-  commonIdentifier?: string;
-  equipmentTeardownTime?: string;
-  headquartersElement?: string;
-  platformType?: string;
+  latitude: number;
+  longitude: number;
 };

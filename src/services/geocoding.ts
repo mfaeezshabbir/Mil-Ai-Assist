@@ -1,6 +1,3 @@
-// src/services/geocoding.ts
-"use server";
-
 type GeocodeResult = {
   latitude: number;
   longitude: number;
@@ -8,15 +5,13 @@ type GeocodeResult = {
 
 /**
  * Geocodes a location name using the Mapbox Geocoding API.
- * @param locationName - The name of the location to geocode (e.g., "Paris").
- * @returns A promise that resolves to the coordinates or null if not found.
+ * Server-only helper — not a public server action.
  */
 export async function geocode(
   locationName: string
 ): Promise<GeocodeResult | null> {
   const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
   if (!accessToken) {
-    // eslint-disable-next-line no-console
     console.error("Mapbox access token is not configured.");
     return null;
   }
@@ -27,7 +22,9 @@ export async function geocode(
 
   try {
     const response = await fetch(endpoint);
-    const data = await response.json();
+    const data = (await response.json()) as {
+      features?: { center: [number, number] }[];
+    };
 
     if (data.features && data.features.length > 0) {
       const [longitude, latitude] = data.features[0].center;
@@ -36,7 +33,6 @@ export async function geocode(
 
     return null;
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error("Error fetching geocoding data:", error);
     return null;
   }

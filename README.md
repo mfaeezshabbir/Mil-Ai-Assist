@@ -57,14 +57,20 @@ The app has two main modules:
    - Get a free API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
    - This enables natural language command processing.
 
-3. Add both tokens to `.env.local`:
+3. Copy `example.env` to `.env.local` and fill in:
 
    ```bash
    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
    GEMINI_API_KEY=your_gemini_api_key_here
+   NEXTAUTH_SECRET=generate-a-long-random-string
+   NEXTAUTH_URL=http://localhost:9002
+   AUTH_ADMIN_USERNAME=admin
+   AUTH_ADMIN_PASSWORD=change-me
+   AUTH_OPERATOR_USERNAME=operator
+   AUTH_OPERATOR_PASSWORD=change-me
    ```
 
-   **Note**: If you don't configure `GEMINI_API_KEY`, AI features will use a fallback parser with limited functionality. You can still add symbols manually using the "+" button on the map.
+   **Note**: If you don't configure `GEMINI_API_KEY`, AI features will use a fallback parser with limited functionality. You can still add symbols manually using the "+" button on the map. Planner login uses the `AUTH_*` accounts above; there are no hardcoded passwords in source.
 
 ---
 
@@ -122,12 +128,7 @@ The app has two main modules:
    npm install
    ```
 
-2. Add environment variables (see [Environment Setup](#environment-setup)):
-
-   ```bash
-   NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=your_mapbox_token_here
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
+2. Add environment variables (see [Environment Setup](#environment-setup)).
 
 3. Run locally:
 
@@ -156,9 +157,10 @@ The app has two main modules:
 
 ## 🔮 Next Improvements
 
-- ✅ Replace longitude-based clock with **IANA timezone lookup** (`tz-lookup`).
-- ✅ Add **Playwright E2E tests** for mission workflows.
-- ✅ Add **micro-animations** for smoother UX.
+- Replace the longitude-based overlay clock with IANA timezone lookup.
+- Add Playwright E2E coverage for sample command prompts.
+- Persist overlays server-side instead of browser `localStorage`.
+- Replace env-file credentials with a real identity provider and MFA.
 
 ---
 

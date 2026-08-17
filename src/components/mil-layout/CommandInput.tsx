@@ -3,25 +3,19 @@
 import React, { useEffect, useRef } from "react";
 import { Crosshair, Send, Loader2, Radio } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
-function CommandInput({ action }: { action: any }) {
+
+export type CommandFormAction = (formData: FormData) => void | Promise<void>;
+
+function CommandInput() {
   const { pending } = useFormStatus();
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    // Only run in the browser
-    if (typeof window === "undefined") return;
     if (pending) return;
-
-    const mq = window.matchMedia("(min-width: 640px)");
-    const isSmOrUp = mq.matches;
-    const el = isSmOrUp ? inputRef.current : textareaRef.current;
-    if (el) el.focus();
+    textareaRef.current?.focus();
   }, [pending]);
 
   return (
@@ -29,23 +23,14 @@ function CommandInput({ action }: { action: any }) {
       <span className="hidden md:flex items-center justify-center rounded-full bg-primary/10 p-2 mr-0 sm:mr-2 mb-2 sm:mb-0 self-start sm:self-auto">
         <Crosshair className="h-5 w-5 text-primary" />
       </span>
-      {/* Show textarea on mobile, input on sm+ screens */}
       <Textarea
         name="command"
         ref={textareaRef}
-        className="block sm:hidden flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base resize rounded-md min-h-[44px] max-h-32"
+        className="flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base resize-y sm:resize-none rounded-md min-h-[44px] sm:min-h-[40px] sm:max-h-10"
         placeholder="Enter tactical command..."
         disabled={pending}
         required
-        rows={5}
-      />
-      <Input
-        name="command"
-        ref={inputRef}
-        className="hidden sm:block flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base"
-        placeholder="Enter tactical command..."
-        disabled={pending}
-        required
+        rows={1}
       />
       <Button
         type="submit"
@@ -69,8 +54,11 @@ function CommandInput({ action }: { action: any }) {
   );
 }
 
-// The panel component, merged and exported as default
-const CommandInputPanel = ({ formAction }: { formAction: any }) => {
+const CommandInputPanel = ({
+  formAction,
+}: {
+  formAction?: CommandFormAction;
+}) => {
   return (
     <div className="md:p-4 md:border-t md:border-tactical border-primary/30 bg-background/90 backdrop-blur-sm w-full">
       <form action={formAction} className="space-y-2">
@@ -89,7 +77,7 @@ const CommandInputPanel = ({ formAction }: { formAction: any }) => {
             SECURE CHANNEL
           </Badge>
         </div>
-        <CommandInput action={formAction} />
+        <CommandInput />
       </form>
     </div>
   );

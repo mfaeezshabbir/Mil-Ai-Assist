@@ -74,10 +74,10 @@ export default function SecurityPolicyPage() {
         <section id="retention" className="mb-6">
           <h2 className="text-xl font-semibold mb-2">Retention & Export</h2>
           <p className="text-muted-foreground">
-            Define retention schedules according to your organizational policy.
-            MilAIAssist provides simple export options (GeoJSON, image
-            snapshots) for offline archival; ensure exported files are handled
-            securely.
+            Overlay symbols and routes are stored in the browser
+            (localStorage) for the current device only. They are not synced to
+            a server. Clear site data to wipe a session. Do not treat the
+            browser store as an archival system for operational data.
           </p>
         </section>
 
@@ -97,18 +97,23 @@ export default function SecurityPolicyPage() {
             Authentication & Access Control
           </h2>
           <p className="text-muted-foreground">
-            Follow the principle of least privilege. Maintain role-based access
-            controls and consider multifactor authentication for all operator
-            accounts. Log all administrative actions and review periodically.
+            Planner routes are protected by NextAuth JWT sessions. Credentials
+            come from environment variables (`AUTH_ADMIN_*` and
+            `AUTH_OPERATOR_*`). Server actions that call Gemini or Mapbox
+            require a valid session. Roles are carried on the session but are
+            not used for fine-grained authorization yet.
           </p>
           <ul className="list-disc list-inside mt-2 text-muted-foreground">
-            <li>Use unique operator accounts; avoid shared credentials.</li>
             <li>
-              Disable or remove accounts promptly when access is no longer
-              required.
+              Set a unique <code>NEXTAUTH_SECRET</code> per environment.
             </li>
             <li>
-              Use centralized identity providers (SAML/OAuth) if available.
+              Do not reuse example passwords. A development-only skip control
+              exists locally and is ignored in production builds.
+            </li>
+            <li>
+              Natural-language commands are sent to Google Gemini. Do not
+              enter classified or restricted mission text.
             </li>
           </ul>
         </section>

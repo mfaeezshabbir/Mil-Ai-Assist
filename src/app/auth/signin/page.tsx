@@ -48,10 +48,8 @@ export default function SignInPage() {
     setLoading(true);
     setError("");
     try {
-      // Auto-login with admin credentials in dev
       const result = await signIn("credentials", {
-        username: "admin",
-        password: "admin123",
+        devSkip: "1",
         redirect: false,
       });
 

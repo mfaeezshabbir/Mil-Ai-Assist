@@ -6,22 +6,23 @@ import {
 } from "@/ai/flows/process-command-flow";
 import type { SIDCMetadataOutput } from "@/ai/flows/extract-sidc-metadata";
 import { geocode } from "@/services/geocoding";
+import { requireSession } from "@/lib/auth";
+import { toLatLng } from "@/lib/coordinates";
 
-// Define the output shapes for the client
-type SymbolResult = {
-  // GeoJSON-like feature representing the symbol location
+export type SymbolResult = {
+  type: "symbol";
   feature: {
-    type: string;
+    type: "Feature";
     geometry: {
-      type: string;
+      type: "Point";
       coordinates: [number, number];
     };
-    properties?: Record<string, any>;
+    properties?: Record<string, string | undefined>;
   };
   metadata: SIDCMetadataOutput;
 };
 
-type RouteResult = {
+export type RouteResult = {
   type: "route";
   data: {
     start: { lat: number; lng: number };
@@ -31,58 +32,78 @@ type RouteResult = {
   };
 };
 
-type ActionResult = {
+export type ActionResult = {
+  id: string | null;
   feature: SymbolResult | RouteResult | null;
   error: string | null;
 };
 
+function resultId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export async function getMapFeatureFromCommand(
-  prevState: ActionResult,
+  _prevState: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const command = formData.get("command") as string;
+  try {
+    await requireSession();
+  } catch {
+    return {
+      id: resultId(),
+      feature: null,
+      error: "You must be signed in to run commands.",
+    };
+  }
+
+  const commandValue = formData.get("command");
+  const command =
+    typeof commandValue === "string" ? commandValue.trim() : "";
   if (!command) {
-    return { feature: null, error: "Command cannot be empty." };
+    return {
+      id: resultId(),
+      feature: null,
+      error: "Command cannot be empty.",
+    };
   }
 
   try {
-    const extractedFeature = await processCommand({ command });
+    const extractedFeature: MapFeature = await processCommand({ command });
     if (extractedFeature.type === "symbol") {
-      // Build a GeoJSON-like point feature for the map and return SIDC metadata separately
-      const { latitude, longitude, ...meta } = extractedFeature.data as any;
-      if (
-        typeof latitude !== "number" ||
-        typeof longitude !== "number" ||
-        latitude === 0 ||
-        longitude === 0
-      ) {
+      const { latitude, longitude, ...meta } = extractedFeature.data;
+      const coords = toLatLng(latitude, longitude);
+      if (!coords) {
         throw new Error(
           "Could not determine coordinates. Please specify a location in your command (e.g., 'at Lahore' or provide coordinates like '33.72, 73.09')."
         );
       }
 
-      const geoFeature = {
-        type: "Feature",
-        geometry: {
-          type: "Point",
-          coordinates: [longitude, latitude],
-        },
-        properties: {
-          // include main icon and sidc if present for debugging
-          mainIconId: (extractedFeature.data as any).mainIconId,
-          sidc: (extractedFeature.data as any).sidc,
-        },
-      };
-
-      const result: ActionResult = {
+      return {
+        id: resultId(),
         feature: {
-          feature: geoFeature,
-          metadata: meta,
-        } as any,
+          type: "symbol",
+          feature: {
+            type: "Feature",
+            geometry: {
+              type: "Point",
+              coordinates: [coords.longitude, coords.latitude],
+            },
+            properties: {
+              mainIconId: (extractedFeature.data as { mainIconId?: string })
+                .mainIconId,
+            },
+          },
+            metadata: {
+            ...meta,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          },
+        },
         error: null,
       };
-      return result;
-    } else if (extractedFeature.type === "route") {
+    }
+
+    if (extractedFeature.type === "route") {
       const { startLocationName, endLocationName, ...rest } =
         extractedFeature.data;
 
@@ -98,6 +119,7 @@ export async function getMapFeatureFromCommand(
       }
 
       return {
+        id: resultId(),
         feature: {
           type: "route",
           data: {
@@ -110,7 +132,11 @@ export async function getMapFeatureFromCommand(
       };
     }
 
-    return { feature: null, error: "Unrecognized feature type from AI." };
+    return {
+      id: resultId(),
+      feature: null,
+      error: "Unrecognized feature type from AI.",
+    };
   } catch (e) {
     console.error(e);
     let errorMessage =
@@ -121,9 +147,9 @@ export async function getMapFeatureFromCommand(
     ) {
       errorMessage =
         "The AI model is currently busy. Please try your command again shortly.";
-    } else {
+    } else if (!errorMessage.startsWith("Could not")) {
       errorMessage = `Failed to process command: ${errorMessage}`;
     }
-    return { feature: null, error: errorMessage };
+    return { id: resultId(), feature: null, error: errorMessage };
   }
 }

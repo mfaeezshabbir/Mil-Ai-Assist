@@ -3,22 +3,20 @@
 import React from "react";
 import { Geocoder } from "@/components/geocoder";
 import FloatingCommand from "@/components/mil-layout/FloatingCommand";
-import { AddSymbolDialog } from "@/components/add-symbol-dialog";
 import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
 import { Button } from "@/components/ui/button";
 import { MapPlus } from "lucide-react";
+import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 
 type ControlsProps = {
-  mapRef: React.RefObject<MapRef>;
+  mapRef: React.RefObject<MapRef | null>;
   symbolSize?: "small" | "medium" | "large" | "xxl";
   onSymbolSizeChange?: (s: "small" | "medium" | "large" | "xxl") => void;
   symbols?: SymbolData[];
-  formAction?: any;
-  onAddSymbol?: (symbol: SymbolData) => void;
-  mapCenter?: { latitude: number; longitude: number };
-  onAddSymbol?: () => void;
+  formAction?: CommandFormAction;
+  onOpenCreateEditor?: () => void;
 };
 
 export default function Controls({
@@ -27,45 +25,32 @@ export default function Controls({
   onSymbolSizeChange,
   symbols,
   formAction,
-  onAddSymbol,
-  mapCenter,
+  onOpenCreateEditor,
 }: ControlsProps) {
-  const [showSymbolSize, setShowSymbolSize] = React.useState(false);
-
   return (
-    <>
-      <div className="fixed right-3 top-20 flex flex-col gap-2">
-        {/* Add Symbol Button */}
-        <Button
-          onClick={onAddSymbol}
-          size="sm"
-          variant="outline"
-          className="bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10 text-foreground"
-          title="Add Symbol"
-        >
-          <MapPlus className="h-4 w-4" />
-        </Button>
+    <div className="fixed right-3 top-20 flex flex-col gap-2 z-10">
+      <Button
+        onClick={onOpenCreateEditor}
+        size="sm"
+        variant="outline"
+        className="bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10 text-foreground"
+        title="Add Symbol"
+      >
+        <MapPlus className="h-4 w-4" />
+      </Button>
 
-        {symbols && symbols.length > 0 && (
-          <SymbolSizer
-            symbolSize={symbolSize}
-            onSymbolSizeChange={onSymbolSizeChange}
-          />
-        )}
-        <Geocoder
-          mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN!}
-          mapRef={mapRef}
+      {symbols && symbols.length > 0 && (
+        <SymbolSizer
+          symbolSize={symbolSize}
+          onSymbolSizeChange={onSymbolSizeChange}
         />
+      )}
+      <Geocoder
+        mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ?? ""}
+        mapRef={mapRef}
+      />
 
-        {onAddSymbol && (
-          <AddSymbolDialog
-            onAddSymbol={onAddSymbol}
-            defaultPosition={mapCenter}
-          />
-        )}
-
-        <FloatingCommand inline formAction={formAction} />
-      </div>
-    </>
+      <FloatingCommand inline formAction={formAction} />
+    </div>
   );
 }

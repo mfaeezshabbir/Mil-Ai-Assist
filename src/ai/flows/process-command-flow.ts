@@ -1,18 +1,15 @@
-// src/ai/flows/process-command-flow.ts
-"use server";
-
 /**
- * @fileOverview This file defines the primary Genkit flow for processing natural language commands.
- * It uses AI tools to determine whether the user wants to draw a single symbol or a route between two points,
- * and extracts the necessary data for either action.
+ * @fileOverview Primary Genkit flow for processing natural language commands.
+ * Determines whether the user wants a symbol or a route and extracts the data.
  */
 
 import { ai } from "@/ai/genkit";
 import { z } from "genkit";
-import { geocode } from "@/services/geocoding";
 import { extractSidcMetadataFlow } from "./extract-sidc-metadata";
 import { findFunctionId } from "@/lib/sidc-mappings";
 import { generateSIDC, validateSIDC } from "@/lib/sidc-generator";
+import { resolveCoordinates } from "@/lib/coordinates";
+import type { SymbolData } from "@/types";
 
 // Zod schema for the input required to draw a standard military symbol.
 const SymbolInputSchema = z.object({
@@ -99,8 +96,20 @@ const SymbolInputSchema = z.object({
     .describe(
       'AI-provided label or designation for the unit (e.g., "Alpha-1", "Task Force Bravo"). Max length 21.'
     ),
-  latitude: z.number().describe("Latitude of the unit"),
-  longitude: z.number().describe("Longitude of the unit"),
+  latitude: z
+    .number()
+    .optional()
+    .describe("Latitude of the unit when known from the command."),
+  longitude: z
+    .number()
+    .optional()
+    .describe("Longitude of the unit when known from the command."),
+  locationName: z
+    .string()
+    .optional()
+    .describe(
+      "Place name to geocode when numeric coordinates were not provided."
+    ),
   // Amplifiers
   additionalInformation: z
     .string()
@@ -240,60 +249,15 @@ const MapFeatureSchema = z.union([
 ]);
 export type MapFeature = z.infer<typeof MapFeatureSchema>;
 
-// The tool the AI will use to "draw" features. We accept any input here and
-// validate inside the handler to avoid pre-validation errors when the AI
-// returns an empty object ({}). The handler will attempt to coerce/fallback
-// to a valid MapFeature.
 const drawMapFeaturesTool = ai.defineTool(
   {
     name: "drawMapFeatures",
     description:
       "Draw features on the map. This can be a single symbol or a route between two locations.",
-    // Accept anything at the tool boundary; validate/parse inside the handler.
-    inputSchema: z.any(),
-    outputSchema: z.any(),
+    inputSchema: MapFeatureSchema,
+    outputSchema: MapFeatureSchema,
   },
-  async (input) => {
-    try {
-      // If input already matches MapFeatureSchema, return it.
-      const parsed = MapFeatureSchema.parse(input);
-      return parsed;
-    } catch (e) {
-      // If the AI returned an empty object or invalid structure, attempt a fallback.
-      // If the tool call included a natural language command, use that as a description.
-      try {
-        // Try common places where a description/command might be provided
-        const description =
-          (input && (input.description || input.command)) ||
-          (input && input.data && input.data.description) ||
-          "";
-
-        // Always attempt fallback extraction (mock extractor will return a placeholder)
-        const fallback = await extractSidcMetadataFlow({ description });
-        if (
-          fallback &&
-          typeof (fallback as any).latitude === "number" &&
-          typeof (fallback as any).longitude === "number"
-        ) {
-          return { type: "symbol", data: fallback } as any;
-        }
-      } catch (err) {
-        console.warn("drawMapFeaturesTool fallback failed:", err);
-      }
-
-      // If fallback also failed, return a minimal placeholder feature so the app can handle it
-      return {
-        type: "symbol",
-        data: {
-          symbolStandardIdentity: "Friend",
-          symbolSet: "Land Unit",
-          symbolCategory: "Unknown",
-          latitude: 0,
-          longitude: 0,
-        },
-      } as any;
-    }
-  }
+  async (input) => input
 );
 
 // The main prompt that directs the AI to use the appropriate tool based on the user's command.
@@ -308,142 +272,125 @@ const processCommandPrompt = ai.definePrompt({
 
 Command: {{{command}}}
 
-If a unique name or designation is included in the user's command (for example: 'Raptors', "Thunder Run", or Alpha-1), set the aiLabel field in the symbol data to that exact text (max 21 characters). If no name is provided, omit aiLabel (do not insert a default like 'Unknown').`,
+If a unique name or designation is included in the user's command (for example: 'Raptors', "Thunder Run", or Alpha-1), set the aiLabel field in the symbol data to that exact text (max 21 characters). If no name is provided, omit aiLabel (do not insert a default like 'Unknown').
+When coordinates are not numeric, set locationName instead of inventing 0,0.`,
 });
-// Note: aiLabel instruction is embedded directly in the prompt above.
 
-// The main flow that gets executed by the server action.
+async function withResolvedSymbolCoords(
+  data: z.infer<typeof SymbolInputSchema>,
+  fallbackText: string
+): Promise<MapFeature> {
+  const coords = await resolveCoordinates({
+    latitude: data.latitude,
+    longitude: data.longitude,
+    locationName: data.locationName,
+    fallbackText,
+  });
+
+  if (!coords) {
+    throw new Error(
+      "Could not determine coordinates. Please specify a location in your command (e.g., 'at Lahore' or provide coordinates like '33.72, 73.09')."
+    );
+  }
+
+  const mainIconId =
+    findFunctionId(data.symbolSet, data.symbolCategory) || "000000";
+  const symbolData = {
+    ...data,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    mainIconId,
+  };
+
+  try {
+    const sidc = generateSIDC(symbolData as unknown as SymbolData);
+    return {
+      type: "symbol",
+      data: {
+        ...symbolData,
+        sidc,
+        sidcValid: validateSIDC(sidc),
+      } as z.infer<typeof SymbolInputSchema>,
+    };
+  } catch {
+    return { type: "symbol", data: symbolData };
+  }
+}
+
+function toTitle(value?: string) {
+  if (!value) return value;
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/(^|\s)\S/g, (token) => token.toUpperCase());
+}
+
 const processCommandFlow = ai.defineFlow(
   {
     name: "processCommandFlow",
     inputSchema: z.object({ command: z.string() }),
-    // Accept any output at the flow boundary and validate/parse inside the handler.
-    outputSchema: z.any(),
+    outputSchema: MapFeatureSchema,
   },
   async (input) => {
-    const { output } = await processCommandPrompt(input);
-
-    // Try to validate the AI output against our MapFeatureSchema.
     try {
-      const parsed = MapFeatureSchema.parse(output);
-      return parsed;
-    } catch (err) {
-      // If validation failed, continue to fallbacks below.
+      const { output } = await processCommandPrompt(input);
+      const parsed = MapFeatureSchema.safeParse(output);
+      if (parsed.success) {
+        if (parsed.data.type === "symbol") {
+          return withResolvedSymbolCoords(parsed.data.data, input.command);
+        }
+        return parsed.data;
+      }
+    } catch (error) {
+      console.warn("Primary command prompt failed, using fallbacks:", error);
     }
 
-    // Fallback: try extracting SIDC metadata directly from the command
-    // This helps when the AI returns an empty object ({}) or fails schema validation.
-    // 1) Try extracting with the dedicated extractor
     try {
       const fallback = await extractSidcMetadataFlow({
         description: input.command,
       });
-      if (
-        fallback &&
-        typeof (fallback as any).latitude === "number" &&
-        typeof (fallback as any).longitude === "number"
-      ) {
-        return { type: "symbol", data: fallback } as any;
-      }
-    } catch (e) {
-      console.warn("Fallback SIDC metadata extraction failed:", e);
+      return withResolvedSymbolCoords(fallback, input.command);
+    } catch (error) {
+      console.warn("Fallback SIDC metadata extraction failed:", error);
     }
 
-    // 2) Lightweight NL fallback parser: try to parse "<unit-type> <echelon> at <location>"
-    try {
-      const cmd = (input.command || "").toString();
-      const cmdLower = cmd.toLowerCase();
+    const cmd = input.command || "";
+    const cmdLower = cmd.toLowerCase();
+    const echelonMatch = cmdLower.match(
+      /\b(team|squad|section|platoon|company|battalion|regiment|brigade|division|corps|army)\b/
+    );
+    const unitMatch = cmdLower.match(
+      /\b(infantry|armou?red|armor|tank|artillery|engineer|recon|airborne|cavalry|infantryman)\b/
+    );
+    const quotedMatch = cmd.match(/['"]([^'"]{1,21})['"]/);
+    const coords = await resolveCoordinates({ fallbackText: cmd });
 
-      // Echelon regex
-      const echelonMatch = cmdLower.match(
-        /\b(team|squad|section|platoon|company|battalion|regiment|brigade|division|corps|army)\b/
+    if (!coords) {
+      throw new Error(
+        "Could not determine coordinates. Please specify a location in your command (e.g., 'at Lahore' or provide coordinates like '33.72, 73.09')."
       );
-      const unitMatch = cmdLower.match(
-        /\b(infantry|armou?red|armor|tank|artillery|engineer|recon|airborne|cavalry|infantryman)\b/
-      );
-      // location: capture the token after ' at ' or ' in '
-      const locMatch = cmd.match(/(?:at|in)\s+([A-Za-z\s\,]+)/i);
-
-      const locationName = locMatch
-        ? locMatch[1].trim().split(/[,\.]/)[0]
-        : undefined;
-      let latitude: number | null = null;
-      let longitude: number | null = null;
-
-      if (locationName) {
-        const geo = await geocode(locationName);
-        if (geo) {
-          latitude = geo.latitude;
-          longitude = geo.longitude;
-        }
-      }
-
-      // Try to extract a quoted aiLabel from the command (e.g., 'Raptors', "Thunder Run")
-      const quotedMatch = cmd.match(/['\"]([^'\"]{1,21})['\"]/);
-      const aiLabel = quotedMatch ? quotedMatch[1].trim() : undefined;
-
-      if (latitude !== null && longitude !== null) {
-        // Build normalized symbol data
-        const symbolCategory = unitMatch
-          ? unitMatch[1] || unitMatch[0]
-          : "Infantry";
-
-        // Title-case helpers
-        const toTitle = (s?: string) =>
-          s
-            ? s
-                .toString()
-                .trim()
-                .toLowerCase()
-                .replace(/(^|\s)\S/g, (t) => t.toUpperCase())
-            : s;
-
-        const echelon = echelonMatch ? toTitle(echelonMatch[1]) : undefined;
-
-        // Find function ID from mappings
-        const mainIconId =
-          findFunctionId("Land Unit", symbolCategory) || "000000";
-
-        const symbolData: any = {
-          symbolStandardIdentity: "Friend",
-          symbolSet: "Land Unit",
-          symbolCategory: toTitle(symbolCategory),
-          mainIconId,
-          modifier1: "00",
-          modifier2: "00",
-          latitude,
-          longitude,
-          aiLabel,
-        };
-        if (echelon) symbolData.symbolEchelon = echelon;
-
-        // Generate SIDC and validate
-        try {
-          const sidc = generateSIDC(symbolData);
-          const valid = validateSIDC(sidc);
-          symbolData.sidc = sidc;
-          symbolData.sidcValid = valid;
-        } catch (err) {
-          console.warn("Failed to generate SIDC:", err);
-        }
-
-        return { type: "symbol", data: symbolData } as any;
-      }
-    } catch (e) {
-      console.warn("NL fallback parser failed:", e);
     }
 
-    // 3) Final fallback: return a minimal placeholder symbol so the app can handle it.
-    return {
-      type: "symbol",
-      data: {
+    const symbolCategory = unitMatch
+      ? unitMatch[1] || unitMatch[0]
+      : "Infantry";
+
+    return withResolvedSymbolCoords(
+      {
         symbolStandardIdentity: "Friend",
         symbolSet: "Land Unit",
-        symbolCategory: "Unknown",
-        latitude: 0,
-        longitude: 0,
+        symbolCategory: toTitle(symbolCategory) || "Infantry",
+        symbolEchelon: echelonMatch
+          ? (toTitle(echelonMatch[1]) as z.infer<
+              typeof SymbolInputSchema
+            >["symbolEchelon"])
+          : undefined,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        aiLabel: quotedMatch ? quotedMatch[1].trim() : undefined,
       },
-    } as any;
+      cmd
+    );
   }
 );
 

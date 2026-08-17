@@ -3,13 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { Brain, X } from "lucide-react";
 import CommandInputPanel from "@/components/mil-layout/CommandInput";
-import { Button } from "../ui/button";
+import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 
 const FloatingCommand = ({
   formAction,
   inline = false,
 }: {
-  formAction: any;
+  formAction?: CommandFormAction;
   inline?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
