@@ -27,6 +27,7 @@ export default function Markers({
           key={symbol.id}
           longitude={symbol.longitude}
           latitude={symbol.latitude}
+          anchor="bottom"
           draggable={!!onSymbolDragEnd}
           onDragEnd={(e) => {
             if (onSymbolDragEnd) {

@@ -26,10 +26,10 @@ const buttonVariants = cva(
           "bg-primary/20 text-primary uppercase tracking-wide font-mono border border-primary/50 shadow-tactical hover:bg-primary/30",
       },
       size: {
-        default: "h-10 px-4 py-2 rounded-sm",
-        sm: "h-9 px-3 rounded-sm",
-        lg: "h-11 px-8 rounded-sm",
-        icon: "h-10 w-10 rounded-sm",
+        default: "h-10 px-4 py-2 rounded-none",
+        sm: "h-9 px-3 rounded-none",
+        lg: "h-11 px-8 rounded-none",
+        icon: "h-10 w-10 rounded-none",
       },
     },
     defaultVariants: {

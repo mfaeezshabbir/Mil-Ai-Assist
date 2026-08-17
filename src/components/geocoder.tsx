@@ -59,13 +59,14 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
 
   return (
     <>
-      <div
+      <button
+        type="button"
         aria-label={open ? "Close geocoder" : "Open geocoder"}
-        className="border-2 border-primary h-10 w-10 rounded-lg bg-gradient-to-br from-accent to-primary text-white shadow-2xl flex items-center justify-center transform transition-transform duration-200 p-[2px] z-50"
+        className="hud-rail-btn z-50"
         onClick={() => setOpen((s) => !s)}
       >
-        {open ? <X className="h-6 w-6" /> : <MapPin className="h-6 w-6" />}
-      </div>
+        {open ? <X className="h-4 w-4" /> : <MapPin className="h-4 w-4" />}
+      </button>
 
       {/* Panel as Sheet */}
       {open && (
@@ -78,12 +79,12 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
           />
 
           <div className="relative h-2/5 w-full max-w-md mx-4 mb-6">
-            <div className="bg-background/90 backdrop-blur-md border border-primary/20 rounded-t-xl shadow-tactical overflow-hidden transform transition-all duration-300 animate-slide-in-up">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-primary/10">
+            <div className="hud-panel overflow-hidden transform transition-all duration-300 animate-slide-in-up">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-primary/20">
                 <div className="flex items-center gap-3">
-                  <div className="h-2 w-2 rounded-full bg-accent shadow-md" />
-                  <h3 className="text-sm font-display uppercase tracking-wide text-primary">
-                    Location Search
+                  <div className="h-1.5 w-1.5 bg-primary animate-tactical-pulse" />
+                  <h3 className="text-xs font-mono uppercase tracking-[0.22em] text-primary">
+                    Locate
                   </h3>
                 </div>
                 <button
@@ -113,7 +114,7 @@ export function Geocoder({ mapboxAccessToken, mapRef }: GeocoderProps) {
                             <button
                               key={result.id}
                               onClick={() => handleSelect(result)}
-                              className="block w-full text-left p-2 rounded-md hover:bg-muted text-sm"
+                              className="block w-full text-left p-2 hover:bg-muted text-sm font-mono"
                               type="button"
                             >
                               {result.place_name}

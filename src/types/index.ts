@@ -14,6 +14,16 @@ export type UnitOrder = {
   destLat: number;
 };
 
+export type PieceKind =
+  | "combat"
+  | "objective"
+  | "fob"
+  | "supply"
+  | "minefield"
+  | "obstacle";
+
+export type ForceSide = "Friend" | "Hostile" | "Neutral";
+
 export type SymbolData = Omit<
   AIMetadata,
   "symbolCategory" | "latitude" | "longitude"
@@ -33,5 +43,12 @@ export type SymbolData = Omit<
   longitude: number;
   strength?: number;
   speedKmPerTurn?: number;
+  attack?: number;
+  defense?: number;
+  rangeKm?: number;
+  pieceKind?: PieceKind;
+  catalogId?: string;
+  controlledBy?: ForceSide;
+  controlStreak?: number;
   order?: UnitOrder;
 };

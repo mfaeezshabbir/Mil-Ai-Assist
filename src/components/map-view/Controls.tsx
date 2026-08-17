@@ -6,7 +6,6 @@ import FloatingCommand from "@/components/mil-layout/FloatingCommand";
 import type { MapRef } from "react-map-gl";
 import type { SymbolData } from "@/types";
 import SymbolSizer from "../symbolSizer";
-import { Button } from "@/components/ui/button";
 import { MapPlus } from "lucide-react";
 import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
 
@@ -28,16 +27,15 @@ export default function Controls({
   onOpenCreateEditor,
 }: ControlsProps) {
   return (
-    <div className="fixed right-3 top-20 flex flex-col gap-2 z-10">
-      <Button
+    <div className="absolute right-3 top-3 flex flex-col gap-2 z-20 pointer-events-auto">
+      <button
+        type="button"
         onClick={onOpenCreateEditor}
-        size="sm"
-        variant="outline"
-        className="bg-background/80 backdrop-blur-sm border-primary/20 hover:bg-primary/10 text-foreground"
-        title="Add Symbol"
+        className="hud-rail-btn"
+        title="Deploy unit"
       >
         <MapPlus className="h-4 w-4" />
-      </Button>
+      </button>
 
       {symbols && symbols.length > 0 && (
         <SymbolSizer

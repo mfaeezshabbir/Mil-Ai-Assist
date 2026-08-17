@@ -3,6 +3,7 @@
 import { MilitarySymbol } from "./military-symbol";
 import type { SymbolData } from "@/types";
 import Image from "next/image";
+import { TRACK_COLORS, pieceIdentity } from "@/lib/sim/track-style";
 
 type PointMarkerProps = {
   symbol: SymbolData;
@@ -15,30 +16,30 @@ export function PointMarker({
   size = 40,
   selected = false,
 }: PointMarkerProps) {
-  // Determine size class based on size value
-  const getSizeClass = (size: number) => {
-    if (size <= 96) return "symbol-marker-small";
-    if (size <= 128) return "symbol-marker-medium";
-    if (size <= 156) return "symbol-marker-large";
-    return "symbol-marker-xxl";
-  };
+  const identity = pieceIdentity(symbol);
+  const colors = TRACK_COLORS[identity];
 
   return (
-    <div
-      className={`relative flex flex-col items-center cursor-pointer ${
-        selected ? "ring-2 ring-sky-400 rounded-sm" : ""
-      }`}
-    >
-      {/* The icon (either SIDC or custom image) */}
+    <div className="relative flex flex-col items-center cursor-pointer">
+      {symbol.aiLabel && (
+        <div
+          className="mb-0.5 px-1.5 py-0.5 font-mono text-[10px] tracking-wider uppercase whitespace-nowrap border"
+          style={{
+            color: colors.stroke,
+            borderColor: `${colors.stroke}66`,
+            background: "rgba(8, 12, 20, 0.82)",
+          }}
+        >
+          {symbol.aiLabel}
+        </div>
+      )}
+
       <div
-        className={`absolute bottom-full mb-1 drop-shadow-lg symbol-marker-container ${getSizeClass(size)}`}
+        className="relative"
+        style={{
+          boxShadow: selected ? `0 0 0 1px ${colors.stroke}` : undefined,
+        }}
       >
-        {/* AI-provided label shown above symbol if present */}
-        {symbol.aiLabel && (
-          <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white text-xs px-2 py-0.5 rounded whitespace-nowrap">
-            {symbol.aiLabel}
-          </div>
-        )}
         {symbol.displayType === "image" && symbol.imageUrl ? (
           <Image
             src={symbol.imageUrl}
@@ -48,17 +49,17 @@ export function PointMarker({
             className="object-contain max-w-full max-h-full"
           />
         ) : (
-          <MilitarySymbol symbol={symbol} size={size} />
+          <MilitarySymbol symbol={symbol} size={size} selected={selected} />
         )}
       </div>
 
-      {/* The base point on the map */}
-      <div className="w-3 h-3 bg-primary border-2 border-white rounded-full shadow-md"></div>
-      {typeof symbol.strength === "number" && (
-        <div className="mt-0.5 bg-black/70 text-white text-[10px] leading-none px-1 py-0.5 rounded">
-          {symbol.strength}
-        </div>
-      )}
+      <div
+        className="mt-0.5 h-1.5 w-1.5 rotate-45 border"
+        style={{
+          background: colors.stroke,
+          borderColor: colors.stroke,
+        }}
+      />
     </div>
   );
 }

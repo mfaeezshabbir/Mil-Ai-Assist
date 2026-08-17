@@ -67,25 +67,30 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-tactical-grid bg-[size:20px_20px] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background bg-tactical-grid bg-[size:24px_24px] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-4">
             <SysLogo />
-            <span className="text-2xl font-display font-bold tracking-wider uppercase">
-              MilAIAssist
-            </span>
+            <div className="text-left">
+              <div className="text-lg font-display tracking-[0.22em] uppercase text-primary">
+                MilAIAssist
+              </div>
+              <div className="font-mono text-[10px] tracking-[0.28em] text-muted-foreground uppercase">
+                Theater CIC
+              </div>
+            </div>
           </div>
-          <p className="text-sm font-mono text-muted-foreground">
-            CLASSIFIED // FOR OFFICIAL USE ONLY
+          <p className="text-[10px] font-mono tracking-[0.22em] text-secondary uppercase">
+            Restricted access // exercise
           </p>
         </div>
 
-        <Card className="border-tactical bg-background/95 backdrop-blur-sm shadow-tactical">
+        <Card className="hud-scan border-primary/35 bg-card/90 backdrop-blur-sm shadow-tactical">
           <CardHeader className="text-center">
-            <CardTitle className="flex items-center justify-center gap-2">
+            <CardTitle className="flex items-center justify-center gap-2 text-base tracking-[0.18em]">
               <Shield className="h-5 w-5" />
-              SECURE ACCESS
+              Authenticate
             </CardTitle>
           </CardHeader>
           <CardContent>

@@ -17,14 +17,14 @@ import SysLogo from "../Logo";
 
 export default function LandingHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const handleSignOut = () => {
     signOut();
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-tactical border-primary/50 bg-background/95 backdrop-blur-sm shadow-tactical">
+    <header className="sticky top-0 z-50 w-full hud-scan hud-panel border-x-0 border-t-0">
       <div className="container mx-auto h-16 flex items-center px-4 md:px-6">
         <Link
           href="/"
@@ -32,16 +32,17 @@ export default function LandingHeader() {
           prefetch={false}
         >
           <SysLogo />
-          <span className="text-lg uppercase">MilAIAssist</span>
-          <span className="text-xs text-secondary rounded bg-muted px-1.5 py-0.5 font-mono">
-            v1.0
+          <span className="text-sm uppercase tracking-[0.2em] text-primary">
+            MilAIAssist
+          </span>
+          <span className="hidden sm:inline text-[10px] text-secondary border border-secondary/40 px-1.5 py-0.5 font-mono tracking-widest">
+            CIC
           </span>
         </Link>
-        <div className="h-4 w-px bg-border mx-4 hidden md:block"></div>
-        <div className="text-xs font-mono text-muted-foreground hidden md:block">
-          CLASSIFIED // FOR OFFICIAL USE ONLY
+        <div className="h-4 w-px bg-primary/30 mx-4 hidden md:block" />
+        <div className="text-[10px] font-mono tracking-[0.2em] text-muted-foreground hidden md:block uppercase">
+          Theater command // exercise
         </div>
-        {/* Desktop nav */}
         <nav className="ml-auto items-center gap-4 hidden md:flex">
           {session ? (
             <div className="flex items-center gap-3">
@@ -49,10 +50,10 @@ export default function LandingHeader() {
                 asChild
                 size="sm"
                 variant="secondary"
-                className="font-mono tracking-wide"
+                className="font-mono tracking-[0.16em]"
               >
                 <Link href="/planner">
-                  ENTER SIMULATOR
+                  ENTER CIC
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -86,33 +87,30 @@ export default function LandingHeader() {
               </DropdownMenu>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <Button
-                asChild
-                size="sm"
-                variant="secondary"
-                className="font-mono tracking-wide"
-              >
-                <Link href="/auth/signin">
-                  <Shield className="mr-2 h-4 w-4" />
-                  AUTHENTICATE
-                </Link>
-              </Button>
-            </div>
+            <Button
+              asChild
+              size="sm"
+              variant="secondary"
+              className="font-mono tracking-[0.16em]"
+            >
+              <Link href="/auth/signin">
+                <Shield className="mr-2 h-4 w-4" />
+                AUTHENTICATE
+              </Link>
+            </Button>
           )}
         </nav>
-        {/* Mobile menu button */}
         <button
-          className="ml-auto md:hidden p-2 rounded hover:bg-muted transition-colors"
+          type="button"
+          className="ml-auto md:hidden p-2 hover:bg-muted transition-colors"
           aria-label="Open menu"
           onClick={() => setMenuOpen((v) => !v)}
         >
           <Menu className="h-6 w-6" />
         </button>
       </div>
-      {/* Mobile nav */}
       {menuOpen && (
-        <div className="md:hidden bg-background border-t border-tactical z-50 relative">
+        <div className="md:hidden bg-background border-t border-primary/20 z-50 relative">
           <nav className="flex flex-col gap-2 px-4 py-2">
             {session ? (
               <>
@@ -127,7 +125,7 @@ export default function LandingHeader() {
                   onClick={() => setMenuOpen(false)}
                 >
                   <Link href="/planner">
-                    ENTER SIMULATOR
+                    ENTER CIC
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>

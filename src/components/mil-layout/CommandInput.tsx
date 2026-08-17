@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
-import { Crosshair, Send, Loader2, Radio } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
 import { Textarea } from "../ui/textarea";
@@ -19,33 +18,34 @@ function CommandInput() {
   }, [pending]);
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 bg-card/80 rounded-lg shadow-lg px-3 sm:px-4 py-2 sm:py-3 border border-primary/20 w-full">
-      <span className="hidden md:flex items-center justify-center rounded-full bg-primary/10 p-2 mr-0 sm:mr-2 mb-2 sm:mb-0 self-start sm:self-auto">
-        <Crosshair className="h-5 w-5 text-primary" />
+    <div className="flex items-center gap-3 w-full">
+      <span className="hidden sm:block font-mono text-primary text-sm select-none">
+        &gt;
       </span>
       <Textarea
         name="command"
         ref={textareaRef}
-        className="flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-base resize-y sm:resize-none rounded-md min-h-[44px] sm:min-h-[40px] sm:max-h-10"
-        placeholder="Issue order: Move Raptors to Kabul"
+        className="flex-1 font-mono bg-transparent border-none focus:ring-0 focus-visible:ring-0 text-sm resize-none min-h-9 max-h-9 p-0 placeholder:text-muted-foreground/70"
+        placeholder="Move Raptors to Kabul"
         disabled={pending}
         required
         rows={1}
       />
       <Button
         type="submit"
-        className="flex items-center gap-2 font-mono tracking-wide h-10 px-4 w-full sm:w-auto"
+        variant="outline"
+        className="font-mono tracking-[0.16em] text-xs h-9 px-4"
         size="sm"
         disabled={pending}
       >
         {pending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Processing
+            LINK
           </>
         ) : (
           <>
-            Execute
+            TRANSMIT
             <Send className="h-4 w-4" />
           </>
         )}
@@ -60,22 +60,16 @@ const CommandInputPanel = ({
   formAction?: CommandFormAction;
 }) => {
   return (
-    <div className="md:p-4 md:border-t md:border-tactical border-primary/30 bg-background/90 backdrop-blur-sm w-full">
-      <form action={formAction} className="space-y-2">
-        <div className="hidden md:flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-accent shadow-md" />
-            <h3 className="text-sm font-display uppercase tracking-wide text-primary">
-              Tactical Orders
-            </h3>
+    <div className="hud-scan hud-panel border-x-0 border-b-0 px-4 py-3">
+      <form action={formAction}>
+        <div className="hidden md:flex items-center justify-between mb-2">
+          <div className="font-mono text-[10px] tracking-[0.28em] text-primary uppercase">
+            Orders uplink
           </div>
-          <Badge
-            variant="outline"
-            className="font-mono text-xs border-primary/30 flex items-center justify-center"
-          >
-            <Radio className="h-3 w-3 mr-1 animate-tactical-pulse" />
-            SECURE CHANNEL
-          </Badge>
+          <div className="flex items-center gap-2 font-mono text-[10px] tracking-widest text-muted-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-tactical-pulse" />
+            CHANNEL LIVE
+          </div>
         </div>
         <CommandInput />
       </form>

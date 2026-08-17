@@ -1,8 +1,11 @@
 import type { SymbolData } from "@/types";
-import { haversineKm } from "./movement";
-import { isFriendly, isHostile, unitLabel, withSimDefaults } from "./units";
-
-export const ENGAGEMENT_RANGE_KM = 3;
+import {
+  areEnemies,
+  attackProfile,
+  combatRole,
+  pickTarget,
+} from "./rules";
+import { isCombatUnit, unitLabel, withSimDefaults } from "./units";
 
 export type CombatLogEntry = string;
 
@@ -10,63 +13,82 @@ function clampStrength(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-export function resolveCombat(units: SymbolData[]): {
+function shotDamage(attacker: SymbolData, defender: SymbolData, units: SymbolData[]): {
+  damage: number;
+  notes: string[];
+} {
+  const profile = attackProfile(attacker, defender, units);
+  const def = withSimDefaults(defender).defense ?? 3;
+  const raw = profile.attack * 5.2 - def * 0.85;
+  return {
+    damage: Math.max(4, Math.round(raw)),
+    notes: profile.notes,
+  };
+}
+
+function fireTargets(units: SymbolData[], attacker: SymbolData): SymbolData[] {
+  return units.filter((unit) => {
+    if (unit.id === attacker.id) return false;
+    if (isCombatUnit(unit) && areEnemies(attacker, unit)) return true;
+    if (
+      (unit.pieceKind === "fob" || unit.pieceKind === "supply") &&
+      areEnemies(attacker, unit)
+    ) {
+      return true;
+    }
+    return false;
+  });
+}
+
+export function resolveCombat(
+  units: SymbolData[],
+  movedIds: Set<string> = new Set()
+): {
   units: SymbolData[];
   log: CombatLogEntry[];
 } {
   const next = units.map(withSimDefaults);
-  const friends = next.filter((unit) =>
-    isFriendly(unit.symbolStandardIdentity)
-  );
-  const hostiles = next.filter((unit) =>
-    isHostile(unit.symbolStandardIdentity)
-  );
-  const usedHostile = new Set<string>();
   const log: CombatLogEntry[] = [];
-  const strengthById = new Map(next.map((unit) => [unit.id, unit.strength ?? 100]));
+  const incoming = new Map<string, number>();
 
-  for (const friend of friends) {
-    let best: { unit: SymbolData; distance: number } | null = null;
-    for (const hostile of hostiles) {
-      if (usedHostile.has(hostile.id)) continue;
-      const distance = haversineKm(
-        friend.latitude,
-        friend.longitude,
-        hostile.latitude,
-        hostile.longitude
-      );
-      if (distance > ENGAGEMENT_RANGE_KM) continue;
-      if (!best || distance < best.distance) {
-        best = { unit: hostile, distance };
-      }
-    }
-    if (!best) continue;
-
-    usedHostile.add(best.unit.id);
-    const friendStr = strengthById.get(friend.id) ?? 100;
-    const hostileStr = strengthById.get(best.unit.id) ?? 100;
-    const friendHit = 10 + friendStr * 0.25;
-    const hostileHit = 10 + hostileStr * 0.25;
-    const friendAfter = clampStrength(friendStr - hostileHit);
-    const hostileAfter = clampStrength(hostileStr - friendHit);
-    strengthById.set(friend.id, friendAfter);
-    strengthById.set(best.unit.id, hostileAfter);
-
+  const fire = (attacker: SymbolData, defender: SymbolData) => {
+    const { damage, notes } = shotDamage(attacker, defender, next);
+    incoming.set(defender.id, (incoming.get(defender.id) ?? 0) + damage);
+    const tag = notes.length ? ` [${notes.join("+")}]` : "";
     log.push(
-      `${unitLabel(friend)} (${friendAfter}) engaged ${unitLabel(best.unit)} (${hostileAfter}) at ${best.distance.toFixed(1)} km`
+      `${unitLabel(attacker)} fires on ${unitLabel(defender)} for ${damage}${tag}`
     );
+  };
+
+  for (const attacker of next.filter(isCombatUnit)) {
+    if (combatRole(attacker) === "artillery" && movedIds.has(attacker.id)) {
+      log.push(`${unitLabel(attacker)} moved — no fire this turn`);
+      continue;
+    }
+    const target = pickTarget(attacker, fireTargets(next, attacker));
+    if (!target) continue;
+    fire(attacker, target.unit);
   }
 
   const surviving = next
-    .map((unit) => ({
-      ...unit,
-      strength: strengthById.get(unit.id) ?? unit.strength ?? 100,
-    }))
+    .map((unit) => {
+      const hit = incoming.get(unit.id);
+      if (!hit) return unit;
+      const strength = clampStrength((unit.strength ?? 100) - hit);
+      const status =
+        strength <= 0
+          ? "Destroyed"
+          : strength < 45
+            ? "Damaged"
+            : unit.status;
+      return { ...unit, strength, status };
+    })
     .filter((unit) => {
-      const fights =
-        isFriendly(unit.symbolStandardIdentity) ||
-        isHostile(unit.symbolStandardIdentity);
-      if (!fights) return true;
+      const destroyable =
+        isCombatUnit(unit) ||
+        unit.pieceKind === "fob" ||
+        unit.pieceKind === "supply";
+      if (!destroyable) return true;
       if ((unit.strength ?? 0) > 0) return true;
       log.push(`${unitLabel(unit)} destroyed`);
       return false;

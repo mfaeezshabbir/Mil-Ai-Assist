@@ -36,21 +36,18 @@ const SymbolSizer: React.FC<SymbolSizerProps> = ({
 
   return (
     <div className="lg:hidden" ref={sizerRef}>
-      <div
+      <button
+        type="button"
         aria-label={showSymbolSize ? "Close symbol sizer" : "Open symbol sizer"}
-        className={
-          "border-2 border-primary h-10 w-10 rounded-lg bg-gradient-to-br from-accent to-primary text-white shadow-2xl flex items-center justify-center transform transition-transform duration-200 p-[2px]"
-        }
+        className="hud-rail-btn"
         onClick={() => setShowSymbolSize((prev) => !prev)}
-        role="button"
-        tabIndex={0}
       >
-        <ImageUpscale className="h-6 w-6" />
-      </div>
+        <ImageUpscale className="h-4 w-4" />
+      </button>
       {showSymbolSize && (
-        <div className="absolute right-0 mt-2 z-20 bg-black/60 backdrop-blur-md rounded-lg border border-white/30 p-2 shadow-lg flex flex-col items-center">
-          <div className="text-[10px] text-white/60 mb-2 px-2 font-mono tracking-widest uppercase">
-            Symbol Size
+        <div className="absolute right-0 mt-2 z-20 hud-panel p-2 flex flex-col items-center min-w-[12rem]">
+          <div className="text-[10px] text-primary mb-2 px-2 font-mono tracking-[0.22em] uppercase">
+            Marker scale
           </div>
           <div className="flex flex-row gap-2 justify-center items-center">
             {Object.entries(SYMBOL_SIZES).map(([size, pixels]) => (
@@ -62,21 +59,20 @@ const SymbolSizer: React.FC<SymbolSizerProps> = ({
                   );
                   setShowSymbolSize(false);
                 }}
-                className={`flex flex-col items-center px-2 py-1 rounded-lg transition-all border border-transparent
-                                                                        ${
-                                                                          symbolSize ===
-                                                                          size
-                                                                            ? "bg-white/20 text-white border-white/40 shadow"
-                                                                            : "text-white/70 hover:bg-white/10 hover:text-white"
-                                                                        }`}
+                className={`flex flex-col items-center px-2 py-1 transition-all border
+                  ${
+                    symbolSize === size
+                      ? "bg-primary/15 text-primary border-primary/50"
+                      : "text-muted-foreground border-transparent hover:bg-muted hover:text-foreground"
+                  }`}
                 style={{ minWidth: 48 }}
               >
                 <span
-                  className="inline-block mb-1 rounded-full border border-white/30"
+                  className="inline-block mb-1 border border-primary/40"
                   style={{
                     width: (pixels as number) / 2,
                     height: (pixels as number) / 2,
-                    background: "rgba(255,255,255,0.15)",
+                    background: "hsl(186 88% 48% / 0.2)",
                   }}
                 />
                 <span className="text-[11px] font-mono uppercase">{size}</span>

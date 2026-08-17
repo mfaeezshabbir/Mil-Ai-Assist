@@ -18,7 +18,7 @@ export function haversineKm(
   return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
-function destinationPoint(
+export function destinationPoint(
   lat: number,
   lng: number,
   bearingRad: number,
@@ -42,7 +42,10 @@ function destinationPoint(
   return { latitude: toDeg(lat2), longitude: toDeg(lng2) };
 }
 
-export function stepUnitTowardOrder(unit: SymbolData): SymbolData {
+export function stepUnitTowardOrder(
+  unit: SymbolData,
+  speedFactor = 1
+): SymbolData {
   const next = withSimDefaults(unit);
   const order = next.order;
   if (!order || order.type === "hold") {
@@ -55,7 +58,7 @@ export function stepUnitTowardOrder(unit: SymbolData): SymbolData {
     order.destLat,
     order.destLng
   );
-  const speed = next.speedKmPerTurn ?? 15;
+  const speed = (next.speedKmPerTurn ?? 15) * speedFactor;
 
   if (remaining <= 0.05 || remaining <= speed) {
     return {

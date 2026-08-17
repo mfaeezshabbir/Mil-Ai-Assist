@@ -24,17 +24,19 @@
 .mapboxgl-ctrl-group {
   background-color: hsl(var(--card)) !important;
   border: 1px solid hsl(var(--primary) / 0.3) !important;
+  border-radius: 0 !important;
   box-shadow:
-    0 0 0 1px rgba(0, 255, 0, 0.1),
-    0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+    0 0 0 1px hsl(186 88% 48% / 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.55) !important;
 }
 
 .mapboxgl-ctrl button {
   color: hsl(var(--foreground)) !important;
+  border-radius: 0 !important;
 }
 
 .mapboxgl-ctrl button:hover {
-  background-color: hsl(var(--accent)) !important;
+  background-color: hsl(186 88% 48% / 0.18) !important;
 }
 
 .mapboxgl-ctrl button.active {
@@ -45,8 +47,8 @@
 /* Tactical map overlay */
 .tactical-grid-overlay {
   background-image:
-    linear-gradient(rgba(0, 255, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 0, 0.05) 1px, transparent 1px);
+    linear-gradient(hsl(186 88% 48% / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(186 88% 48% / 0.06) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -73,8 +75,8 @@
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   box-shadow:
-    0 0 0 1px rgba(0, 255, 0, 0.05),
-    0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    0 0 0 1px hsl(186 88% 48% / 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.55);
 }
 
 /* Military input styling */
@@ -108,8 +110,8 @@
 }
 
 .status-active {
-  background-color: hsl(var(--tactical-green));
-  box-shadow: 0 0 5px hsl(var(--tactical-green));
+  background-color: hsl(var(--primary));
+  box-shadow: 0 0 5px hsl(var(--primary));
 }
 
 .status-alert {
@@ -137,4 +139,99 @@
   font-family: var(--font-display);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.hud-scan {
+  position: relative;
+}
+
+.hud-scan::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    hsl(222 32% 5% / 0.18) 3px
+  );
+  opacity: 0.35;
+}
+
+.hud-panel {
+  position: relative;
+  background: hsl(222 32% 6% / 0.82);
+  border: 1px solid hsl(186 88% 48% / 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.hud-rail-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(222 32% 7% / 0.9);
+  border: 1px solid hsl(186 88% 48% / 0.35);
+  color: hsl(186 88% 72%);
+  cursor: pointer;
+}
+
+.hud-rail-btn:hover {
+  background: hsl(186 88% 48% / 0.15);
+  color: hsl(186 88% 80%);
+}
+
+.hud-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.hud-corner-tl {
+  top: 8px;
+  left: 8px;
+  border-top: 2px solid hsl(186 88% 48% / 0.85);
+  border-left: 2px solid hsl(186 88% 48% / 0.85);
+}
+
+.hud-corner-tr {
+  top: 8px;
+  right: 8px;
+  border-top: 2px solid hsl(186 88% 48% / 0.85);
+  border-right: 2px solid hsl(186 88% 48% / 0.85);
+}
+
+.hud-viewport .hud-corner-tr {
+  right: 3.5rem;
+}
+
+.hud-corner-bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom: 2px solid hsl(186 88% 48% / 0.85);
+  border-left: 2px solid hsl(186 88% 48% / 0.85);
+}
+
+.hud-corner-br {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 2px solid hsl(186 88% 48% / 0.85);
+  border-right: 2px solid hsl(186 88% 48% / 0.85);
+}
+
+.sidc-glyph {
+  overflow: hidden;
+}
+
+.sidc-glyph svg {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
 }

@@ -4,33 +4,27 @@ import Link from "next/link";
 
 export default function LandingFooter() {
   return (
-    <footer className="w-full border-t border-primary/20 bg-gradient-to-t from-background/95 to-background/80 backdrop-blur-md shadow-tactical-inset">
-      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between py-8 px-4 gap-6">
-        <div className="flex flex-col md:flex-row items-center gap-3">
-          <span className="text-xs font-semibold tracking-widest text-primary uppercase">
-            UNCLASSIFIED
-          </span>
-          <span className="hidden md:inline text-muted-foreground">|</span>
-          <span className="text-xs font-semibold tracking-widest text-primary uppercase">
-            MIL-STD-2525D COMPLIANT
-          </span>
-          <span className="hidden md:inline text-muted-foreground">|</span>
-          <span className="text-xs font-mono text-muted-foreground">
-            {new Date().getFullYear()}
-          </span>
+    <footer className="w-full border-t border-primary/25 bg-card/40">
+      <div className="container mx-auto flex flex-col md:flex-row items-center justify-between py-6 px-4 gap-4">
+        <div className="flex flex-col md:flex-row items-center gap-3 font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">
+          <span className="text-primary">Exercise</span>
+          <span className="hidden md:inline text-primary/30">|</span>
+          <span>MIL-STD-2525D</span>
+          <span className="hidden md:inline text-primary/30">|</span>
+          <span>{new Date().getFullYear()}</span>
         </div>
         <nav className="flex items-center gap-6">
           <Link
             href="/security-policy"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-150"
+            className="text-[11px] font-mono tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors"
           >
-            Security Policy
+            Security
           </Link>
           <Link
             href="/user-manual"
-            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors duration-150"
+            className="text-[11px] font-mono tracking-widest uppercase text-muted-foreground hover:text-primary transition-colors"
           >
-            User Manual
+            Manual
           </Link>
         </nav>
       </div>

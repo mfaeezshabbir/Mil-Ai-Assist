@@ -1,112 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import type { SymbolData } from "@/types";
-import MS from "milsymbol";
-import {
-  generateSIDC,
-  validateSIDC,
-  getSIDCMetadata,
-} from "@/lib/sidc-generator";
-import { toTitleCase } from "@/lib/utils";
+import { TrackSymbol } from "@/components/track-symbol";
+import { generateSIDC } from "@/lib/sidc-generator";
 import { getFunctionIdName } from "@/lib/sidc-mappings";
+import { trackClass, trackClassLabel } from "@/lib/sim/track-style";
 
 type MilitarySymbolProps = {
   symbol: SymbolData;
   size?: number;
+  selected?: boolean;
 };
 
-export function MilitarySymbol({ symbol, size = 35 }: MilitarySymbolProps) {
-  const [svgHtml, setSvgHtml] = useState("");
-  const [sidc, setSidc] = useState("");
-  const [isValid, setIsValid] = useState(true);
-
-  useEffect(() => {
-    // milsymbol is a client-side library, so we only run it in the browser
-    if (typeof window === "undefined" || !symbol) return;
-
-    try {
-      const generatedSidc = generateSIDC(symbol);
-      setSidc(generatedSidc);
-
-      // Validate the SIDC using milsymbol
-      const isValidSidc = validateSIDC(generatedSidc);
-      setIsValid(isValidSidc);
-
-      const {
-        id,
-        latitude,
-        longitude,
-        symbolEchelon,
-        mainIconId,
-        symbolStandardIdentity,
-        context,
-        status,
-        hqtfd,
-        symbolSet,
-        modifier1,
-        modifier2,
-        ...options
-      } = symbol;
-
-      const milSymbol = new MS.Symbol(generatedSidc, {
-        ...options,
-        size: size,
-        colorMode: "Light",
-        outlineWidth: 3,
-        outlineColor: "rgba(0, 0, 0, 0.9)",
-      });
-
-      setSvgHtml(milSymbol.asSVG());
-
-      // Log metadata for debugging in development
-      if (process.env.NODE_ENV === "development") {
-        const metadata = getSIDCMetadata(generatedSidc);
-        console.log("SIDC Metadata:", metadata);
-      }
-    } catch (e) {
-      console.error("Error creating military symbol:", e, symbol);
-      setIsValid(false);
-      // Fallback to a simple placeholder if milsymbol fails
-      setSvgHtml(
-        `<svg width="${size}" height="${size}"><rect x="0" y="0" width="${size}" height="${size}" fill="red" /></svg>`
-      );
-    }
-  }, [symbol, size]);
-
+export function MilitarySymbol({
+  symbol,
+  size = 35,
+  selected = false,
+}: MilitarySymbolProps) {
   if (!symbol) return null;
 
+  const sidc = (() => {
+    try {
+      return generateSIDC(symbol);
+    } catch {
+      return "";
+    }
+  })();
+  const kind = trackClass(symbol);
   const title = [
-    symbol.context,
-    symbol.status,
+    symbol.aiLabel,
+    trackClassLabel(kind),
+    getFunctionIdName(symbol.symbolSet, symbol.mainIconId),
     symbol.symbolStandardIdentity,
-    getFunctionIdName(symbol.symbolSet, symbol.mainIconId) + " unit",
-    symbol.symbolEchelon ? `(${symbol.symbolEchelon})` : "",
-    symbol.hqtfd !== "Not Applicable" ? `(${toTitleCase(symbol.hqtfd)})` : "",
-    `at ${symbol.latitude.toFixed(4)}, ${symbol.longitude.toFixed(4)}`,
-    `\nSIDC: ${sidc}`,
-    !isValid ? "\n⚠️ Invalid SIDC" : "",
+    symbol.symbolEchelon,
+    `SIDC ${sidc}`,
   ]
     .filter(Boolean)
-    .join(" ");
+    .join(" · ");
 
-  // The container div is for tooltip and layout purposes.
-  // dangerouslySetInnerHTML will insert the SVG from milsymbol.
   return (
     <div
       title={title}
       aria-label={title}
-      className={`drop-shadow-lg military-symbol-container military-symbol-preview ${!isValid ? "ring-2 ring-red-500 ring-opacity-50 rounded" : ""}`}
-      style={{
-        width: `${size}px`,
-        height: `${size}px`,
-        flexShrink: 0,
-      }}
+      className="military-symbol-container military-symbol-preview flex items-center justify-center"
+      style={{ width: size, height: size, flexShrink: 0 }}
     >
-      <div
-        className="w-full h-full flex items-center justify-center"
-        dangerouslySetInnerHTML={{ __html: svgHtml }}
-      />
+      <TrackSymbol symbol={symbol} size={size} selected={selected} />
     </div>
   );
 }

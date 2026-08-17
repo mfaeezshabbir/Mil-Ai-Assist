@@ -9,8 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { MAP_STYLES } from "@/components/map-view";
 import SysLogo from "../Logo";
 
@@ -19,113 +17,126 @@ type Props = {
   turn: number;
   friendCount: number;
   hostileCount: number;
+  objFriend?: number;
+  objHostile?: number;
+  objTotal?: number;
   onChangeMapStyle: (style: string) => void;
   onOpenList: () => void;
   onResolveTurn: () => void;
 };
-
-function Logo() {
-  return (
-    <div className="flex items-center">
-      <SysLogo />
-      <h1 className="text-lg font-display font-bold uppercase tracking-wider hidden md:inline">
-        MilAIAssist
-      </h1>
-    </div>
-  );
-}
 
 export default function PlannerHeader({
   currentTime,
   turn,
   friendCount,
   hostileCount,
+  objFriend = 0,
+  objHostile = 0,
+  objTotal = 0,
   onChangeMapStyle,
   onOpenList,
   onResolveTurn,
 }: Props) {
+  const total = Math.max(friendCount + hostileCount, 1);
+  const friendPct = (friendCount / total) * 100;
+
   return (
-    <header className="border-b border-tactical border-primary/50 bg-background/90 backdrop-blur-sm shadow-tactical z-10 flex flex-row items-center justify-between px-4 py-2 gap-2">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <Logo />
-        <div className="hidden md:flex items-center">
-          <Separator orientation="vertical" className="h-6 mx-3" />
-          <Badge
-            variant="outline"
-            className="font-mono text-xs tracking-wide px-2 py-0 border-primary/30"
-          >
-            ARMY SIMULATOR
-          </Badge>
+    <header className="relative z-20 hud-scan hud-panel border-x-0 border-t-0">
+      <div className="flex items-stretch gap-0">
+        <div className="flex items-center gap-3 px-4 py-3 min-w-0">
+          <SysLogo />
+          <div className="hidden sm:block min-w-0">
+            <div className="font-display text-sm tracking-[0.22em] uppercase text-primary leading-none">
+              MilAIAssist
+            </div>
+            <div className="font-mono text-[10px] tracking-widest text-muted-foreground mt-1 uppercase">
+              Theater CIC
+            </div>
+          </div>
         </div>
-        <Badge
-          variant="outline"
-          className="font-mono text-xs px-2 py-0.5 border-primary/40 bg-primary/5 text-primary"
-        >
-          TURN {turn}
-        </Badge>
-        <span className="hidden sm:inline font-mono text-xs text-muted-foreground">
-          F {friendCount} / H {hostileCount}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <Badge
-          variant="outline"
-          className="rounded-sm hidden lg:flex items-center font-mono text-xs px-3 py-1 border-primary/40 bg-primary/5 text-primary"
-          title="Local clock at map center"
-        >
-          {currentTime}
-        </Badge>
-        <Button
-          size="sm"
-          className="font-mono text-xs"
-          onClick={onResolveTurn}
-        >
-          <Play className="h-3 w-3 mr-1" />
-          RESOLVE TURN
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="font-mono text-xs border-primary/30"
-            >
-              <Layers className="h-3 w-3 mr-1" />
-              <span className="hidden md:inline">MAP</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() => onChangeMapStyle(MAP_STYLES.TACTICAL)}
-            >
-              Tactical (Dark)
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onChangeMapStyle(MAP_STYLES.SATELLITE)}
-            >
-              Satellite
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onChangeMapStyle(MAP_STYLES.TERRAIN)}
-            >
-              Terrain
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => onChangeMapStyle(MAP_STYLES.STREETS)}
-            >
-              Streets
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Button
-          variant="outline"
-          size="sm"
-          className="font-mono text-xs border-primary/30"
-          onClick={onOpenList}
-        >
-          <Waypoints className="h-3 w-3 mr-1" />
-          <span className="hidden md:inline">FORCES</span>
-        </Button>
+
+        <div className="hidden md:flex items-center px-4 border-l border-primary/20">
+          <div>
+            <div className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground">
+              TURN
+            </div>
+            <div className="font-display text-3xl leading-none text-secondary tabular-nums">
+              {String(turn).padStart(2, "0")}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 min-w-0 px-4 py-2 hidden sm:flex flex-col justify-center gap-1 border-l border-primary/20">
+          <div className="flex justify-between font-mono text-[10px] tracking-widest uppercase">
+            <span className="text-primary">FRIEND {friendCount}</span>
+            <span className="text-destructive">HOSTILE {hostileCount}</span>
+          </div>
+          <div className="h-1.5 w-full bg-muted overflow-hidden flex">
+            <div
+              className="h-full bg-primary"
+              style={{ width: `${friendPct}%` }}
+            />
+            <div className="h-full flex-1 bg-destructive" />
+          </div>
+          <div className="font-mono text-[10px] text-muted-foreground tracking-widest">
+            PHASE ORDERS · {currentTime}
+            {objTotal > 0
+              ? ` · OBJ F ${objFriend}/${objTotal}  H ${objHostile}/${objTotal} · HOLD 2`
+              : ""}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-2 ml-auto">
+          <span className="md:hidden font-display text-xl text-secondary tabular-nums px-2">
+            T{turn}
+          </span>
+          <Button
+            size="sm"
+            variant="secondary"
+            className="font-display tracking-[0.18em] text-xs h-11 px-5 shadow-amber"
+            onClick={onResolveTurn}
+          >
+            <Play className="h-4 w-4" />
+            RESOLVE
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" title="Map style">
+                <Layers className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="font-mono text-xs">
+              <DropdownMenuItem
+                onClick={() => onChangeMapStyle(MAP_STYLES.TACTICAL)}
+              >
+                Tactical
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onChangeMapStyle(MAP_STYLES.SATELLITE)}
+              >
+                Satellite
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onChangeMapStyle(MAP_STYLES.TERRAIN)}
+              >
+                Terrain
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => onChangeMapStyle(MAP_STYLES.STREETS)}
+              >
+                Streets
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button
+            variant="outline"
+            size="icon"
+            title="Force list"
+            onClick={onOpenList}
+          >
+            <Waypoints className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </header>
   );

@@ -9,10 +9,11 @@ import {
 } from "@/app/actions";
 import { useToast } from "@/hooks/use-toast";
 import type { SIDCMetadataOutput } from "@/ai/flows/extract-sidc-metadata";
-import type { RouteData, SymbolData } from "@/types";
+import type { ForceSide, RouteData, SymbolData } from "@/types";
 import { MapView, MAP_STYLES } from "@/components/map-view";
 import PlannerHeader from "@/components/mil-layout/PlannerHeader";
 import MapOverlay from "@/components/mil-layout/MapOverlay";
+import WargameTray from "@/components/wargame-tray";
 import { SymbolListSheet } from "./symbol-list-sheet";
 import { SymbolEditor } from "./symbol-editor";
 import CommandInputPanel from "@/components/mil-layout/CommandInput";
@@ -24,9 +25,13 @@ import {
 import { resolveTurn } from "@/lib/sim/turn";
 import {
   countForces,
+  countObjectives,
+  isCombatUnit,
   unitLabel,
   withSimDefaults,
 } from "@/lib/sim/units";
+import { createPiece, type CatalogId } from "@/lib/sim/catalog";
+import { sampleBattle } from "@/lib/sim/scenario";
 
 const initialState: ActionResult = {
   id: null,
@@ -94,10 +99,14 @@ export function MilAssistLayout() {
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [listSheetOpen, setListSheetOpen] = useState(false);
   const [createMode, setCreateMode] = useState(false);
+  const [deployId, setDeployId] = useState<CatalogId | null>(null);
+  const [deploySide, setDeploySide] = useState<ForceSide>("Friend");
   const [lastCombatLine, setLastCombatLine] = useState<string | null>(null);
+  const [aar, setAar] = useState<string[]>([]);
   const [defaultCoordinates, setDefaultCoordinates] = useState<
     { lng: number; lat: number } | undefined
   >();
+  const [pickingLocation, setPickingLocation] = useState(false);
   const [currentMapStyle, setCurrentMapStyle] = useState<string>(
     MAP_STYLES.TACTICAL
   );
@@ -119,8 +128,13 @@ export function MilAssistLayout() {
   const mapClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const symbolsRef = useRef(symbols);
   const selectedIdRef = useRef(selectedId);
+  const deployIdRef = useRef(deployId);
+  const deploySideRef = useRef(deploySide);
+  const pickingLocationRef = useRef(false);
   symbolsRef.current = symbols;
   selectedIdRef.current = selectedId;
+  deployIdRef.current = deployId;
+  deploySideRef.current = deploySide;
   const { toast } = useToast();
   const [state, formAction] = useActionState(
     getMapFeatureFromCommand,
@@ -129,6 +143,19 @@ export function MilAssistLayout() {
 
   const selectedUnit = symbols.find((unit) => unit.id === selectedId) ?? null;
   const forces = countForces(symbols);
+  const objectives = countObjectives(symbols);
+
+  const placeCatalogPiece = (coords: { lat: number; lng: number }) => {
+    const id = deployIdRef.current;
+    if (!id) return;
+    const piece = createPiece(id, coords, deploySideRef.current);
+    setSymbols((prev) => [...prev, piece]);
+    setSelectedId(piece.id);
+    toast({
+      title: "Piece placed",
+      description: unitLabel(piece),
+    });
+  };
 
   const assignMoveOrder = (
     unitId: string,
@@ -182,6 +209,16 @@ export function MilAssistLayout() {
     const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
   }, [viewState.longitude]);
+
+  useEffect(() => {
+    const canvas = mapRef.current?.getMap()?.getCanvas();
+    if (!canvas) return;
+    const previous = canvas.style.cursor;
+    canvas.style.cursor = pickingLocation ? "crosshair" : previous;
+    return () => {
+      canvas.style.cursor = previous;
+    };
+  }, [pickingLocation]);
 
   const handleViewStateChange = (newViewState: ViewState) => {
     setViewState(newViewState);
@@ -305,10 +342,44 @@ export function MilAssistLayout() {
     setEditSheetOpen(true);
   };
 
+  const beginLocationPick = (draft: SymbolData) => {
+    pickingLocationRef.current = true;
+    setActiveSymbol(draft);
+    setPickingLocation(true);
+    setDeployId(null);
+    setEditSheetOpen(false);
+  };
+
+  const finishLocationPick = (coords: { lat: number; lng: number }) => {
+    const lat = Math.round(coords.lat * 10000) / 10000;
+    const lng = Math.round(coords.lng * 10000) / 10000;
+    pickingLocationRef.current = false;
+    setPickingLocation(false);
+    setDefaultCoordinates({ lat, lng });
+    setActiveSymbol((prev) =>
+      prev ? { ...prev, latitude: lat, longitude: lng } : prev
+    );
+    setEditSheetOpen(true);
+  };
+
+  const cancelLocationPick = () => {
+    pickingLocationRef.current = false;
+    setPickingLocation(false);
+    setEditSheetOpen(true);
+  };
+
   const handleMapDoubleClick = (coords: { lng: number; lat: number }) => {
+    if (pickingLocationRef.current) {
+      finishLocationPick({ lat: coords.lat, lng: coords.lng });
+      return;
+    }
     if (mapClickTimer.current) {
       clearTimeout(mapClickTimer.current);
       mapClickTimer.current = null;
+    }
+    if (deployIdRef.current) {
+      placeCatalogPiece({ lat: coords.lat, lng: coords.lng });
+      return;
     }
     setActiveSymbol(null);
     setCreateMode(true);
@@ -317,7 +388,23 @@ export function MilAssistLayout() {
   };
 
   const handleMapClick = (coords: { lng: number; lat: number }) => {
+    if (pickingLocationRef.current) {
+      if (mapClickTimer.current) {
+        clearTimeout(mapClickTimer.current);
+        mapClickTimer.current = null;
+      }
+      finishLocationPick({ lat: coords.lat, lng: coords.lng });
+      return;
+    }
     if (Date.now() < ignoreMapClickUntil.current) return;
+    if (deployIdRef.current) {
+      if (mapClickTimer.current) {
+        clearTimeout(mapClickTimer.current);
+        mapClickTimer.current = null;
+      }
+      placeCatalogPiece({ lat: coords.lat, lng: coords.lng });
+      return;
+    }
     if (!selectedId) return;
     if (mapClickTimer.current) clearTimeout(mapClickTimer.current);
     mapClickTimer.current = setTimeout(() => {
@@ -326,13 +413,18 @@ export function MilAssistLayout() {
         (item) => item.id === selectedIdRef.current
       );
       const id = selectedIdRef.current;
-      if (!id || !unit) return;
+      if (!id || !unit || !isCombatUnit(unit)) return;
       assignMoveOrder(id, { lat: coords.lat, lng: coords.lng }, unitLabel(unit));
     }, 280);
   };
 
   const handleSymbolClick = (symbol: SymbolData) => {
+    if (pickingLocationRef.current) {
+      finishLocationPick({ lat: symbol.latitude, lng: symbol.longitude });
+      return;
+    }
     ignoreMapClickUntil.current = Date.now() + 300;
+    setDeployId(null);
     setSelectedId(symbol.id);
     setCreateMode(false);
     setEditSheetOpen(false);
@@ -380,6 +472,7 @@ export function MilAssistLayout() {
     setTurn((prev) => prev + 1);
     const summary = result.log[result.log.length - 1] ?? "No contact this turn";
     setLastCombatLine(summary);
+    setAar(result.log.slice(-4));
     if (selectedId && !result.units.some((unit) => unit.id === selectedId)) {
       setSelectedId(null);
     }
@@ -391,40 +484,44 @@ export function MilAssistLayout() {
           : "Forces moved. No engagement.",
     });
     if (result.victor === "friend") {
-      toast({ title: "Friendly force prevails", description: summary });
+      toast({
+        title:
+          result.reason === "objectives"
+            ? "Objectives held"
+            : "Friendly force prevails",
+        description: summary,
+      });
     }
     if (result.victor === "hostile") {
       toast({
         variant: "destructive",
-        title: "Hostile force prevails",
+        title:
+          result.reason === "objectives"
+            ? "Objectives lost"
+            : "Hostile force prevails",
         description: summary,
       });
     }
   };
 
   return (
-    <div className="flex flex-col h-dvh bg-tactical-grid bg-[size:20px_20px]">
+    <div className="flex flex-col h-dvh bg-background bg-tactical-grid bg-[size:24px_24px]">
       <PlannerHeader
         currentTime={currentTime}
         turn={turn}
         friendCount={forces.friend}
         hostileCount={forces.hostile}
+        objFriend={objectives.friend}
+        objHostile={objectives.hostile}
+        objTotal={objectives.total}
         onChangeMapStyle={(s) => setCurrentMapStyle(s)}
         onOpenList={() => setListSheetOpen(true)}
         onResolveTurn={handleResolveTurn}
       />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 relative">
-            <MapOverlay
-              viewState={viewState}
-              formatCoordinate={formatCoordinate}
-              formatScale={formatScale}
-              selectedUnit={selectedUnit}
-              lastCombatLine={lastCombatLine}
-            />
-
+      <div className="flex flex-1 min-h-0 overflow-hidden p-2 pt-0">
+        <div className="flex-1 flex flex-col min-h-0 border border-primary/25 bg-card/40">
+          <div className={`flex-1 relative min-h-0 overflow-hidden ${pickingLocation ? "cursor-crosshair" : ""}`}>
             <MapView
               ref={mapRef}
               symbols={symbols}
@@ -441,6 +538,43 @@ export function MilAssistLayout() {
               onSymbolSizeChange={setSymbolSize}
               formAction={formAction}
             />
+
+            <WargameTray
+              deployId={deployId}
+              deploySide={deploySide}
+              onDeployId={setDeployId}
+              onDeploySide={setDeploySide}
+              onLoadSample={() => {
+                const pieces = sampleBattle();
+                setSymbols(pieces);
+                setTurn(1);
+                setSelectedId(null);
+                setDeployId(null);
+                setLastCombatLine(null);
+                setAar([]);
+                mapRef.current?.flyTo({
+                  center: [73.09, 33.71],
+                  zoom: 10.4,
+                });
+                toast({
+                  title: "Sample battle loaded",
+                  description: "Two forces, two objectives, mines and a FOB",
+                });
+              }}
+            />
+
+            <MapOverlay
+              viewState={viewState}
+              formatCoordinate={formatCoordinate}
+              formatScale={formatScale}
+              selectedUnit={selectedUnit}
+              units={symbols}
+              lastCombatLine={lastCombatLine}
+              aar={aar}
+              placing={!!deployId}
+              pickingLocation={pickingLocation}
+              onCancelPick={cancelLocationPick}
+            />
           </div>
 
           <div className="hidden lg:block">
@@ -452,15 +586,22 @@ export function MilAssistLayout() {
       <SymbolEditor
         open={editSheetOpen}
         onOpenChange={(open) => {
+          if (!open && pickingLocationRef.current) {
+            setEditSheetOpen(false);
+            return;
+          }
           setEditSheetOpen(open);
           if (!open) {
             setCreateMode(false);
             setDefaultCoordinates(undefined);
+            setPickingLocation(false);
+            pickingLocationRef.current = false;
           }
         }}
         symbol={activeSymbol}
         createMode={createMode}
         defaultCoordinates={defaultCoordinates}
+        onPickLocation={beginLocationPick}
         onSave={handleSymbolSave}
         onDelete={(symbolId) => {
           setSymbols((prev) => prev.filter((s) => s.id !== symbolId));

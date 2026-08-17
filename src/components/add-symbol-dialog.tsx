@@ -97,13 +97,13 @@ export function AddSymbolDialog({
   // Simple mapping for common categories to function IDs
   const getCategoryId = (category: string): string => {
     const mapping: Record<string, string> = {
-      Infantry: "110100",
-      Armor: "120100",
-      Artillery: "130100",
-      Engineer: "140100",
-      Reconnaissance: "150100",
-      Aviation: "050000",
-      Naval: "100000",
+      Infantry: "121100",
+      Armor: "120500",
+      Artillery: "130300",
+      Engineer: "140700",
+      Reconnaissance: "121300",
+      Aviation: "120600",
+      Naval: "120000",
     };
     return mapping[category] || "000000";
   };
@@ -114,7 +114,7 @@ export function AddSymbolDialog({
         <Button
           variant="outline"
           size="icon"
-          className="bg-gradient-to-br from-accent to-primary text-white hover:from-primary hover:to-accent border-none shadow-md"
+          className="hud-rail-btn"
           title="Add Symbol Manually"
         >
           <Plus className="h-5 w-5" />

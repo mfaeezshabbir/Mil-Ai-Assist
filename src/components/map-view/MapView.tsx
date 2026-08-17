@@ -13,6 +13,10 @@ import type { RouteData, SymbolData } from "@/types";
 import Controls from "./Controls";
 import Markers from "./Markers";
 import type { CommandFormAction } from "@/components/mil-layout/CommandInput";
+import { circlePolygon } from "@/lib/sim/geo";
+import { BOARD } from "@/lib/sim/catalog";
+import { isCombatUnit } from "@/lib/sim/units";
+import { TRACK_COLORS, pieceIdentity } from "@/lib/sim/track-style";
 
 export type MapViewProps = {
   symbols: SymbolData[];
@@ -133,6 +137,62 @@ const MapView = forwardRef<MapRef, MapViewProps>(
       [onViewStateChange]
     );
 
+    const selected = symbols.find((unit) => unit.id === selectedSymbolId);
+    const rangeCollection = {
+      type: "FeatureCollection" as const,
+      features:
+        selected && isCombatUnit(selected) && (selected.rangeKm ?? 0) > 0
+          ? [
+              circlePolygon(
+                selected.latitude,
+                selected.longitude,
+                selected.rangeKm ?? 3
+              ),
+            ]
+          : [],
+    };
+
+    const assetRings = {
+      type: "FeatureCollection" as const,
+      features: symbols.flatMap((unit) => {
+        if (unit.pieceKind === "objective") {
+          const feature = circlePolygon(
+            unit.latitude,
+            unit.longitude,
+            BOARD.captureKm
+          );
+          const color = TRACK_COLORS[pieceIdentity(unit)].stroke;
+          return [{ ...feature, properties: { kind: "objective", color } }];
+        }
+        if (unit.pieceKind === "minefield") {
+          const feature = circlePolygon(
+            unit.latitude,
+            unit.longitude,
+            BOARD.mineKm
+          );
+          return [{ ...feature, properties: { kind: "mine", color: "#F59E2A" } }];
+        }
+        if (unit.pieceKind === "supply" || unit.pieceKind === "fob") {
+          const feature = circlePolygon(
+            unit.latitude,
+            unit.longitude,
+            BOARD.supplyKm
+          );
+          return [
+            {
+              ...feature,
+              properties: { kind: "supply", color: "#0FD0E6" },
+            },
+          ];
+        }
+        return [];
+      }),
+    };
+
+    const selectedColor = selected
+      ? TRACK_COLORS[pieceIdentity(selected)].stroke
+      : "#0FD0E6";
+
     const routeCollection = {
       type: "FeatureCollection" as const,
       features: routes.map((route) => ({
@@ -168,6 +228,51 @@ const MapView = forwardRef<MapRef, MapViewProps>(
             doubleClickZoom={false}
             style={{ position: "relative", width: "100%", height: "100%" }}
           >
+            {assetRings.features.length > 0 && (
+              <Source id="board-rings" type="geojson" data={assetRings}>
+                <Layer
+                  id="board-rings-fill"
+                  type="fill"
+                  paint={{
+                    "fill-color": ["get", "color"],
+                    "fill-opacity": 0.08,
+                  }}
+                />
+                <Layer
+                  id="board-rings-line"
+                  type="line"
+                  paint={{
+                    "line-color": ["get", "color"],
+                    "line-width": 1.5,
+                    "line-dasharray": [2, 2],
+                    "line-opacity": 0.7,
+                  }}
+                />
+              </Source>
+            )}
+
+            {rangeCollection.features.length > 0 && (
+              <Source id="unit-range" type="geojson" data={rangeCollection}>
+                <Layer
+                  id="unit-range-fill"
+                  type="fill"
+                  paint={{
+                    "fill-color": selectedColor,
+                    "fill-opacity": 0.1,
+                  }}
+                />
+                <Layer
+                  id="unit-range-line"
+                  type="line"
+                  paint={{
+                    "line-color": selectedColor,
+                    "line-width": 2,
+                    "line-opacity": 0.85,
+                  }}
+                />
+              </Source>
+            )}
+
             {routes.length > 0 && (
               <Source id="command-routes" type="geojson" data={routeCollection}>
                 <Layer
@@ -206,9 +311,7 @@ const MapView = forwardRef<MapRef, MapViewProps>(
             />
           </Map>
 
-          <div className="absolute inset-0 pointer-events-none border border-primary/20">
-            <div className="w-full h-full bg-tactical-grid opacity-10"></div>
-          </div>
+          <div className="absolute inset-0 pointer-events-none border border-primary/15" />
         </div>
 
         <Controls
